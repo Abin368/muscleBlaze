@@ -1,0 +1,404 @@
+/* styles.css */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #D4D4D4;
+  height: 100px;
+  padding: 0 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.logo .m {
+  color: black;
+}
+
+.logo .b {
+  color: #FBBC04;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.nav-links li {
+  margin: 0 20px;
+  position: relative;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #FBBC04;
+}
+
+.nav-links li a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: #FBBC04;
+  bottom: -5px;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.nav-links li a:hover::after {
+  width: 100%;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 25px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-bar input:focus {
+  border-color: #FBBC04;
+}
+
+.search-bar button {
+  background: #FBBC04;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 15px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-bar button:hover {
+  background: #e0a800;
+}
+
+.search-bar button i {
+  color: white;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+}
+
+.icons a {
+  color: black;
+  margin: 0 15px;
+  font-size: 20px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.icons a:hover {
+  color: #FBBC04;
+}
+
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.hamburger .line {
+  width: 25px;
+  height: 3px;
+  background-color: black;
+  margin: 4px 0;
+  transition: all 0.3s ease;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  header {
+    padding: 0 20px;
+    height: 80px;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 80px;
+    right: 0;
+    background-color: #D4D4D4;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
+
+  .nav-links.active {
+    height: 250px; /* Adjust based on content */
+  }
+
+  .nav-links li {
+    margin: 15px 0;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .search-bar {
+    display: none; /* Hide search bar on smaller screens */
+  }
+
+  .icons {
+    margin-left: auto; /* Push icons to the right */
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 24px;
+  }
+
+  .icons a {
+    margin: 0 10px;
+    font-size: 18px;
+  }
+}
+
+/* Footer Styles */
+footer {
+  background-color: black;
+  color: white;
+  padding: 40px 20px;
+  font-family: 'Arial', sans-serif;
+  margin-top: 40px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 20px;
+}
+
+.footer-section h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #FBBC04; /* Accent color for headings */
+}
+
+.footer-section p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-section.links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section.links ul li {
+  margin-bottom: 10px;
+}
+
+.footer-section.links ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-section.links ul li a:hover {
+  color: #FBBC04;
+}
+
+.footer-section.social .social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-section.social .social-icons a {
+  color: white;
+  font-size: 20px;
+  transition: color 0.3s ease;
+}
+
+.footer-section.social .social-icons a:hover {
+  color: #FBBC04;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+  font-size: 14px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-section {
+    min-width: 100%;
+  }
+
+  .footer-section.links ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-section.social .social-icons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-section h3 {
+    font-size: 16px;
+  }
+
+  .footer-section p,
+  .footer-section.links ul li a,
+  .footer-bottom p {
+    font-size: 12px;
+  }
+
+  .footer-section.social .social-icons a {
+    font-size: 18px;
+  }
+}
+/* Dropdown Container */
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+  transition: transform 0.3s ease; /* Add smooth hover effect */
+}
+.profile-dropdown:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* Profile Icon */
+.profile-icon {
+  color: black;
+  font-size: 24px;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease; /* Added transform transition */
+}
+.profile-icon:hover {
+  color: #FBBC04; /* Highlight color on hover */
+  transform: rotate(360deg); /* Smooth rotation on hover */
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #ffffff;
+  min-width: 200px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Larger shadow for depth */
+  border-radius: 12px; /* Softer rounded corners */
+  z-index: 1;
+  padding: 15px 0;
+  margin-top: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease; /* Smooth dropdown animation */
+}
+
+/* Show Dropdown on Hover (with animation) */
+.profile-dropdown:hover .dropdown-content {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* User's Name in Dropdown */
+.dropdown-content p {
+  padding: 12px 24px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 2px solid #eee; /* Thicker separator line */
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.dropdown-content p:hover {
+  background-color: #f5f5f5; /* Subtle hover effect for the user's name */
+}
+
+/* Dropdown Links */
+.dropdown-content a {
+  display: block;
+  padding: 12px 24px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: background-color 0.3s ease, padding-left 0.3s ease; /* Added padding transition */
+  border-radius: 6px;
+  margin: 4px 0; /* Space between links */
+}
+.dropdown-content a:hover {
+  background-color: #FBBC04; /* Elegant background color on hover */
+  color: white; /* Text color changes when hovered */
+  padding-left: 30px; /* Indentation effect */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dropdown-content {
+    right: -60px; /* Adjust position for smaller screens */
+    min-width: 180px; /* Slightly narrower for mobile */
+  }
+  .profile-icon {
+    font-size: 28px; /* Larger icon on small screens */
+  }
+}
