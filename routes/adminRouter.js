@@ -5,7 +5,10 @@ const {adminAuth} =require('../middlewares/authMiddleware')
 const { preventCache, isAdmin} = require('../middlewares/cacheControl');
 const customerController =require('../controllers/admin/customerController')
 const  categoryController=require('../controllers/admin/categoryController')
-const  productController=require('../controllers/admin/productController')
+const  productController=require('../controllers/admin/productController');
+const multer = require('multer');  // Import multer
+const { storage, fileFilter } = require('../helpers/multer');  // Import the Multer config from helpers
+const upload = multer({ storage, fileFilter });  
 
 router.get('/admin/login',preventCache, adminController.loadLogin);
 router.post('/admin/login',preventCache, adminController.login);
@@ -29,6 +32,10 @@ router.get('/admin/deleteCategory',adminAuth,categoryController.deleteCategory)
 
 //product management
 router.get('/admin/addproducts',adminAuth,productController.getProductAddPage)
-
+router.post('/admin/addProduct', upload.fields([
+    { name: 'images1', maxCount: 1 },
+    { name: 'images2', maxCount: 1 },
+    { name: 'images3', maxCount: 1 }
+]), productController.addProducts);  
 
 module.exports=router

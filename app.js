@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config(); 
 const session = require('express-session');
+// const flash = require('connect-flash');
 const passport = require("./config/passport");
 const app = express();
 const path = require('path');
@@ -21,7 +22,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000
     }
 }));
-
+// app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -29,6 +30,12 @@ app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
+
+// app.use((req, res, next) => {
+//     res.locals.success = req.flash('success');
+//     res.locals.error = req.flash('error');
+//     next();
+// });
 
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
