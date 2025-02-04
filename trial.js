@@ -164,3 +164,74 @@
 
 
 //----------------------------------------------------------------------------------------------------
+const categoryInfo = async (req, res) => {
+    try {
+        const search = req.query.search || "";
+        const page = parseInt(req.query.page) || 1;
+        const limit = 4;
+
+        const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit);
+
+        res.render("admin/categoryDetails", {
+            cat: categoryData,
+            currentPage: page,
+            totalPages: totalPages,
+            totalCategories: totalCategories,
+            search: search
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.redirect('pageerror');
+    }
+};
+
+//--------------------------------------------------------------
+const addCategory = async (req, res) => {
+    const { name, description } = req.body;
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+
+    try {
+        // Check if category exists
+        const existingCategory = await Category.findOne({ name });
+        if (existingCategory) {
+            const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit);
+            return res.render('admin/categoryDetails', {
+                error: true,
+                message: 'Category already exists',
+                search: search,
+                cat: categoryData,
+                currentPage: page,
+                totalPages: totalPages,
+                totalCategories: totalCategories
+            });
+        }
+
+        // Save new category
+        const newCategory = new Category({ name, description });
+        await newCategory.save();
+
+        // Fetch updated categories
+        const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit);
+
+        return res.render('admin/categoryDetails', {
+            error: false,
+            message: 'Category added successfully',
+            search: search,
+            cat: categoryData,
+            currentPage: page,
+            totalPages: totalPages,
+            totalCategories: totalCategories
+        });
+    } catch (error) {
+        console.error(error);
+        return res.render('admin/categoryDetails', {
+            error: true,
+            message: 'An error occurred while adding the category',
+            search: search,
+            cat: []
+        });
+    }
+};

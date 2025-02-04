@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Category Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+    <link rel="stylesheet" href="/categoryDetails.css">
+    
+</head>
+<body>
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+        <div class="main-content">
+            <h1>Category Management</h1>
+            
+            <!-- Search Bar -->
+            <form action="/admin/categories" method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Search category..." value="<%= search %>" class="search-input">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+       
+            <!-- Category Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <!-- <th>Offer Price</th>
+                        <th>Offer</th> -->
+                        <th>List/Unlist</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+               <tbody>
+    <% cat.forEach((category, index) => { %>
+        <tr>
+            <td><%= index + 1 %></td>
+            <td><%= category.name %></td>
+            <td><%= category.description %></td>
+            <!-- <td><%= category.offerPrice %></td>
+            <td><%= category.offer %>%</td> -->
+            <td>
+                <% if (category.isListed) { %>
+                    <button class="btn btn-danger" style="width: 70px;">
+                        <a href="/admin/listCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" class="text-white" style="text-decoration: none;">Unlist</a>
+                    </button>
+                <% } else { %>
+                    <button class="btn btn-success" style="width: 70px;">
+                        <a href="/admin/unlistCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" class="text-white" style="text-decoration: none;">List</a>
+                    </button>
+                <% } %>
+            </td>
+            
+            <td class="action-icons">
+                <button class="btn btn-primary" style="width: 70px;">
+                        <a href="/admin/editCategory/<%= category._id %>" class="btn btn-warning btn-sm" style="color: black;">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                </button>
+                <button class="btn btn-danger" style="width: 70px;">
+                    <a href="/admin/deleteCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" 
+                       class="text-white" style="text-decoration: none;">Delete</a>
+                </button>
+            </td>
+            
+            
+        </tr>
+    <% }) %>
+</tbody>
+
+            </table>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&search=<%= search %>">Previous</a>
+                <% } %>
+            
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>&search=<%= search %>" class="<%= i === currentPage ? 'active' : '' %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+            
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&search=<%= search %>">Next</a>
+                <% } %>
+            </div>
+
+
+
+            
+              <!-- ----------------------------------->
+            
+            <!-- <% if (typeof error !== 'undefined' && error) { %>
+                <div class="error-message" style="color: red;">
+                    <%= message %>
+                </div>
+            <% } else if (typeof error !== 'undefined' && !error) { %>
+                <div class="success-message" style="color: green;">
+                    <%= message %>
+                </div>
+            <% } %>
+             -->
+
+
+             <% if (successMessage) { %>
+                <div class="success-message" style="color: green;">
+                    <%= successMessage %>
+                </div>
+            <% } %>
+            
+            <% if (errorMessage) { %>
+                <div class="error-message" style="color: red;">
+                    <%= errorMessage %>
+                </div>
+            <% } %>
+            
+            
+
+            <div class="add-category">
+                <h2>Add New Category</h2>
+
+
+                <form action="/admin/addCategory?search=<%= search || '' %>" method="POST" class="add-category-form">
+                    <h2>Add New Category</h2>
+                    
+                    <div class="input-group">
+                        <input type="text" name="name" id="name" placeholder="Category Name" required />
+                        <label for="name"></label>
+                    </div>
+                
+                    <div class="input-group">
+                        <input type="text" name="description" id="description" placeholder="Description" required />
+                        <label for="description"></label>
+                    </div>
+                
+                    <button type="submit" class="submit-btn">Add Ctegory</button>
+                </form>
+                
+             
+                
+            </div>
+        </div>
+    </div>
+
+   <script src="handleFormSubmit.js"></script>
+</body>
+</html>
