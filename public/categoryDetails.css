@@ -189,4 +189,65 @@ input[type="text"]:not(:placeholder-shown) + label {
 
 
 
-  
+
+
+
+
+.custom-btn {
+    display: inline-block;
+    width: 100px;  /* Equal width */
+    padding: 6px 0;  /* Balanced padding */
+    text-align: center;
+    text-decoration: none; /* Removes underline */
+    font-size: 14px;  /* Compact font size */
+    font-weight: 500;  /* Medium weight */
+    border-radius: 4px; /* Soft rounded corners */
+    border: none; /* Removes default button border */
+    cursor: pointer; /* Shows pointer on hover */
+    color: white; /* White text */
+}
+
+/* Green for "Add Offer" and "Unblock" */
+.custom-btn.green {
+    background-color: #28a745;
+}
+
+/* Red for "Remove Offer" and "Block" */
+.custom-btn.red {
+    background-color: red;
+}
+
+/* Hover effects */
+.custom-btn:hover {
+    opacity: 0.85;
+}
+
+.action-btn {
+    display: inline-block;
+    width: 90px;  /* Slightly smaller */
+    padding: 5px 0;  /* Reduced padding */
+    text-align: center;
+    text-decoration: none; /* Removes underline */
+    font-size: 13px;  /* Slightly smaller font size */
+    font-weight: 500;  /* Medium weight */
+    border-radius: 4px; /* Soft rounded corners */
+    border: none; /* Removes default button border */
+    cursor: pointer; /* Shows pointer on hover */
+    color: white; /* White text */
+    margin-right: 10px; /* Small gap between buttons */
+}
+
+/* Edit button: soft orange */
+.action-btn.orange {
+    background-color: #2c3e50; /* Soft orange */
+}
+
+/* Delete button: soft red */
+.action-btn.red {
+    background-color: #f44336; /* Soft red */
+}
+
+/* Hover effects */
+.action-btn:hover {
+    opacity: 0.85;
+}

@@ -19,7 +19,6 @@ const getProductAddPage = async (req, res) => {
 };
 
 
-
 //---------------------------------------------
 const addProducts = async (req, res) => {
     try {
@@ -145,6 +144,220 @@ const addProducts = async (req, res) => {
         });
     }
 };
+//-----------------------------------------------------
+const getAllProducts = async (req, res) => {
+    try {
+        const search = req.query.search || '';
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = 4;
+        // Find category IDs matching the search
+        const matchingCategories = await Category.find({
+            name: { $regex: new RegExp(".*" + search + ".*", "i") }
+        }).select('_id');
+
+        const categoryIds = matchingCategories.map(cat => cat._id);
+
+        // Find products with search criteria
+        const productData = await Product.find({
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { category: { $in: categoryIds } } // Search by category ID
+            ],
+        })
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .populate('category')
+        .exec();
+
+        // Count total matching products
+        const count = await Product.countDocuments({
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { category: { $in: categoryIds } }
+            ],
+        });
+
+        // Get all categories
+        const category = await Category.find({ isListed: true });
+
+        if (category) {
+            res.render("admin/productDetails", {
+                data: productData,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                cat: category,
+                search // Pass search value to the EJS file
+            });
+            
+        } else {
+            res.render('page-404');
+        }
+
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.redirect('/pageerror');
+    }
+};
+
+
+//-----------------------------------------------------
+const addProductOffer = async (req, res) => {
+    try {
+        const { productId, percentage } = req.body;
+        console.log('Product ID:', productId, 'Percentage:', percentage); // Debugging log
+        
+        const findProduct = await Product.findOne({ _id: productId });
+        if (!findProduct) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+        }
+
+        const findCategory = await Category.findOne({ _id: findProduct.category });
+        if (findCategory.categoryOffer > percentage) {
+            return res.json({ status: false, message: "This Product category already has a category offer" });
+        }
+
+        findProduct.salePrice = findProduct.salePrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.productOffer = parseInt(percentage);
+        await findProduct.save();
+
+        findCategory.categoryOffer = 0;
+        await findCategory.save();
+
+        res.json({ status: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
+
+
+
+//-----------------------------------------------------
+
+const removeProductOffer = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const findProduct = await Product.findOne({ _id: productId });
+        
+        if (!findProduct) {
+            return res.status(404).json({ status: false, message: "Product not found" });
+        }
+
+        const percentage = findProduct.productOffer;
+        findProduct.salePrice = findProduct.salePrice + Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.productOffer = 0;
+        await findProduct.save();
+
+        res.json({ status: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
+
+//-----------------------------------------------------
+const blockProduct = async(req,res)=>{
+    try{
+        let id=req.query.id
+        await Product.updateOne({_id:id},{$set:{isBlocked:true}})
+        res.redirect('/admin/products')
+    }catch(error){
+        res.redirect('/pagerror')
+    }
+}
+
+//-----------------------------------------------------
+const unblockProduct = async(req,res)=>{
+    try{
+        let id=req.query.id
+        await Product.updateOne({_id:id},{$set:{isBlocked:false}})
+        res.redirect('/admin/products')
+    }catch(error){
+        res.redirect('/pagerror')
+    }
+}
+
+
+//-----------------------------------------------------
+const getEditProduct = async (req, res) => {
+    try {
+        const id = req.query.id;
+        const product = await Product.findOne({ _id: id });
+        const category = await Category.find({});
+        res.render("admin/editProduct", {
+            product: product,
+            category: category,
+            error: null, 
+            success: null
+        });
+    } catch (error) {
+        res.redirect('/pageerror');
+    }
+};
+
+//-----------------------------------------------------
+const editProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const data = req.body;
+        const product = await Product.findOne({ _id: id });
+
+        const existingProduct = await Product.findOne({
+            productName: data.productName,
+            _id: { $ne: id }
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({ error: 'Product with this name already exists. Please try with another name.' });
+        }
+
+        const images = [];
+        // Handle file uploads
+        if (req.files && (req.files.images1 || req.files.images2 || req.files.images3)) {
+            if (req.files.images1) images.push(req.files.images1[0].filename);
+            if (req.files.images2) images.push(req.files.images2[0].filename);
+            if (req.files.images3) images.push(req.files.images3[0].filename);
+        }
+
+        const updateFields = {
+            productName: data.productName,
+            description: data.description,
+            category: product.category,
+            regularPrice: data.regularPrice,
+            salePrice: data.salePrice,
+            quantity: data.quantity,
+            size: data.size,
+            flavor: data.flavor,
+            // Include new images if provided
+            ...(images.length > 0 && { productImage: [...product.productImage, ...images] })
+        };
+
+        await Product.findByIdAndUpdate(id, updateFields, { new: true });
+        res.redirect('/admin/products');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/pageerror');
+    }
+};
+
+
+//-----------------------------------------------
+const deleteSingleImage = async(req,res)=>{
+    try{
+    const {imageNameToServer, productIdToServer}=req.body
+    const product= await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}})
+    const imagePath = path.join('public','uploads','product-images',imageNameToServer);
+    if(fs.existsSync(imagePath)){
+        await fs.unlinkSync(imagePath)
+        console.log(`Image ${imageNameToServer} deleted successfully`)
+    }else{
+        console.log(`Image ${imageNameToServer} not found`)
+    }
+    res.send({status:true});
+    }catch(error){
+        res.redirect('/pageerror')
+    }
+}
 
 
 
@@ -152,4 +365,12 @@ const addProducts = async (req, res) => {
 module.exports = {
     getProductAddPage,
     addProducts,
+    getAllProducts,
+    addProductOffer,
+    removeProductOffer,
+    blockProduct,
+    unblockProduct,
+    getEditProduct,
+    editProduct,
+    deleteSingleImage
 };

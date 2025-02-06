@@ -38,4 +38,16 @@ router.post('/admin/addProduct', upload.fields([
     { name: 'images3', maxCount: 1 }
 ]), productController.addProducts);  
 
+router.get('/admin/products',adminAuth,productController.getAllProducts)
+router.post('/admin/addProductOffer',adminAuth,productController.addProductOffer)
+router.post('/admin/removeProductOffer',adminAuth,productController.removeProductOffer)
+router.get('/admin/blockProduct',adminAuth,productController.blockProduct)
+router.get('/admin/unblockProduct',adminAuth,productController.unblockProduct)
+router.get('/admin/editProduct',adminAuth,productController.getEditProduct)
+router.post('/admin/editProduct/:id',adminAuth,upload.fields([
+    { name: 'images1', maxCount: 1 },
+    { name: 'images2', maxCount: 1 },
+    { name: 'images3', maxCount: 1 }
+]),productController.editProduct)
+router.post('/admin/deleteImage',adminAuth,productController.deleteSingleImage)
 module.exports=router
