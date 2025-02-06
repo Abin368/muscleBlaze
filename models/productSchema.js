@@ -31,6 +31,10 @@ const productSchema = new Schema({
         type: Number,
         default: 1, 
     },
+    isDeleted:{
+        type:Boolean,
+        default:false
+    },
     flavor: {
         type: String,
         required: true,

@@ -50,4 +50,8 @@ router.post('/admin/editProduct/:id',adminAuth,upload.fields([
     { name: 'images3', maxCount: 1 }
 ]),productController.editProduct)
 router.post('/admin/deleteImage',adminAuth,productController.deleteSingleImage)
+router.get('/admin/deleteProduct',adminAuth,productController.deleteProduct)
+
+
+
 module.exports=router

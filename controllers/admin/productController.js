@@ -24,7 +24,7 @@ const addProducts = async (req, res) => {
     try {
         const product = req.body;
 
-        // Check if all required fields are filled
+       
         if (!product.productName || !product.description || !product.regularPrice || !product.salePrice || !product.quantity || !product.size) {
             return res.render("admin/addProduct", { 
                 categories: await Category.find({ isDeleted: false }),
@@ -149,19 +149,21 @@ const getAllProducts = async (req, res) => {
     try {
         const search = req.query.search || '';
         const page = parseInt(req.query.page, 10) || 1;
-        const limit = 4;
-        // Find category IDs matching the search
+        const limit = 5;
+
+        
         const matchingCategories = await Category.find({
             name: { $regex: new RegExp(".*" + search + ".*", "i") }
         }).select('_id');
 
         const categoryIds = matchingCategories.map(cat => cat._id);
 
-        // Find products with search criteria
+        
         const productData = await Product.find({
+            isDeleted: false,  
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-                { category: { $in: categoryIds } } // Search by category ID
+                { category: { $in: categoryIds } }
             ],
         })
         .limit(limit)
@@ -169,15 +171,15 @@ const getAllProducts = async (req, res) => {
         .populate('category')
         .exec();
 
-        // Count total matching products
+       
         const count = await Product.countDocuments({
+            isDeleted: false,  
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
                 { category: { $in: categoryIds } }
             ],
         });
 
-        // Get all categories
         const category = await Category.find({ isListed: true });
 
         if (category) {
@@ -186,9 +188,8 @@ const getAllProducts = async (req, res) => {
                 currentPage: page,
                 totalPages: Math.ceil(count / limit),
                 cat: category,
-                search // Pass search value to the EJS file
+                search 
             });
-            
         } else {
             res.render('page-404');
         }
@@ -358,9 +359,24 @@ const deleteSingleImage = async(req,res)=>{
         res.redirect('/pageerror')
     }
 }
+//-----------------------------------------------------
 
+const deleteProduct = async(req,res)=>{
+    try{
+        const { id, search, page } = req.query;
 
+        await Product.updateOne({ _id: id }, { $set: { isDeleted: true } });
 
+     
+        req.session.successMessage = 'Category deleted successfully';
+        return res.redirect(`/admin/products?search=${search}&page=${page}`);
+    }catch(error){
+        console.error(error);
+        req.session.errorMessage = 'Failed to delete category';
+        return res.redirect(`/admin/products?search=${search}&page=${page}`);
+
+    }
+}
 //-----------------------------------------------------
 module.exports = {
     getProductAddPage,
@@ -372,5 +388,6 @@ module.exports = {
     unblockProduct,
     getEditProduct,
     editProduct,
-    deleteSingleImage
+    deleteSingleImage,
+    deleteProduct
 };

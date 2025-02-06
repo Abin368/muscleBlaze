@@ -8,7 +8,7 @@ const categoryInfo = async (req, res) => {
     const limit = 4;
 
     try {
-        // Fetch categories where isDeleted is false
+        
         const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit, { isDeleted: false });
 
         const successMessage = req.session.successMessage || null;
