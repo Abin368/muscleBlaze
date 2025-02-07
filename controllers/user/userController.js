@@ -100,7 +100,7 @@ const signup = async (req, res) => {
     
       const newOtp = generateOTP();
       req.session.otpData.otp = newOtp;
-      req.session.otpData.timestamp = Date.now(); // Reset the timestamp
+      req.session.otpData.timestamp = Date.now(); 
   
     
       await sendOTPEmail(otpData.email, newOtp);
@@ -217,138 +217,7 @@ const logout =  async (req,res)=>{
 }
 
 //---------------------------------------------------
-const loadForget = async (req,res)=>{
-    try{
-        return res.render('user/forgot-password',{messages:''})
-    }catch(error){
-        console.log('something gone wrong');
-        res.status(500).send('Server error')
-    }
-}
-//---------------------------------------------------
-// const handleForgotPassword = async (req, res) => {
-//     try {
-//       const { email } = req.body;
-  
-//       const user = await User.findOne({ email });
-//       if (!user) {
-//         return res.render("forgot-password", { messages: { error: "Email not found!" } });
-//       }
-  
-//       const otp = generateOTP().toString(); 
-//       req.session.forgotPasswordOtpData = { email, otp, timestamp: Date.now() };
-  
-//       console.log("Session after storing OTP:", req.session.forgotPasswordOtpData); 
-  
-//       req.session.save((err) => {
-//         if (err) {
-//           console.error("Error saving session:", err);
-//           return res.status(500).render("forgot-password", { messages: { error: "Server error. Please try again!" } });
-//         }
-  
-//         sendOTPEmail(email, otp)
-//           .then(() => {
-//             res.render("otp-forget-verification", { messages: { success: "OTP sent to your email!" } });
-//           })
-//           .catch((error) => {
-//             console.error("Error sending OTP:", error);
-//             res.status(500).render("forgot-password", { messages: { error: "Server error. Please try again!" } });
-//           });
-//       });
-//     } catch (error) {
-//       console.error("Error during forgot password:", error);
-//       res.status(500).render("forgot-password", { messages: { error: "Server error. Please try again!" } });
-//     }
-//   };
-// //---------------------------------------------------
-// const resendForgetotp = async (req, res) => {
-//     try {
-//       const otpData =  req.session.forgotPasswordOtpData;
-  
-//       if (!otpData) {
-//         return res.json({ success: false, message: "No OTP data found!" });
-//       }
-  
-    
-//       const newOtp = generateOTP();
-//       req.session.forgotPasswordOtpData.otp = newOtp;
-//       req.session.forgotPasswordOtpData.timestamp = Date.now(); 
-  
-    
-//       await sendOTPEmail(otpData.email, newOtp);
-  
-//       res.json({ success: true, message: "New OTP sent to your email!" });
-//     } catch (error) {
-//       console.error("Error resending OTP:", error);
-//       res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again!" });
-//     }
-//   };
 
-// //---------------------------------------------------
-// const verifyForgotPasswordOtp = async (req, res) => {
-//     try {
-//       const { otp } = req.body;
-//       const otpData = req.session.forgotPasswordOtpData;
-  
-   
-//       console.log("Session Data:", otpData);
-  
-     
-//       if (!otpData || Date.now() - otpData.timestamp > 5 * 60 * 1000) {
-//         return res.render("otp-verification", { messages: { error: "Invalid or expired OTP!" } });
-//       }
-  
-//       console.log("Entered OTP:", otp);
-//       console.log("Stored OTP:", otpData.otp);
-
-//       if (otpData.otp !== otp) {
-//         return res.render("otp-verification", { messages: { error: "Invalid OTP!" } });
-//       }
-  
-      
-//       res.redirect("/home");
-//     } catch (error) {
-//       console.error("Error verifying OTP:", error);
-//       res.status(500).render("otp-verification", { messages: { error: "Server error. Please try again!" } });
-//     }
-//   };
-  
-// //---------------------------------------------------
-// const loadResetPassword = (req, res) => {
-//     console.log("Session Data in loadResetPassword:", req.session.forgotPasswordOtpData);
-//     res.render("reset-password", { messages: {} });
-//   };
-
-// //---------------------------------------------------
-// const resetPassword = async (req, res) => {
-//     try {
-//       const { newPassword, confirmPassword } = req.body;
-//       const otpData = req.session.forgotPasswordOtpData;
-  
-  
-//       if (!otpData) {
-//         return res.render("reset-password", { messages: { error: "Invalid request!" } });
-//       }
-  
-//       if (newPassword !== confirmPassword) {
-//         return res.render("reset-password", { messages: { error: "Passwords do not match!" } });
-//       }
-  
-     
-//       const hashedPassword = await bcrypt.hash(newPassword, 10);
-  
-    
-//       await User.findOneAndUpdate({ email: otpData.email }, { password: hashedPassword });
-  
-   
-//       req.session.forgotPasswordOtpData = null;
-  
-//       res.render("login", { messages: { success: "Password reset successfully! Please login." } });
-//     } catch (error) {
-//       console.error("Error resetting password:", error);
-//       res.status(500).render("reset-password", { messages: { error: "Server error. Please try again!" } });
-//     }
-//   };
 //---------------------------------------------------
 
 
@@ -363,7 +232,7 @@ module.exports ={
     verifyOtp,
     login,
     logout,
-    loadForget,
+   
     // handleForgotPassword,
     // verifyForgotPasswordOtp,
     // resetPassword,

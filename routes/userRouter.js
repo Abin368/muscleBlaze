@@ -1,6 +1,7 @@
 const express=require('express')
 const router=express.Router()
 const passport = require('passport');
+const profileController=require('../controllers/user/profileController')
 const userController=require('../controllers/user/userController')
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 
@@ -24,15 +25,15 @@ router.get('/auth/google/callback',isLoggedIn,passport.authenticate('google',{fa
       console.log(req.session.user); 
     res.redirect('/')
 })
-
 router.get('/logout',userController.logout)
 
-router.get('/forgot-password',userController.loadForget)
-// router.post('/forgot-password',userController.handleForgotPassword)
-// router.post("/verify-forgot-password-otp", userController.verifyForgotPasswordOtp);
-// router.get("/reset-password", userController.loadResetPassword);
-// router.post("/resend-otp",isLoggedIn,userController.resendForgetotp);
-// router.post("/reset-password", userController.resetPassword);
+//profile management
+router.get('/forgot-password',profileController.getForget)
+router.post('/forgot-password',profileController.forgotEmailValid)
+router.post('/forgot-otp-verification', profileController.verifyOtp);
+router.post("/resend-forget-otp",profileController.resendForgetOtp);
+router.get("/reset-password", profileController.getresetPassword);
+router.post("/reset-password", profileController.resetPassword);
 
 
 

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #000000, #333333);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .otp-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .otp-container h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ffcc00;
+    }
+
+    .otp-container p {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #e0e0e0;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .otp-inputs input {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      font-size: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background: transparent;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .otp-inputs input:focus {
+      border-color: #ffcc00;
+      transform: scale(1.1);
+    }
+
+    .otp-container button {
+      width: 100%;
+      padding: 15px;
+      background: #ffcc00;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .otp-container button:hover {
+      background: #e6b800;
+    }
+
+    .otp-container .resend-otp {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #e0e0e0;
+    }
+
+    .otp-container .resend-otp a {
+      color: #ffcc00;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .otp-container .resend-otp a:hover {
+      text-decoration: underline;
+    }
+
+    /* Glamorous Popup Styles */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      color: #000;
+      text-align: center;
+      animation: float 3s ease-in-out infinite;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .popup.success {
+      background: linear-gradient(135deg, #FFCF10, #FFCF10);
+      color: #fff;
+    }
+
+    .popup.error {
+      background: linear-gradient(135deg, #f44336, #e57373);
+      color: #000000;
+    }
+
+    .popup p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .popup button {
+      padding: 10px 20px;
+      background: #000000;
+      border: none;
+      border-radius: 10px;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .popup button:hover {
+      background: #000000;
+    }
+
+    /* Floating Animation */
+    @keyframes float {
+      0%, 100% {
+        transform: translate(-50%, -50%) translateY(0);
+      }
+      50% {
+        transform: translate(-50%, -50%) translateY(-10px);
+      }
+    }
+
+    /* Fade-In Animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="otp-container">
+    <h2>OTP Verification</h2>
+    <p>Enter the 6-digit OTP sent to your email.</p>
+
+    <form id="otpForm">
+      <div class="otp-inputs">
+          <input type="text" name="otp1" maxlength="1" required autofocus>
+          <input type="text" name="otp2" maxlength="1" required>
+          <input type="text" name="otp3" maxlength="1" required>
+          <input type="text" name="otp4" maxlength="1" required>
+          <input type="text" name="otp5" maxlength="1" required>
+          <input type="text" name="otp6" maxlength="1" required>
+      </div>
+      <button type="submit">Verify OTP</button>
+  </form>
+
+  <div class="resend-otp">
+      Didn't receive the OTP? <a href="#" id="resendOtpLink">Resend OTP</a>
+  </div>
+</div>
+
+<!-- Popup for messages -->
+<div id="popup" class="popup">
+  <p id="popupMessage"></p>
+  <button id="closePopupBtn">Close</button>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const otpForm = document.getElementById('otpForm');
+    const inputs = document.querySelectorAll('.otp-inputs input');
+    const resendOtpLink = document.getElementById('resendOtpLink');
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popupMessage');
+    const closePopupBtn = document.getElementById('closePopupBtn'); // Fix for closing popup
+
+
+
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && index > 0 && input.value.length === 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+//---------------------------------------------------------------
+    // Handle OTP form submission
+    otpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otp = Array.from(inputs).map(input => input.value).join('');
+        console.log("Entered OTP:", otp); 
+
+        try {
+            const response = await fetch('/forgot-otp-verification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otp })
+            });
+
+            const result = await response.json();
+            showPopup(result.message, result.success ? 'success' : 'error');
+
+            if (result.success) {
+                setTimeout(() => {
+                    window.location.href = '/reset-password';
+                }, 2000);
+            }
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            showPopup("Something went wrong. Please try again.", "error");
+        }
+    });
+//------------------------------------------------------------
+    // Handle Resend OTP
+    resendOtpLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    console.log("Resend OTP Clicked"); 
+
+    try {
+        const response = await fetch('/resend-forget-otp', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("Response Status:", response.status); 
+
+        const result = await response.json();
+        console.log("Resend OTP Response:", result);
+
+        showPopup(result.message, result.success ? 'success' : 'error');
+    } catch (error) {
+        console.error("Error resending OTP:", error);
+        showPopup("Something went wrong. Please try again.", "error");
+    }
+});
+
+
+   
+    function showPopup(message, type) {
+        popupMessage.textContent = message;
+        popup.classList.remove("success", "error");
+        popup.classList.add(type);
+        popup.style.display = "block";
+    }
+
+   
+    closePopupBtn.addEventListener('click', closePopup);
+
+    function closePopup() {
+        console.log("Closing popup");
+        popup.style.display = "none";
+    }
+});
+
+
+</script>
+  </body>
+  </html
