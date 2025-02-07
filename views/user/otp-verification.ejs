@@ -207,7 +207,7 @@
   </div>
 
   <script>
-    // Auto-focus the next input field
+   
     const inputs = document.querySelectorAll('.otp-inputs input');
     inputs.forEach((input, index) => {
       input.addEventListener('input', () => {
@@ -223,7 +223,7 @@
       });
     });
 
-    // Handle OTP form submission
+  
     document.getElementById('otpForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -240,14 +240,14 @@
       if (result.success) {
         showPopup(result.message, 'success');
         setTimeout(() => {
-          window.location.href = '/login'; // Redirect to login page
+          window.location.href = '/login'; 
         }, 2000);
       } else {
         showPopup(result.message, 'error');
       }
     });
 
-    // Handle Resend OTP
+   
     document.getElementById('resendOtpLink').addEventListener('click', async (e) => {
       e.preventDefault();
 
@@ -263,7 +263,7 @@
       }
     });
 
-    // Show Popup
+    
     function showPopup(message, type) {
       const popup = document.getElementById('popup');
       const popupMessage = document.getElementById('popupMessage');
@@ -273,7 +273,7 @@
       popup.style.display = 'block';
     }
 
-    // Close Popup
+   
     function closePopup() {
       const popup = document.getElementById('popup');
       popup.style.display = 'none';

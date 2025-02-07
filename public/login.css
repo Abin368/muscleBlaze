@@ -129,3 +129,13 @@ body {
   margin-right: 10px;
 }
 
+.success-message {
+  color: white;
+  background-color: #28a745; /* Green */
+  border: 1px solid #218838;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}

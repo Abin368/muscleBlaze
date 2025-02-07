@@ -33,4 +33,17 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
+
+
+// const redirectAfterPost = (req, res, next) => {
+//   if (req.method === "POST") {
+//       res.redirect(req.originalUrl);
+//   } else {
+//       next();
+//   }
+// };
+
+
+
+
 module.exports = { isLoggedIn, isNotLoggedIn, ensureAuthenticated,adminAuth};

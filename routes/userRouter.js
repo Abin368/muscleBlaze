@@ -4,6 +4,7 @@ const passport = require('passport');
 const profileController=require('../controllers/user/profileController')
 const userController=require('../controllers/user/userController')
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
+const {preventCache} = require('../middlewares/cacheControl')
 
 router.get('/pageNotfound',userController.pageNotfound)
 router.get('/',userController.loadHomepage)
@@ -28,12 +29,18 @@ router.get('/auth/google/callback',isLoggedIn,passport.authenticate('google',{fa
 router.get('/logout',userController.logout)
 
 //profile management
-router.get('/forgot-password',profileController.getForget)
-router.post('/forgot-password',profileController.forgotEmailValid)
-router.post('/forgot-otp-verification', profileController.verifyOtp);
-router.post("/resend-forget-otp",profileController.resendForgetOtp);
-router.get("/reset-password", profileController.getresetPassword);
-router.post("/reset-password", profileController.resetPassword);
+router.get('/forgot-password', preventCache, isLoggedIn, profileController.getForget);
+router.post('/forgot-password', preventCache, isLoggedIn, profileController.forgotEmailValid);
+router.get('/forgot-otp-verification', preventCache, isLoggedIn,profileController.getForgotOtpVerification)
+router.post('/forgot-otp-verification', preventCache, isLoggedIn, profileController.verifyOtp);
+router.post('/resend-forget-otp', preventCache, isLoggedIn, profileController.resendForgetOtp);
+router.get('/reset-password', preventCache, isLoggedIn, profileController.getresetPassword);
+router.post('/reset-password', preventCache, isLoggedIn, profileController.resetPassword);
+
+
+
+
+
 
 
 

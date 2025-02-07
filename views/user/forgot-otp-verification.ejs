@@ -178,32 +178,36 @@
   </style>
 </head>
 <body>
+ 
+
   <div class="otp-container">
     <h2>OTP Verification</h2>
     <p>Enter the 6-digit OTP sent to your email.</p>
 
     <form id="otpForm">
-      <div class="otp-inputs">
-          <input type="text" name="otp1" maxlength="1" required autofocus>
-          <input type="text" name="otp2" maxlength="1" required>
-          <input type="text" name="otp3" maxlength="1" required>
-          <input type="text" name="otp4" maxlength="1" required>
-          <input type="text" name="otp5" maxlength="1" required>
-          <input type="text" name="otp6" maxlength="1" required>
-      </div>
-      <button type="submit">Verify OTP</button>
-  </form>
+        <div class="otp-inputs">
+            <input type="text" name="otp1" maxlength="1" required autofocus>
+            <input type="text" name="otp2" maxlength="1" required>
+            <input type="text" name="otp3" maxlength="1" required>
+            <input type="text" name="otp4" maxlength="1" required>
+            <input type="text" name="otp5" maxlength="1" required>
+            <input type="text" name="otp6" maxlength="1" required>
+        </div>
+        <button type="submit">Verify OTP</button>
+    </form>
 
-  <div class="resend-otp">
-      Didn't receive the OTP? <a href="#" id="resendOtpLink">Resend OTP</a>
-  </div>
+    <div class="resend-otp">
+        <p id="timerDisplay"></p>
+        <button id="resendOtpLink" disabled>Resend OTP</button>
+    </div>
 </div>
 
 <!-- Popup for messages -->
 <div id="popup" class="popup">
-  <p id="popupMessage"></p>
-  <button id="closePopupBtn">Close</button>
+    <p id="popupMessage"></p>
+    <button id="closePopupBtn">Close</button>
 </div>
+
 
 
 <script>
@@ -211,11 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const otpForm = document.getElementById('otpForm');
     const inputs = document.querySelectorAll('.otp-inputs input');
     const resendOtpLink = document.getElementById('resendOtpLink');
+    const timerDisplay = document.getElementById('timerDisplay');
     const popup = document.getElementById('popup');
     const popupMessage = document.getElementById('popupMessage');
-    const closePopupBtn = document.getElementById('closePopupBtn'); // Fix for closing popup
+    const closePopupBtn = document.getElementById('closePopupBtn');
 
-
+    const OTP_EXPIRY_TIME = 60; // 1 minute
+    //----------------------------------------------
 
     inputs.forEach((input, index) => {
         input.addEventListener('input', () => {
@@ -230,12 +236,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-//---------------------------------------------------------------
+    //---------------------------------------------
+
+
+    // Prevent OTP from being sent on page refresh
+    let otpSent = localStorage.getItem('otpSent') === 'true';
+    let expiryTime = localStorage.getItem('otpExpiry');
+
+    if (!expiryTime || Date.now() > expiryTime) {
+        expiryTime = Date.now() + OTP_EXPIRY_TIME * 1000;
+        localStorage.setItem('otpExpiry', expiryTime);
+    }
+
+    function updateTimer() {
+        let remainingTime = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000));
+
+        if (remainingTime > 0) {
+            timerDisplay.textContent = `Resend OTP in ${remainingTime}s`;
+            resendOtpLink.disabled = true;
+        } else {
+            timerDisplay.textContent = "";
+            resendOtpLink.disabled = false;
+            localStorage.removeItem('otpExpiry'); // Clear stored expiry time
+        }
+    }
+
+    const timerInterval = setInterval(() => {
+        updateTimer();
+        if (Date.now() >= expiryTime) {
+            clearInterval(timerInterval);
+        }
+    }, 1000);
+
+    updateTimer();
+
     // Handle OTP form submission
     otpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const otp = Array.from(inputs).map(input => input.value).join('');
-        console.log("Entered OTP:", otp); 
 
         try {
             const response = await fetch('/forgot-otp-verification', {
@@ -257,32 +295,31 @@ document.addEventListener('DOMContentLoaded', () => {
             showPopup("Something went wrong. Please try again.", "error");
         }
     });
-//------------------------------------------------------------
-    // Handle Resend OTP
+
+    // Handle Resend OTP click
     resendOtpLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    console.log("Resend OTP Clicked"); 
+        e.preventDefault();
 
-    try {
-        const response = await fetch('/resend-forget-otp', {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" }
-        });
+        if (resendOtpLink.disabled) return; // Prevent early click
 
-        console.log("Response Status:", response.status); 
+        try {
+            const response = await fetch('/resend-forget-otp', { method: 'POST' });
+            const result = await response.json();
 
-        const result = await response.json();
-        console.log("Resend OTP Response:", result);
+            if (result.success) {
+                localStorage.setItem('otpSent', 'true'); // Set flag when OTP is resent
+                localStorage.setItem('otpExpiry', Date.now() + OTP_EXPIRY_TIME * 1000);
+                updateTimer();
+                showPopup(result.message, 'success');
+            } else {
+                showPopup(result.message, 'error');
+            }
+        } catch (error) {
+            console.error("Error resending OTP:", error);
+            showPopup("Something went wrong. Please try again.", "error");
+        }
+    });
 
-        showPopup(result.message, result.success ? 'success' : 'error');
-    } catch (error) {
-        console.error("Error resending OTP:", error);
-        showPopup("Something went wrong. Please try again.", "error");
-    }
-});
-
-
-   
     function showPopup(message, type) {
         popupMessage.textContent = message;
         popup.classList.remove("success", "error");
@@ -290,13 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.style.display = "block";
     }
 
-   
-    closePopupBtn.addEventListener('click', closePopup);
-
-    function closePopup() {
-        console.log("Closing popup");
+    closePopupBtn.addEventListener('click', () => {
         popup.style.display = "none";
-    }
+    });
 });
 
 
