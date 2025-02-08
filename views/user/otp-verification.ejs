@@ -182,102 +182,148 @@
     <h2>OTP Verification</h2>
     <p>Enter the 6-digit OTP sent to your email.</p>
 
-    <form id="otpForm">
-      <div class="otp-inputs">
-        <input type="text" name="otp1" maxlength="1" required autofocus>
-        <input type="text" name="otp2" maxlength="1" required>
-        <input type="text" name="otp3" maxlength="1" required>
-        <input type="text" name="otp4" maxlength="1" required>
-        <input type="text" name="otp5" maxlength="1" required>
-        <input type="text" name="otp6" maxlength="1" required>
-      </div>
-
-      <button type="submit">Verify OTP</button>
-    </form>
-
-    <div class="resend-otp">
-      Didn't receive the OTP? <a href="#" id="resendOtpLink">Resend OTP</a>
-    </div>
-  </div>
-
-  <!-- Glamorous Popup for Messages -->
-  <div id="popup" class="popup">
-    <p id="popupMessage"></p>
-    <button onclick="closePopup()">Close</button>
-  </div>
-
-  <script>
-   
-    const inputs = document.querySelectorAll('.otp-inputs input');
-    inputs.forEach((input, index) => {
-      input.addEventListener('input', () => {
-        if (input.value.length === 1 && index < inputs.length - 1) {
-          inputs[index + 1].focus();
-        }
-      });
-
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && index > 0 && input.value.length === 0) {
-          inputs[index - 1].focus();
-        }
-      });
-    });
-
   
-    document.getElementById('otpForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const otp = Array.from(inputs).map(input => input.value).join('');
-      const response = await fetch('/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ otp }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        showPopup(result.message, 'success');
-        setTimeout(() => {
-          window.location.href = '/login'; 
-        }, 2000);
-      } else {
-        showPopup(result.message, 'error');
-      }
-    });
-
-   
-    document.getElementById('resendOtpLink').addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      const response = await fetch('/resend-otp', {
-        method: 'POST',
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        showPopup(result.message, 'success');
-      } else {
-        showPopup(result.message, 'error');
-      }
-    });
-
-    
-    function showPopup(message, type) {
+      <form id="otpForm">
+          <div class="otp-inputs">
+              <input type="text" name="otp1" maxlength="1" required autofocus>
+              <input type="text" name="otp2" maxlength="1" required>
+              <input type="text" name="otp3" maxlength="1" required>
+              <input type="text" name="otp4" maxlength="1" required>
+              <input type="text" name="otp5" maxlength="1" required>
+              <input type="text" name="otp6" maxlength="1" required>
+          </div>
+          <button type="submit">Verify OTP</button>
+      </form>
+  
+      <div class="resend-otp">
+          <p id="timerDisplay"></p>
+          <button id="resendOtpLink" disabled>Resend OTP</button>
+      </div>
+  </div>
+  
+  <!-- Popup for messages -->
+  <div id="popup" class="popup">
+      <p id="popupMessage"></p>
+      <button id="closePopupBtn">Close</button>
+  </div>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const otpForm = document.getElementById('otpForm');
+      const inputs = document.querySelectorAll('.otp-inputs input');
+      const resendOtpLink = document.getElementById('resendOtpLink');
+      const timerDisplay = document.getElementById('timerDisplay');
       const popup = document.getElementById('popup');
       const popupMessage = document.getElementById('popupMessage');
-
-      popupMessage.textContent = message;
-      popup.className = `popup ${type}`;
-      popup.style.display = 'block';
-    }
-
-   
-    function closePopup() {
-      const popup = document.getElementById('popup');
-      popup.style.display = 'none';
-    }
+      const closePopupBtn = document.getElementById('closePopupBtn');
+  
+      const OTP_EXPIRY_TIME = 60; // 1 minute
+  
+      // Auto move to next input
+      inputs.forEach((input, index) => {
+          input.addEventListener('input', () => {
+              if (input.value.length === 1 && index < inputs.length - 1) {
+                  inputs[index + 1].focus();
+              }
+          });
+  
+          input.addEventListener('keydown', (e) => {
+              if (e.key === 'Backspace' && index > 0 && input.value.length === 0) {
+                  inputs[index - 1].focus();
+              }
+          });
+      });
+  
+      // OTP expiration timer
+      let expiryTime = localStorage.getItem('otpExpiry');
+      if (!expiryTime || Date.now() > expiryTime) {
+          expiryTime = Date.now() + OTP_EXPIRY_TIME * 1000;
+          localStorage.setItem('otpExpiry', expiryTime);
+      }
+  
+      function updateTimer() {
+          let remainingTime = Math.max(0, Math.floor((expiryTime - Date.now()) / 1000));
+  
+          if (remainingTime > 0) {
+              timerDisplay.textContent = `Resend OTP in ${remainingTime}s`;
+              resendOtpLink.disabled = true;
+          } else {
+              timerDisplay.textContent = "";
+              resendOtpLink.disabled = false;
+              localStorage.removeItem('otpExpiry'); 
+          }
+      }
+  
+      const timerInterval = setInterval(() => {
+          updateTimer();
+          if (Date.now() >= expiryTime) {
+              clearInterval(timerInterval);
+          }
+      }, 1000);
+  
+      updateTimer();
+  
+      // Handle OTP form submission
+      otpForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const otp = Array.from(inputs).map(input => input.value).join('');
+  
+          try {
+              const response = await fetch('/verify-otp', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ otp })
+              });
+  
+              const result = await response.json();
+              showPopup(result.message, result.success ? 'success' : 'error');
+  
+              if (result.success) {
+                  setTimeout(() => {
+                      window.location.href = '/login';
+                  }, 2000);
+              }
+          } catch (error) {
+              console.error("Error verifying OTP:", error);
+              showPopup("Something went wrong. Please try again.", "error");
+          }
+      });
+  
+      // Handle Resend OTP click
+      resendOtpLink.addEventListener('click', async (e) => {
+          e.preventDefault();
+  
+          if (resendOtpLink.disabled) return; 
+  
+          try {
+              const response = await fetch('/resend-otp', { method: 'POST' });
+              const result = await response.json();
+  
+              if (result.success) {
+                  localStorage.setItem('otpExpiry', Date.now() + OTP_EXPIRY_TIME * 1000);
+                  updateTimer();
+                  showPopup(result.message, 'success');
+              } else {
+                  showPopup(result.message, 'error');
+              }
+          } catch (error) {
+              console.error("Error resending OTP:", error);
+              showPopup("Something went wrong. Please try again.", "error");
+          }
+      });
+  
+      function showPopup(message, type) {
+          popupMessage.textContent = message;
+          popup.classList.remove("success", "error");
+          popup.classList.add(type);
+          popup.style.display = "block";
+      }
+  
+      closePopupBtn.addEventListener('click', () => {
+          popup.style.display = "none";
+      });
+  });
   </script>
+  
 </body>
 </html>

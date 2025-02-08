@@ -5,12 +5,12 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 
 //---------------------------------------------
-// Function to generate a 6-digit OTP
+
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Nodemailer setup
+
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -82,7 +82,7 @@ const getForgotOtpVerification = (req, res) => {
 
 //-------------------------------------------------------
 
-// Handle OTP Generation & Email Validation
+
 const forgotEmailValid = async (req, res) => {
     try {
         const { email } = req.body;

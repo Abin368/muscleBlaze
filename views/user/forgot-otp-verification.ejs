@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             timerDisplay.textContent = "";
             resendOtpLink.disabled = false;
-            localStorage.removeItem('otpExpiry'); // Clear stored expiry time
+            localStorage.removeItem('otpExpiry'); 
         }
     }
 
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 
     updateTimer();
-
+//----------------------------------------------
     // Handle OTP form submission
     otpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -295,19 +295,19 @@ document.addEventListener('DOMContentLoaded', () => {
             showPopup("Something went wrong. Please try again.", "error");
         }
     });
-
+//-----------------------------------------------
     // Handle Resend OTP click
     resendOtpLink.addEventListener('click', async (e) => {
         e.preventDefault();
 
-        if (resendOtpLink.disabled) return; // Prevent early click
+        if (resendOtpLink.disabled) return; 
 
         try {
             const response = await fetch('/resend-forget-otp', { method: 'POST' });
             const result = await response.json();
 
             if (result.success) {
-                localStorage.setItem('otpSent', 'true'); // Set flag when OTP is resent
+                localStorage.setItem('otpSent', 'true'); 
                 localStorage.setItem('otpExpiry', Date.now() + OTP_EXPIRY_TIME * 1000);
                 updateTimer();
                 showPopup(result.message, 'success');

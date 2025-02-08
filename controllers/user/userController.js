@@ -44,49 +44,59 @@ const loadLogin=async(req,res)=>{
         res.redirect('pageNotfound')
     }
 }
+
+//--------------------------------------------------
+const getVerifyOtp = (req, res) => {
+  if (!req.session.otpData) {
+    return res.redirect('/signup'); 
+  }
+  res.render('user/otp-verification', { email: req.session.otpData.email, message: '' }); 
+};
 //---------------------------------------------------
 const signup = async (req, res) => {
-    try {
-      const { name, email, phone, password, confirmPassword } = req.body;
-  
-     
-      const errors = validateInput(name, email, phone, password, confirmPassword);
-      if (errors.length > 0) {
-        return res.render("user/signup", { messages: { error: errors } });
-      }
-  
-    
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.render("user/signup", { messages: { error: [ERROR_MESSAGES.EMAIL_EXISTS] } });
-      }
-  
-     
-      const otp = generateOTP();
-      req.session.otpData = { name, email, phone, password, otp, timestamp: Date.now() };
-  
-      
-      req.session.save((err) => {
-        if (err) {
-          console.error("Error saving session:", err);
-          return res.status(500).render("user/signup", { messages: { error: [ERROR_MESSAGES.SERVER_ERROR] } });
-        }
-  
-       
-        sendOTPEmail(email, otp)
-          .then(() => {
-            res.render("user/otp-verification", { messages: { success: "OTP sent to your email!" } });
-          })
-          .catch((error) => {
-            console.error("Error sending OTP:", error);
-            res.status(500).render("user/signup", { messages: { error: [ERROR_MESSAGES.SERVER_ERROR] } });
-          });
-      });
-    } catch (error) {
-      console.error("Error during signup:", error);
-      res.status(500).render("user/signup", { messages: { error: [ERROR_MESSAGES.SERVER_ERROR] } });
+  try {
+    const { name, email, phone, password, confirmPassword } = req.body;
+
+   
+    const errors = validateInput(name, email, phone, password, confirmPassword);
+    if (errors.length > 0) {
+      return res.status(400).json({ success: false, message: errors.join(", ") });
     }
-  };
+
+   
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email already exists. Please use a different email." });
+    }
+
+    if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
+      return res.status(400).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
+    }
+
+    const otp = generateOTP();
+    try {
+      await sendOTPEmail(email, otp);
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      return res.status(500).json({ success: false, message: "Failed to send OTP, please try again." });
+    }
+
+    req.session.otpData = { name, email, phone, password, otp, timestamp: Date.now() };
+    req.session.otpExpiry = Date.now() + 60000; 
+    console.log("Generated OTP:", otp);
+    // console.log("Redirecting user to: /otp-verification");  
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully. Please verify your email.",
+      redirectUrl: "/otp-verification"
+    });
+  } catch (error) {
+    console.error("Error during signup:", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
   
   //---------------------------------------------------
   const resendOtp = async (req, res) => {
@@ -101,9 +111,11 @@ const signup = async (req, res) => {
       const newOtp = generateOTP();
       req.session.otpData.otp = newOtp;
       req.session.otpData.timestamp = Date.now(); 
+
   
     
       await sendOTPEmail(otpData.email, newOtp);
+      console.log(newOtp)
   
       res.json({ success: true, message: "New OTP sent to your email!" });
     } catch (error) {
@@ -113,7 +125,7 @@ const signup = async (req, res) => {
   };
     //---------------------------------------------------
  
-  const verifyOtp = async (req, res) => {
+  const verifySignupOtp = async (req, res) => {
     try {
       const { otp } = req.body;
       const otpData = req.session.otpData;
@@ -218,7 +230,6 @@ const logout =  async (req,res)=>{
 
 //---------------------------------------------------
 
-//---------------------------------------------------
 
 
   
@@ -229,9 +240,10 @@ module.exports ={
     loadLogin,
     signup,
     resendOtp,
-    verifyOtp,
+    verifySignupOtp,
     login,
     logout,
+    getVerifyOtp
    
     // handleForgotPassword,
     // verifyForgotPasswordOtp,
