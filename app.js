@@ -6,8 +6,10 @@ const passport = require("./config/passport");
 const app = express();
 const path = require('path');
 const connectDB = require('./config/db'); 
+const bannerMiddleware = require('./middlewares/bannerMiddleware')
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
+
 connectDB(); 
 
 app.use(express.json());
@@ -22,6 +24,10 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000
     }
 }));
+
+app.use(bannerMiddleware.loadBanners)
+
+
 // app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -36,6 +42,11 @@ app.use((req, res, next) => {
 //     res.locals.error = req.flash('error');
 //     next();
 // });
+app.use((req, res, next) => {
+    res.locals.searchQuery = req.query.query || ""; 
+    next();
+  });
+  
 
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
@@ -44,18 +55,21 @@ app.use((req, res, next) => {
 });
 
 
-// app.set('views', [
-//     path.join(__dirname, 'views/user'),
-//     path.join(__dirname, 'views/admin')
-// ]);
+
 
 app.set('view engine', 'ejs');
 
 
- // app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')]);
+
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+app.use((req, res, next) => {
+    res.locals.currentPath = req.path; // Store current URL path
+    next();
+});
 
 app.use('/', userRouter);
 app.use('/', adminRouter); // Admin routes

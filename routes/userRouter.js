@@ -3,6 +3,8 @@ const router=express.Router()
 const passport = require('passport');
 const profileController=require('../controllers/user/profileController')
 const userController=require('../controllers/user/userController')
+const productController=require('../controllers/user/productController')
+
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
 
@@ -38,7 +40,16 @@ router.get('/reset-password', preventCache, isLoggedIn, profileController.getres
 router.post('/reset-password', preventCache, isLoggedIn, profileController.resetPassword);
 
 
+router.get('/product/:id', preventCache,isLoggedIn,userController.getProductDetail);
+router.get('/category/:categoryName', preventCache,isLoggedIn,userController.getCategoryPage);
 
+router.get('/shop',preventCache,userController.loadShoppingPage)
+router.get('/filter',preventCache,userController.filterProduct)
+router.get('/search', preventCache,userController.searchProducts);
+
+//product management
+
+router.get('/productDetails',preventCache,productController.productDetails)
 
 
 

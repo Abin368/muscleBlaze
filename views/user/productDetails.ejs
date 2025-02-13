@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drift-zoom/dist/drift-basic.min.css">
+
+    <style>
+
+.drift-inline-pane {
+    border-radius: 50%; /* Makes the zoom area circular */
+    border: 2px solid #ff6600;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+
+     
+        .product-details-container {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          margin: 20px auto;
+          max-width: 1100px;
+        }
+        
+        /* Product Images Section */
+        .product-images {
+          flex: 1;
+          min-width: 300px;
+          text-align: center;
+        }
+        
+        .main-image img {
+          width: 100%;
+          max-width: 400px;
+          border-radius: 8px;
+          transition: transform 0.3s ease;
+        }
+        
+        .main-image img:hover {
+          transform: scale(1.05);
+        }
+        
+        /* Thumbnail Gallery */
+        .thumbnail-gallery {
+          display: flex;
+          justify-content: center;
+          margin-top: 10px;
+        }
+        
+        .thumbnail {
+          margin: 5px;
+          cursor: pointer;
+        }
+        
+        .thumbnail img {
+          width: 60px;
+          height: 60px;
+          border-radius: 6px;
+          border: 2px solid transparent;
+          transition: border 0.3s ease;
+        }
+        
+        .thumbnail img:hover {
+          border: 2px solid #ff6600;
+        }
+        
+        /* Product Info Section */
+        .product-info {
+          flex: 1;
+          padding: 20px;
+        }
+        
+        .product-category {
+          font-size: 18px;
+          color: black;
+          margin-bottom: 5px;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        
+        .product-name {
+          font-size: 24px;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 10px;
+        }
+        
+        /* Size and Flavor */
+        .size-flavor {
+          display: flex;
+          justify-content: space-between;
+          max-width: 300px;
+          margin-bottom: 10px;
+        }
+        
+        .size, .flavor {
+          background: black;
+          padding: 5px 10px;
+          border-radius: 5px;
+          color: #ccc;
+        }
+        
+        /* Rating Section */
+        .product-rating {
+          display: flex;
+          align-items: center;
+          margin: 10px 0;
+        }
+        
+        .stars {
+          margin-left: 5px;
+        }
+        
+        .star {
+          font-size: 18px;
+          color: #ccc;
+        }
+        
+        .star.filled {
+          color: #ffcc00;
+        }
+        
+        .rating-count {
+          margin-left: 5px;
+          font-size: 14px;
+          color: #666;
+        }
+        
+        /* Description */
+        .product-description {
+          margin: 15px 0;
+        }
+        
+        .product-description h3 {
+          font-size: 18px;
+          margin-bottom: 5px;
+          color: #333;
+        }
+        
+        /* Price Section */
+        .product-price {
+          font-size: 20px;
+          font-weight: bold;
+          color: black;
+          margin-top: 10px;
+        }
+        
+        .discount {
+          font-size: 16px;
+          color: red;
+          margin-left: 5px;
+        }
+        
+        /* Quantity Selector */
+        .quantity-selector {
+          display: flex;
+          align-items: center;
+          margin: 15px 0;
+        }
+        
+        .quantity-selector input {
+          width: 50px;
+          padding: 5px;
+          text-align: center;
+          font-size: 16px;
+          margin-left: 10px;
+        }
+        
+        .stock-status {
+          margin-left: 15px;
+          font-size: 14px;
+        }
+        
+        .in-stock {
+          color: green;
+        }
+        
+        .limited-stock {
+          color: orange;
+        }
+        
+        .out-of-stock {
+          color: red;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+          display: flex;
+          gap: 15px;
+          margin-top: 20px;
+        }
+        
+        button {
+          padding: 12px 20px;
+          font-size: 16px;
+          font-weight: bold;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+        
+        .add-to-cart {
+          background: #ffa41b;
+          color: black;
+        }
+        
+        .add-to-cart:hover {
+          background: #ff8c00;
+        }
+        
+        .buy-now {
+          background: #ffa41b;
+          color: rgb(0, 0, 0);
+        }
+        
+        .buy-now:hover {
+          background: #ff8c00;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .product-details-container {
+            flex-direction: column;
+            align-items: center;
+          }
+        
+          .product-info {
+            text-align: center;
+          }
+        
+          .size-flavor {
+            justify-content: center;
+          }
+        
+          .action-buttons {
+            flex-direction: column;
+            width: 100%;
+          }
+        
+          button {
+            width: 100%;
+          }
+        }
+        .actual_price span.price {
+          font-size: 16px;
+          color: #777;
+          text-decoration: line-through;
+         
+        }
+        
+        
+        
+            </style>
+</head>
+<body>
+
+    <%- include('../../views/partials/user/header') %>
+    <%- include('./breadcrump') %>
+
+    <div class="product-details-container">
+     
+        <div class="product-images">
+        
+          <!-- <div class="main-image">
+            <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" id="mainImage">
+          </div>
+     -->
+
+     <div class="main-image">
+        <img 
+            src="/uploads/product-images/<%= product.productImage[0] %>" 
+            alt="<%= product.productName %>" 
+            id="mainImage"
+            class="drift-trigger"
+            data-zoom="/uploads/product-images/<%= product.productImage[0] %>"
+        >
+    </div>
+ 
+          <div class="thumbnail-gallery">
+            <% product.productImage.forEach((image, index) => { %>
+              <div class="thumbnail">
+                <img id="zoom-image"
+                  src="/uploads/product-images/<%= image %>" 
+                  alt="Thumbnail <%= index + 1 %>"
+                  onclick="changeMainImage('<%= image %>')"
+                >
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+       
+        <!-- Product Details Section -->
+        <div class="product-info">
+          <!-- Category -->
+          <div class="product-category">
+            <span></span> <%= product.category.name%>
+          </div>
+    
+          <!-- Product Name -->
+          <h1 class="product-name"><%= product.productName %></h1>
+    
+          <!-- Size and Flavor -->
+          <div class="size-flavor">
+            <div class="size">
+              <span>Size:</span> <%= product.size ? product.size + ' kg' : 'N/A' %>
+            </div>
+            <div class="flavor">
+              <span>Flavor:</span> <%= product.flavor || 'N/A' %>
+            </div>
+          </div>
+    
+          <!-- Rating -->
+          <div class="product-rating">
+            <span>Rating:</span>
+            <div class="stars">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <span class="star <%= i <= product.rating ? 'filled' : '' %>">&#9733;</span>
+              <% } %>
+            </div>
+            <span class="rating-count">(<%= product.ratingCount || 0 %> reviews)</span>
+          </div>
+    
+          <!-- Description -->
+          <div class="product-description">
+            <h3>Description</h3>
+            <p><%= product.description %></p>
+          </div>
+    
+          <!-- Price -->
+
+          <div class="actual_price">
+            <span class="mrp">MRP:</span> 
+            <span class="price">₹<%= product.regularPrice.toFixed(2) %></span>
+        </div>
+        
+
+
+          <div class="product-price">
+           
+            <span>Price:</span> ₹<%= product.salePrice.toFixed(2) %>
+            <% if (product.productOffer && product.productOffer > 0) { %>
+              <span class="discount">(<%= product.productOffer %>% off)</span>
+            <% } %>
+          </div>
+    
+          <!-- Quantity Selector -->
+          <div class="quantity-selector">
+            <label for="quantity">Quantity:</label>
+            <input 
+              type="number" 
+              id="quantity" 
+              name="quantity" 
+              min="1" 
+              max="<%= product.quantity %>" 
+              value="1"
+            >
+        
+
+
+            <span class="stock-status">
+              <% if (product.quantity === 0) { %>
+                <span class="out-of-stock">Out of Stock</span>
+              <% } else if (product.quantity < 5) { %>
+                <span class="limited-stock">Only <%= product.quantity %> left in stock!</span>
+              <% } else { %>
+                <span class="in-stock">In Stock</span>
+              <% } %>
+            </span>
+          </div>
+    
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button class="add-to-cart" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+            <button class="buy-now" onclick="buyNow('<%= product._id %>')">Buy Now</button>
+          </div>
+        </div>
+      </div>
+<!------------------ --------------------------- -->
+    
+
+
+
+
+ <!-- Related Products Section -->
+ <div class="container">
+    <h1>Related Products</h1>
+    <div class="products-grid">
+        <% if (relatedProducts && relatedProducts.length > 0) { %>
+            <% for (let i = 0; i < relatedProducts.length; i++) { %>
+                <div class="product-card">
+                    <a href="/productDetails?id=<%= relatedProducts[i]._id %>">
+                        <img 
+                            src="/uploads/product-images/<%= relatedProducts[i].productImage && relatedProducts[i].productImage.length > 0 ? relatedProducts[i].productImage[0] : 'default-image.jpg' %>" 
+                            alt="<%= relatedProducts[i].productName %>" 
+                            class="product-image"
+                        > 
+                    </a>
+                    <div class="product-name"><%= relatedProducts[i].productName %></div>
+                    <div class="product-details">Size: <%= relatedProducts[i].size ? relatedProducts[i].size + ' kg' : 'N/A' %></div>
+                    <div class="product-details">Flavor: <%= relatedProducts[i].flavor || 'N/A' %></div>
+                    <div class="product-details">
+                        Price: ₹<%= relatedProducts[i].salePrice ? relatedProducts[i].salePrice.toFixed(2) : '0.00' %> 
+                        <% if (relatedProducts[i].productOffer && relatedProducts[i].productOffer > 0) { %>
+                            <span class="offer-text">(<%= relatedProducts[i].productOffer %>% off)</span>
+                        <% } %>
+                    </div>
+                    
+                    <div class="product-details">
+                        <% if (relatedProducts[i].quantity === 0) { %>
+                            <span style="color: red; font-weight: bold;">Out of stock</span>
+                        <% } else if (relatedProducts[i].quantity < 5) { %>
+                            <span style="color: orange; font-weight: bold;">Limited Stock</span>
+                        <% } else { %>
+                            <span style="color: green; font-weight: bold;">Available</span>
+                        <% } %>
+                    </div>
+
+                    <div class="wishlist-icon">
+                        <i class="fas fa-heart" onclick="addToWishlist('<%= relatedProducts[i]._id %>')"></i>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('<%= relatedProducts[i]._id %>')">Add to Cart</button>
+                </div>
+            <% } %>
+        <% } else { %>
+            <p>No related products available.</p>
+        <% } %>
+    </div>
+</div>
+
+
+    <%- include('../../views/partials/user/footer') %>
+    <script src="/script.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/drift-zoom/dist/Drift.min.js"></script>
+
+
+    <script>
+       document.addEventListener("DOMContentLoaded", function () {
+    var mainImage = document.querySelector('#mainImage');
+
+    new Drift(mainImage, {
+        inlinePane: true,       
+        inlineOffsetY: -50,     
+        zoomFactor: 2,          
+        containInline: true,    
+        hoverBoundingBox: false 
+    });
+
+    // Function to change the main image when clicking thumbnails
+    function changeMainImage(imageSrc) {
+        mainImage.src = "/uploads/product-images/" + imageSrc;
+        mainImage.setAttribute('data-zoom', "/uploads/product-images/" + imageSrc);
+    }
+
+    window.changeMainImage = changeMainImage;
+});
+
+    </script>
+
+
+    
+</body>
+</html>

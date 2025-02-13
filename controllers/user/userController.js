@@ -1,4 +1,7 @@
 const User =require("../../models/userSchema")
+const Category =require('../../models/categorySchema')
+const Product = require('../../models/productSchema')
+const Banner= require('../../models/bannerSchema')
 const bcrypt = require("bcrypt");
 const { sendOTPEmail } = require("../../services/emailService");
 const { generateOTP,validateInput, ERROR_MESSAGES } = require("../../utils/validation");
@@ -165,6 +168,7 @@ const signup = async (req, res) => {
   //---------------------------------------------------
   const login = async (req, res) => {
     try {
+     
       const { email, password } = req.body;
       const findUser = await User.findOne({ isAdmin: 0, email: email });
   
@@ -186,6 +190,7 @@ const signup = async (req, res) => {
           _id: findUser._id,
           username:findUser.name,
           email:findUser.email
+         
      }
       res.redirect('/');
       console.log(req.session.user); 
@@ -196,21 +201,45 @@ const signup = async (req, res) => {
   };
 //---------------------------------------------------
 const loadHomepage = async (req, res) => {
-    try {
-      const user = req.session.user;  
-      
-      if (user) {
-       
-        res.render('user/home', { user: user });
-      } else {
-       
-        res.render('user/home', { user: null });
-      }
-    } catch (error) {
-      console.log('Error loading homepage:', error);
-      res.status(500).send('Server error');
-    }
-  };
+  try {
+    const user = req.session.user;
+    const today = new Date().toISOString();
+    const findBanner = await Banner.find({
+      startDate: { $lt: new Date(today) },
+      endDate: { $gt: new Date(today) },
+    });
+    
+    const categories = await Category.find({ isListed: true });
+    const categoryIds = categories.length ? categories.map(category => category._id) : [];
+
+    let productData = await Product.find({
+      isBlocked: false,
+      category: { $in: categoryIds.length ? categoryIds : undefined },
+      quantity: { $gt: 0 }
+    });
+
+    productData = productData
+      .filter(p => p.createdAt)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 6);
+
+    console.log("User:", user);
+   console.log("Banners fetched:", findBanner);
+console.log("Type of findBanner:", typeof findBanner);
+console.log("findBanner length:", findBanner.length);
+
+
+    res.render('user/home', { 
+      user: user || null, 
+      product: productData, 
+      banner: findBanner.length ? findBanner : []  
+    });
+
+  } catch (error) {
+    console.error('Error loading homepage:', error);
+    res.status(500).render('user/pageNotfound', { message: 'Something went wrong!' });
+  }
+};
   //------------------------------------------------------
 const logout =  async (req,res)=>{
     try{
@@ -230,6 +259,266 @@ const logout =  async (req,res)=>{
 
 //---------------------------------------------------
 
+const getProductDetail = (req, res) => {
+  const productId = req.params.id;
+
+  Product.findById(productId)
+      .then((product) => {
+          if (!product) {
+              return res.redirect('/404'); 
+          }
+          res.render('user/productDetail', { product, currentPath: req.originalUrl });
+      })
+      .catch((err) => {
+          console.error(err);
+          res.redirect('/pageNotfound'); 
+      });
+};
+//-----------------------------------------------------
+const getCategoryPage = (req, res) => {
+  const categoryName = req.params.categoryName;
+
+  Product.find({ category: categoryName })
+      .then((products) => {
+          res.render('user/category', { products, currentPath: req.originalUrl });
+      })
+      .catch((err) => {
+          console.error(err);
+          res.redirect('/pageNotfound');
+      });
+};
+//------------------------------------
+const loadShoppingPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const searchQuery = req.query.query || ""; 
+    const selectedFlavor = req.query.flavor || ""; 
+    const selectedCategory = req.query.category || "";
+    const selectedPrice = req.query.price || ""; 
+
+    console.log("selectedFlavor in controller:", selectedFlavor); 
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
+
+   
+    let productFilter = {
+      isBlocked: false,
+      quantity: { $gt: 0 }
+    };
+
+    if (searchQuery) {
+      productFilter.$or = [
+        { name: { $regex: searchQuery, $options: "i" } }, 
+        { category: { $regex: searchQuery, $options: "i" } },
+        { flavor: { $regex: searchQuery, $options: "i" } } 
+      ];
+    }
+
+    if (selectedFlavor) {
+      productFilter.flavor = selectedFlavor;
+    }
+
+    if (selectedCategory) {
+      productFilter.category = selectedCategory;
+    }
+
+   
+    const product = await Product.find(productFilter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalProducts = await Product.countDocuments(productFilter);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.render('user/shop', {
+      user: user ? await User.findById(user).lean() : null,
+      product,
+      categories: await Category.find({ isListed: true }).lean(),
+      flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      searchQuery,
+      selectedFlavor, 
+      selectedCategory, 
+      selectedPrice 
+    });
+
+  } catch (error) {
+    console.error("Error in loadShoppingPage:", error);
+    res.redirect('/pageNotFound');
+  }
+};
+
+//-------------------------------
+const filterProduct = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const category = req.query.category;
+    const flavor = req.query.flavor;
+    const price = req.query.price;
+
+    const query = {
+      isBlocked: false,
+      quantity: { $gt: 0 }
+    };
+
+  
+    if (category) {
+      const findCategory = await Category.findById(category).lean();
+      if (findCategory) {
+        query.category = findCategory._id;
+      }
+    }
+
+    
+    if (flavor) {
+      query.flavor = flavor;
+    }
+
+    
+    if (price) {
+      query.salePrice = {
+        "1500": { $lt: 1500 },
+        "2500": { $lt: 2500 },
+        "4000": { $lt: 4000 },
+        "above4000": { $gt: 4000 }
+      }[price] || query.salePrice;
+    }
+
+   
+    let findProducts = await Product.find(query).sort({ createdAt: -1 }).lean();
+
+
+const uniqueFlavors = await Product.distinct("flavor", {
+  isBlocked: false,
+  quantity: { $gt: 0 }
+});
+
+
+ 
+    const categories = await Category.find({ isListed: true }).lean();
+
+   
+    const itemsPerPage = 6;
+    const currentPage = parseInt(req.query.page) || 1;
+    const totalPages = Math.ceil(findProducts.length / itemsPerPage);
+    const currentProduct = findProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    let userData = null;
+    if (user) {
+      userData = await User.findById(user).lean();
+      if (userData) {
+        const searchEntry = {
+          category: category || null,
+          flavor: flavor || null,
+          price: price || null,
+          searchedOn: new Date()
+        };
+        userData.searchHistory.push(searchEntry);
+        await User.updateOne({ _id: user }, { $push: { searchHistory: searchEntry } });
+      }
+    }
+
+    req.session.filterProducts = currentProduct;
+
+    res.render("user/shop", {
+      user: userData,
+      product: currentProduct,
+      categories,
+      flavors: uniqueFlavors.filter(Boolean), 
+      totalPages,
+      currentPage,
+      selectedCategory: category || null,
+      selectedFlavor: flavor || null,
+      selectedPrice: price || null
+    });
+
+  } catch (error) {
+    console.error("Error filtering products:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+//-----------------------------------------------------------------
+
+const searchProducts = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const query = req.query.query ? req.query.query.trim() : "";
+
+
+    const selectedFlavor = req.query.flavor || "";
+    const selectedCategory = req.query.category || "";
+    const selectedPrice = req.query.price || "";
+
+    console.log("Selected Flavor in Search Controller:", selectedFlavor);
+
+    
+    const categories = await Category.find({ isListed: true }).lean();
+
+    let searchCondition = {
+      isBlocked: false,
+      quantity: { $gt: 0 },
+      $or: [
+        { name: { $regex: query, $options: "i" } }, 
+        { description: { $regex: query, $options: "i" } }, 
+      ],
+    };
+
+    const matchedCategory = await Category.findOne({ name: { $regex: query, $options: "i" } }).lean();
+    if (matchedCategory) {
+      searchCondition.$or.push({ category: matchedCategory._id });
+    }
+
+  
+    if (selectedFlavor) {
+      searchCondition.flavor = selectedFlavor;
+    }
+
+    if (selectedCategory) {
+      searchCondition.category = selectedCategory;
+    }
+
+    // Pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
+
+   
+    const product = await Product.find(searchCondition)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalProducts = await Product.countDocuments(searchCondition);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.render("user/shop", {
+      user: user ? await User.findById(user).lean() : null,
+      product, 
+      categories,
+      flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
+      totalProducts,
+      currentPage: page,
+      totalPages,
+      searchQuery: query,
+      selectedFlavor, 
+      selectedCategory,
+      selectedPrice, 
+    });
+
+  } catch (error) {
+    console.error("Error in searchProducts:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+
 
 
   
@@ -243,7 +532,14 @@ module.exports ={
     verifySignupOtp,
     login,
     logout,
-    getVerifyOtp
+    getVerifyOtp,
+    getProductDetail,
+    getCategoryPage,
+    loadShoppingPage,
+    filterProduct,
+    searchProducts
+    
+
    
     // handleForgotPassword,
     // verifyForgotPasswordOtp,

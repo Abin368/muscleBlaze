@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+
+    <link rel="stylesheet" href="/addProduct.css">
+</head>
+<body>
+    <%- include('../../views/partials/admin/sidebar') %>
+
+    <div class="main-content">
+        <h1 class="text-center">Add Banner</h1>
+    
+
+        <% if (typeof error !== "undefined" && error) { %>
+            <div class="alert alert-danger">
+                <%= error %>
+            </div>
+        <% } %>
+
+       
+
+        <form action="/admin/addBanner" method="POST" enctype="multipart/form-data" onsubmit="return validateAndSubmit()">
+            <div class="mb-3">
+                <label class="form-label">Banner Title</label>
+                <input type="text" name="bannerName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="startDate" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" name="endDate" class="form-control" required>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4>Choose Banner Image</h4>
+                </div>
+                <div class="card-body">
+                    <input class="form-control" type="file" name="images1" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event)">
+                    <img id="croppedImg" style="max-width: 100%; margin-top: 10px; display: none;">
+                    <div class="error-message" id="imageError"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-md rounded font-sm hover-up publish-btn">Publish</button>
+        </form>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+   <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cropperInstances = {}; 
+    const imageInput = document.getElementById("input1");
+    const croppedImage = document.getElementById("croppedImg");
+    const saveButton = document.getElementById("saveButton");
+
+    imageInput.addEventListener("change", function (event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            if (!file.type.startsWith("image/")) {
+                alert("Please upload an image file (JPEG, PNG)");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                croppedImage.src = e.target.result;
+                croppedImage.style.display = "block";
+
+              
+                if (cropperInstances["input1"]) {
+                    cropperInstances["input1"].destroy();
+                }
+
+                // Initialize Cropper.js
+                cropperInstances["input1"] = new Cropper(croppedImage, {
+                    aspectRatio: 1,
+                    viewMode: 2,
+                    autoCropArea: 1,
+                    responsive: true
+                });
+
+                saveButton.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    saveButton.addEventListener("click", function () {
+        const cropper = cropperInstances["input1"];
+        if (cropper) {
+            cropper.getCroppedCanvas({ width: 800, height: 440 }).toBlob((blob) => {
+                const file = new File([blob], `cropped_${imageInput.files[0].name}`, { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                imageInput.files = dataTransfer.files;
+                alert("Image cropped successfully!");
+            });
+        }
+    });
+
+    
+    window.validateAndSubmit = function () {
+        const bannerName = document.querySelector("input[name='bannerName']").value.trim();
+        const description = document.querySelector("textarea[name='description']").value.trim();
+        const startDate = document.querySelector("input[name='startDate']").value;
+        const endDate = document.querySelector("input[name='endDate']").value;
+        const images = imageInput.files.length;
+
+        if (!bannerName || !description || !startDate || !endDate) {
+            alert("Please fill in all required fields!");
+            return false;
+        }
+
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("End date must be later than start date!");
+            return false;
+        }
+
+        if (images !== 1) {
+            alert("Please upload and crop an image!");
+            return false;
+        }
+
+        document.querySelector("form").submit();
+    };
+});
+
+
+   </script>
+</body>
+</html>

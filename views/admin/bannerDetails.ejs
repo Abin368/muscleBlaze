@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+   
+    <link rel="stylesheet" href="/categoryDetails.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+       .add-banner-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* Space between button and table */
+}
+
+.add-banner-btn {
+    background-color: #f39c12; /* Blue color */
+    color: black; /* White text */
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    text-align: center;
+}
+
+.add-banner-btn:hover {
+    background-color: #f79903; /* Darker blue */
+    transform: scale(1.05);
+}
+
+.add-banner-btn:active {
+    transform: scale(0.95);
+}
+
+
+    </style>
+    
+    
+</head>
+<body>
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+        <div class="main-content">
+        <h1>Banner Management</h1>
+        
+       
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (data && data.length > 0) { %>
+                    <% for (let i = 0; i < data.length; i++) { %>
+                        <tr>
+                            <td>
+                                <img src="/uploads/banner-images/<%= data[i].image %>" alt="Banner Image">
+                            </td>
+                            <td><%= data[i].title %></td>
+                            <td><%= data[i].description %></td>
+
+                          <td>
+                              <% if (data[i].startDate <= new Date() && data[i].endDate >= new Date()) { %>
+                             <p style="color: green; font-weight: bold;">Active</p>
+                             <% } else { %>
+                              <p style="color: red; font-weight: bold;">No Active</p>
+                                <% } %>
+                        </td>
+
+                            
+                        <td class="action" data-title="Remove">
+                            <a href="/admin/deleteBanner?id=<%= data[i]._id %>" onclick="return confirmDelete();">
+                                <i class="fas fa-trash-alt" style="color: red; font-size: 18px;"></i>
+                            </a>
+                        </td>  
+            
+                        </tr>
+                    <% } %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align:center;">No banners available</td>
+                    </tr>
+                <% } %>
+            </tbody>
+            
+        </table>
+        <div class="add-banner-container">
+
+        <a href="/admin/addBanner">
+            <button class="add-banner-btn">Add Banner</button>
+        </a>
+           
+        </div>
+
+    </div>
+</div>
+    
+</body>
+</html>

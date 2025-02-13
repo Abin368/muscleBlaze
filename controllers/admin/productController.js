@@ -292,6 +292,7 @@ const getEditProduct = async (req, res) => {
             success: null
         });
     } catch (error) {
+        console.log('here is the issue')
         res.redirect('/pageerror');
     }
 };
@@ -313,23 +314,31 @@ const editProduct = async (req, res) => {
         }
 
         const images = [];
-        // Handle file uploads
         if (req.files && (req.files.images1 || req.files.images2 || req.files.images3)) {
             if (req.files.images1) images.push(req.files.images1[0].filename);
             if (req.files.images2) images.push(req.files.images2[0].filename);
             if (req.files.images3) images.push(req.files.images3[0].filename);
         }
 
+       
+        let categoryId = product.category; 
+        if (data.category) {
+            const category = await Category.findOne({ name: data.category });
+            if (!category) {
+                return res.status(400).json({ error: 'Invalid category selected.' });
+            }
+            categoryId = category._id; 
+        }
+
         const updateFields = {
             productName: data.productName,
             description: data.description,
-            category: product.category,
+            category: categoryId, 
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
             quantity: data.quantity,
             size: data.size,
             flavor: data.flavor,
-            // Include new images if provided
             ...(images.length > 0 && { productImage: [...product.productImage, ...images] })
         };
 

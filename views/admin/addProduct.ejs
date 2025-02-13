@@ -172,13 +172,13 @@
                     croppedImage.src = e.target.result;
                     croppedImage.style.display = "block";
 
-                    // Initialize Cropper.js
+                   
                     if (cropperInstances[inputId]) {
                         cropperInstances[inputId].destroy();
                     }
 
                     cropperInstances[inputId] = new Cropper(croppedImage, {
-                        aspectRatio: 1, // Square crop
+                        aspectRatio: 1, 
                         viewMode: 2,
                         autoCropArea: 1,
                         responsive: true

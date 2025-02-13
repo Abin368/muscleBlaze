@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shop</title>
+    <link rel="stylesheet" href="styles.css">
+ 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<style>
+/* Shop Container */
+.shop-container {
+    display: flex;
+    align-items: flex-start; /* Align sidebar & product grid at the top */
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease-in-out;
+    height: 100%; /* Makes sidebar match product grid height */
+}
+
+/* Sidebar Title */
+.sidebar h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ff6600;
+    padding-bottom: 5px;
+    text-transform: uppercase;
+}
+
+/* Category List */
+.categories {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Category Items */
+.categories li {
+    margin-bottom: 12px;
+}
+
+/* Category Links */
+.category-link {
+    display: block;
+    color: #444;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    background: #f8f8f8;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.category-link:hover {
+    background: #ff6600;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Product Container */
+.container {
+    flex-grow: 1; /* Allows product grid to take remaining space */
+    width: calc(100% - 270px); /* Adjust width considering sidebar width */
+}
+
+/* Product Grid */
+.products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between product cards */
+    align-items: stretch; /* Ensure all cards are of equal height */
+}
+
+/* Product Card */
+.product-card {
+    width: calc(25% - 14px); /* Ensures 4 products per row */
+    min-width: 200px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Product Card Hover */
+.product-card:hover {
+    transform: scale(1.03);
+}
+
+/* Responsive Fix */
+@media (max-width: 1024px) {
+    .product-card {
+        width: calc(33.33% - 14px); /* 3 per row on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        text-align: center;
+    }
+    .categories li {
+        display: inline-block;
+        margin: 5px;
+    }
+    .product-card {
+        width: calc(50% - 14px); /* 2 per row on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        width: 100%; /* 1 per row on small screens */
+    }
+}
+
+.reset-btn {
+    background-color: #FBBC04; /* Highlight color */
+    color: black;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: block;
+}
+
+.reset-btn:hover {
+    background-color: #e64a19;
+}
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.page-link {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+    background-color: #FBBC04;
+    border-radius: 8px;
+    transition: 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.page-link:hover {
+    background-color: orange;
+    color: black;
+    transform: scale(1.1);
+}
+
+.page-link.active {
+    background-color: black;
+    color: #FBBC04;
+    border: 2px solid #FBBC04;
+}
+
+.page-link:active {
+    transform: scale(0.95);
+}
+
+
+
+
+</style>
+<body>
+    <%- include('../../views/partials/user/header') %>
+    <%- include('./breadcrump') %>
+
+    <div class="shop-container">
+        
+        <aside class="sidebar">
+            <button onclick="resetFilters()" class="reset-btn">Reset Filters</button>
+
+            <h3>Sort By</h3>
+            <ul class="categories">
+                <li><a href="/filter?price=1500" class="category-link">Price Lower to Higher</a></li>
+                <li><a href="/filter?price=2500" class="category-link">Price Higher to Lower</a></li>
+
+            </ul>
+
+
+            <h3>Categories</h3>
+            <ul class="categories">
+                <% categories.forEach(category => { %> 
+                    <li>
+                        <a href="/filter?category=<%= category._id %>" class="category-link"><%= category.name %></a>
+                    </li>
+                <% }) %>
+            </ul>
+    
+            <h3>Flavors</h3>
+<ul class="categories">
+    <% if (flavors.length > 0) { %>
+        <% flavors.forEach(flavor => { %>
+            <!-- <li>
+                <a href="/filter?flavor=<%= flavor %>" 
+                   class="category-link <%= selectedFlavor === flavor ? 'active' : '' %>">
+                   <%= flavor %>
+                </a>
+            </li> -->
+
+            <li>
+                <a href="/filter?flavor=<%= flavor %>" 
+                   class="category-link <%= (selectedFlavor && selectedFlavor === flavor) ? 'active' : '' %>">
+                   <%= flavor %>
+                </a>
+            </li>
+            
+        <% }) %>
+    <% } else { %>
+        <li>No flavors available</li>
+    <% } %>
+</ul>
+
+    
+            <h3>Price Range</h3>
+            <ul class="categories">
+                <li><a href="/filter?price=1500" class="category-link">Below ₹1500</a></li>
+                <li><a href="/filter?price=2500" class="category-link">Below ₹2500</a></li>
+                <li><a href="/filter?price=4000" class="category-link">Below ₹4000</a></li>
+                <li><a href="/filter?price=above4000" class="category-link">Above ₹4000</a></li>
+            </ul>
+        </aside>
+    
+        <!-- Main Content Area for Products -->
+        <div class="container">
+            <h1>All Products</h1>
+            <div class="products-grid">
+                <% for (let i = 0; i < product.length; i++) { %>
+                    <div class="product-card">
+                        <a href="/productDetails?id=<%=product[i]._id%>">
+            
+                        <img 
+                            src="/uploads/product-images/<%= product[i].productImage && product[i].productImage.length > 0 ? product[i].productImage[0] : 'default-image.jpg' %>" 
+                            alt="<%= product[i].name %>" 
+                            class="product-image"
+                            
+                        > 
+                        </a>
+                        <div class="product-name"><%= product[i].productName %></div>
+                        <div class="product-details">Size: <%= product[i].size ? product[i].size + ' kg' : 'N/A' %></div>
+                        <div class="product-details">Flavor: <%= product[i].flavor || 'N/A' %></div>
+                        <div class="product-details">
+                            Price: ₹<%= product[i].salePrice ? product[i].salePrice.toFixed(2) : '0.00' %> 
+                            <% if (product[i].productOffer && product[i].productOffer > 0) { %>
+                                <span class="offer-text">(<%= product[i].productOffer %>% off)</span>
+                            <% } %>
+                        </div>
+                        
+                        <div class="product-details">
+                            <% if (product[i].quantity === 0) { %>
+                                <span style="color: red; font-weight: bold;">Out of stock</span>
+                            <% } else if (product[i].quantity < 5) { %>
+                                <span style="color: orange; font-weight: bold;">Limited Stock</span>
+                            <% } else { %>
+                                <span style="color: green; font-weight: bold;">Available</span>
+                            <% } %>
+                        </div>
+    
+                        <div class="wishlist-icon">
+                            <i class="fas fa-heart" onclick="addToWishlist('<%= product[i]._id %>')"></i>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart('<%= product[i]._id %>')">Add to Cart</button>
+                    </div>
+                <% } %>
+              
+                
+            </div>
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" class="page-link">Previous</a>
+                <% } %>
+            
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" 
+                       class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+            
+                <% if (currentPage < totalPages) { %>
+                    <a href="?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" class="page-link">Next</a>
+                <% } %>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+     <!-- Closing .shop-container -->
+    
+
+    <%- include('../../views/partials/user/footer') %>
+    <script src="/script.js"></script>
+    <script>
+        function resetFilters() {
+    window.location.href = "/shop";
+}
+    </script>
+</body>
+
+</html>

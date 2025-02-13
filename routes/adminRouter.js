@@ -6,6 +6,7 @@ const { preventCache, isAdmin} = require('../middlewares/cacheControl');
 const customerController =require('../controllers/admin/customerController')
 const  categoryController=require('../controllers/admin/categoryController')
 const  productController=require('../controllers/admin/productController');
+const bannerController=require('../controllers/admin/bannerController')
 const multer = require('multer');  // Import multer
 const { storage, fileFilter } = require('../helpers/multer');  // Import the Multer config from helpers
 const upload = multer({ storage, fileFilter });  
@@ -52,7 +53,14 @@ router.post('/admin/editProduct/:id',adminAuth,upload.fields([
 router.post('/admin/deleteImage',adminAuth,productController.deleteSingleImage)
 router.get('/admin/deleteProduct',adminAuth,productController.deleteProduct)
 
+//Banner Management
 
+router.get('/admin/banners',adminAuth,bannerController.getBanner)
+router.get('/admin/addBanner',adminAuth,bannerController.getAddBannerPage)
+router.post('/admin/addBanner',adminAuth,upload.fields([
+    { name: 'images1', maxCount: 1 },
 
+]),bannerController.addBanner)
+router.get('/admin/deleteBanner',adminAuth,bannerController.deleteBanner)
 
 module.exports=router

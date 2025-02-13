@@ -1,0 +1,18 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <% 
+            let paths = currentPath.split("/").filter(path => path); 
+            let fullPath = "";
+            paths.forEach((segment, index) => {
+                fullPath += `/${segment}`;
+                let formattedSegment = segment.replace(/-/g, " "); 
+        %>
+                <% if (index === paths.length - 1) { %>
+                    <li class="breadcrumb-item active" aria-current="page"><%= formattedSegment %></li>
+                <% } else { %>
+                    <li class="breadcrumb-item"><a href="<%= fullPath %>"><%= formattedSegment %></a></li>
+                <% } %>
+        <% }); %>
+    </ol>
+</nav>
