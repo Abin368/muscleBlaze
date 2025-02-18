@@ -128,7 +128,10 @@
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-  }
+    max-height: 300px; /* Set a max height */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
   
   .summary-details p {
     font-size: 16px;
@@ -140,6 +143,7 @@
     width: 94%;
     padding: 12px;
     background-color: #ffcc00;
+    margin-bottom: 10px;
     color: black;
     font-size: 18px;
     border: none;
@@ -209,4 +213,38 @@
       margin-top: 20px;
     }
   }
-  
+
+  .breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}

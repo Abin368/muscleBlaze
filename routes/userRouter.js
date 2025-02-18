@@ -7,6 +7,7 @@ const productController=require('../controllers/user/productController')
 const emailChangeController=require('../controllers/user/emailChangeController')
 const addressController =require('../controllers/user/addressController')
 const cartController=require('../controllers/user/cartController')
+const wishlistController=require('../controllers/user/wishlistController')
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -79,6 +80,10 @@ router.post('/cart/add',preventCache,cartController.addToCart);
 router.post('/cart/update-quantity', preventCache,cartController.updateQuantity);
 router.post('/cart/delete', preventCache, cartController.deleteFromCart);
 
+//wishlist management 
+router.get('/wishlist',preventCache,wishlistController.getWishlist)
+router.post('/wishlist/add',preventCache,wishlistController.addToWishlist);
+router.post('/wishlist/remove', preventCache,wishlistController.removeFromWishlist);
 
 
 

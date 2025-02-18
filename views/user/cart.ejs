@@ -12,6 +12,10 @@
 
     <%- include('../../views/partials/user/header') %>
 
+    <div class="breadcrumbs">
+      <a href="/">Home</a>  <a href="/cart">Cart</a>
+  </div>
+
 
     <h1>Your Cart</h1>
     <div class="container">
@@ -76,6 +80,7 @@
     <%- include('../../views/partials/user/footer') %>
 </body>
 <script>
+    
 function updateQuantity(productId, action) {
   const quantityElement = document.getElementById(`quantity-${productId}`);
   let quantity = parseInt(quantityElement.innerText, 10);

@@ -182,7 +182,10 @@
               <% } %>
             </div>
             <div class="wishlist-icon">
-              <i class="fas fa-heart" onclick="addToWishlist('<%= product[i]._id %>')"></i>
+              <i id="wishlist-icon-<%= product[i]._id %>" 
+                class="fas fa-heart" 
+                onclick="addToWishlist('<%= product[i]._id %>')">
+             </i>
             </div>
             <button class="add-to-cart-btn" onclick="addToCart('<%= product[i]._id %>')">Add to Cart</button>
           </div>
@@ -260,6 +263,34 @@
     alert('Failed to add product to cart');
   });
 }
+
+//----------------------------------
+function addToWishlist(productId) {
+    fetch('/wishlist/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Product added to wishlist ✅');
+            document.getElementById(`wishlist-icon-${productId}`).classList.add('wishlist-added');
+        } else if (data.message === 'Product already in wishlist') {
+            alert('This product is already in your wishlist 🛒');
+        } else {
+            alert('Error adding product to wishlist ⚠️');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add product to wishlist ❌');
+    });
+}
+
+
 
 </script>
 

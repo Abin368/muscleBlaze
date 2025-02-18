@@ -1,0 +1,205 @@
+/* Shop Container */
+.shop-container {
+    display: flex;
+    align-items: flex-start; /* Align sidebar & product grid at the top */
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease-in-out;
+    height: 100%; /* Makes sidebar match product grid height */
+}
+
+/* Sidebar Title */
+.sidebar h3 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ff6600;
+    padding-bottom: 5px;
+    text-transform: uppercase;
+}
+
+/* Category List */
+.categories {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Category Items */
+.categories li {
+    margin-bottom: 12px;
+}
+
+/* Category Links */
+.category-link {
+    display: block;
+    color: #444;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+    background: #f8f8f8;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.category-link:hover {
+    background: #ff6600;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Product Container */
+.container {
+    flex-grow: 1; /* Allows product grid to take remaining space */
+    width: calc(100% - 270px); /* Adjust width considering sidebar width */
+}
+
+/* Product Grid */
+.products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between product cards */
+    align-items: stretch; /* Ensure all cards are of equal height */
+}
+
+/* Product Card */
+.product-card {
+    width: calc(24% - 14px); /* Ensures 4 products per row */
+    min-width: 200px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Product Card Hover */
+.product-card:hover {
+    transform: scale(1.03);
+}
+
+/* Responsive Fix */
+@media (max-width: 1024px) {
+    .product-card {
+        width: calc(33.33% - 14px); /* 3 per row on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        text-align: center;
+    }
+    .categories li {
+        display: inline-block;
+        margin: 5px;
+    }
+    .product-card {
+        width: calc(50% - 14px); /* 2 per row on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        width: 100%; /* 1 per row on small screens */
+    }
+}
+
+.reset-btn {
+    background-color: #FBBC04; /* Highlight color */
+    color: black;
+    font-weight: bold;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: block;
+}
+
+.reset-btn:hover {
+    background-color: #e64a19;
+}
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.page-link {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+    background-color: #FBBC04;
+    border-radius: 8px;
+    transition: 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.page-link:hover {
+    background-color: orange;
+    color: black;
+    transform: scale(1.1);
+}
+
+.page-link.active {
+    background-color: black;
+    color: #FBBC04;
+    border: 2px solid #FBBC04;
+}
+
+.page-link:active {
+    transform: scale(0.95);
+}
+
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}

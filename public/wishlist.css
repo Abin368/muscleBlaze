@@ -1,0 +1,190 @@
+
+/* General container */
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 30px;
+    gap: 40px;
+    flex-wrap: wrap;
+    background-color: #f8f8f8;
+}
+
+/* Wishlist left section */
+.wishlist-left {
+    flex: 3;
+    padding-right: 20px;
+    max-width: 900px;
+}
+
+.wishlist-left h2 {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Wishlist item box */
+.wishlist-item-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    margin-bottom: 25px;
+    padding: 22px;
+    background-color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.wishlist-item-box:hover {
+    transform: scale(1.04);
+}
+
+/* Product Image */
+.wishlist-item-image img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Product Details */
+.wishlist-item-details {
+    margin-left: 35px;
+    flex-grow: 1;
+    color: #333;
+}
+
+.wishlist-item-details h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.wishlist-item-details p {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+/* Price styling */
+.price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #51b279;
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+    padding: 14px 20px;
+    background-color: #ffcc00;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 17px;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #ffcc00;
+}
+
+/* Wishlist Actions (Delete & Date) */
+.wishlist-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 35px;
+}
+
+.delete-icon {
+    font-size: 26px;
+    color: #ffcc00;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+}
+
+.delete-icon:hover {
+    color: #c0392b;
+}
+
+/* Added Date */
+.added-date {
+    font-size: 15px;
+    color: #777;
+    margin-top: 12px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .wishlist-left {
+        width: 100%;
+        padding-right: 0;
+    }
+
+    .wishlist-item-box {
+        flex-direction: column;
+        padding: 25px;
+        align-items: flex-start;
+    }
+
+    .wishlist-item-image {
+        margin-bottom: 12px;
+    }
+
+    .wishlist-item-details {
+        margin-left: 0;
+    }
+
+    .wishlist-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .add-to-cart-btn {
+        width: 100%;
+        margin-top: 12px;
+    }
+}
+
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}

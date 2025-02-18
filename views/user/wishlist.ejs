@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+   <link rel="stylesheet" href="wishlist.css">
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+    <div class="breadcrumbs">
+        <a href="/">Home</a>  <a href="/wishlist">Wishlist</a>
+    </div>
+
+    <div class="container">
+        <div class="wishlist-left">
+            <h1>Your Wishlist</h1>
+    
+            <% if (wishlist && wishlist.length > 0) { %>
+                <% wishlist.forEach(item => { %>
+                    <div class="wishlist-item-box">
+                        <div class="wishlist-item-image">
+                            <img src="/uploads/product-images/<%= item.productId.productImage[0] || 'default-image.jpg' %>" alt="<%= item.productId.name %>">
+                        </div>
+    
+                        <div class="wishlist-item-details">
+                            <h3><%= item.productId.productName %></h3>
+                            <p><strong>Weight:</strong> <%= item.productId.size %>Kg</p>
+                            <p><strong>Flavor:</strong> <%= item.productId.flavor %></p>
+                            <p class="price"><strong>Price:</strong> ₹<%= item.productId.salePrice %></p>
+                            <button class="add-to-cart-btn" onclick="addToCart('<%= item.productId._id %>')">Add to Cart</button>
+                        </div>
+    
+                        <div class="wishlist-actions">
+                            <i class="fas fa-trash delete-icon" onclick="removeFromWishlist('<%= item.productId._id %>')"></i>
+                            <p class="added-date"><strong>Added On:</strong> <%= new Date(item.addedOn).toLocaleDateString() %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Your wishlist is empty.</p>
+            <% } %>
+        </div>
+    </div>
+    
+    
+    
+
+
+    <%- include('../../views/partials/user/footer') %>
+    
+</body>
+<script>
+  
+  function addToCart(productId) {
+  fetch('/cart/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ productId }),
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    if (data.success) {
+      alert('Product added to cart!');
+    
+    } else {
+      alert('Error adding product to cart');
+    }
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    alert('Failed to add product to cart');
+  });
+}
+//------------------------------------------
+function removeFromWishlist(productId) {
+    fetch('/wishlist/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+           
+            location.reload(); 
+        } else {
+            alert('Failed to remove product from wishlist');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error removing product from wishlist');
+    });
+}
+
+
+
+</script>
+</html>
