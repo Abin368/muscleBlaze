@@ -3,6 +3,7 @@ require('dotenv').config();
 const session = require('express-session');
 // const flash = require('connect-flash');
 const passport = require("./config/passport");
+const MongoStore = require('connect-mongo');
 const app = express();
 const path = require('path');
 const connectDB = require('./config/db'); 
@@ -18,6 +19,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions'
+    }),
+    
     cookie: {
         secure: false,
         httpOnly: true,
@@ -31,6 +37,7 @@ app.use(bannerMiddleware.loadBanners)
 // app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

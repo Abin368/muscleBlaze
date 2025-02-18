@@ -50,7 +50,7 @@ const addBanner = async (req, res) => {
 //---------------------------------
 const deleteBanner = async (req, res) => {
     try {
-        const id = req.query.id; // Corrected query param name
+        const id = req.query.id; 
         if (!id) {
             console.log("Error: No ID provided for deletion.");
             return res.redirect('/admin/banners');

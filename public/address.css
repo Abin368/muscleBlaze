@@ -1,0 +1,291 @@
+
+
+
+/* Add address button with dotted border */
+.btn-add-address {
+    width: 200px;
+    height: 200px;
+    border: 3px dotted black;
+    background-color: transparent;
+    color: #FBBC04;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 180px; /* Vertically center the text */
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-add-address:hover {
+    background-color: #FBBC04;
+    color: black;
+}
+
+.btn-add-address:focus {
+    outline: none;
+}
+/* Address List Box */
+.address-box {
+    display: flex;
+    flex-wrap: wrap; /* Allow cards to wrap to the next line */
+    gap: 20px; /* Space between the cards */
+  
+    margin-top: 20px;
+}
+
+/* Address Card */
+.address-card {
+    color: black;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: rgb(255, 255, 255);
+    padding: 15px;
+    text-transform: capitalize; /* Ensure capital letters for the address */
+    width: 22%; /* 4 cards per row */
+    max-width: 270px; /* Prevent card overflow */
+    box-sizing: border-box; /* Make sure the padding doesn't affect the width */
+}
+
+/* Title Section */
+.address-card .card-title {
+    background-color: black;
+    color: white;
+    margin: 0;
+    padding: 10px 15px; /* Padding for title only */
+    text-transform: uppercase;
+}
+
+/* Action Buttons */
+.address-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.address-actions .btn {
+    font-size: 12px;
+    width: 80px;
+    height: 30px;
+    border-radius: 5px;
+}
+
+.edit-btn {
+    background-color: #f39c12;
+    color: black;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.edit-btn:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+.delete-btn {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .address-card {
+        width: 30%; /* 3 cards per row */
+    }
+}
+
+@media (max-width: 767px) {
+    .address-card {
+        width: 45%; /* 2 cards per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .address-card {
+        width: 90%; /* 1 card per row */
+    }
+}
+
+
+h5 {
+    text-transform: capitalize;
+    font-size: large;
+}
+
+/* Modal Styles */
+.modal-dialog {
+    max-width: 400px;
+    margin: 100px auto;
+}
+
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Toast Styles */
+.toast {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 14px;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInOut 4s ease-in-out;
+}
+
+/* Toast animation */
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Error Toast */
+.toast.error {
+    background-color: #dc3545;
+}
+
+
+/* Style for the modal overlay */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark background */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Style for the modal content box (smaller size) */
+.confirmation-modal .modal-content {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px;  /* Set a fixed width */
+}
+
+/* Style for the text inside the modal */
+.confirmation-modal .modal-text {
+    font-size: 16px; /* Smaller font size */
+    margin-bottom: 10px;
+}
+
+/* Style for the buttons */
+.confirmation-modal .modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.confirmation-modal button {
+    width: 45%;  /* Adjust button width to fit in the smaller modal */
+}
+
+
+
+
+
+/* Custom Styling for Edit Address Modal */
+#editModal .modal-dialog {
+    max-width: 600px;  /* Max width of the modal */
+    margin: 1.5rem auto; /* Centering the modal */
+}
+
+#editModal .modal-header {
+    background-color: #f39c12;
+    color: black;
+    font-size: 1.3rem;
+    padding: 1.25rem;
+    border-bottom: 2px solid #ddd;
+    border-radius: 8px 8px 0 0;
+}
+
+#editModal .modal-title {
+    font-weight: bold;
+}
+
+#editModal .modal-body {
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Form group styling */
+#editModal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#editModal label {
+    font-size: 1rem;
+    color: #444;
+    margin-bottom: 0.5rem;
+}
+
+/* Form controls (input fields) */
+#editModal .form-control {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+#editModal .form-control:focus {
+    border-color: #f39c12;
+    box-shadow: 0 0 5px rgba(58, 63, 88, 0.3);
+}
+
+/* Submit Button Styling */
+#editModal button[type="submit"] {
+    background-color: #f39c12;
+    color: black;
+    font-size: 1.1rem;
+    padding: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#editModal button[type="submit"]:hover {
+    background-color: #f39c12;
+}
+
+/* Close button */
+#editModal .btn-close {
+    font-size: 1.5rem;
+}
+
+/* Responsive Design: If the modal is larger than the screen, adjust it */
+@media (max-width: 768px) {
+    #editModal .modal-dialog {
+        max-width: 90%;
+    }
+}

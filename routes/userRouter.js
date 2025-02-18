@@ -4,6 +4,8 @@ const passport = require('passport');
 const profileController=require('../controllers/user/profileController')
 const userController=require('../controllers/user/userController')
 const productController=require('../controllers/user/productController')
+const emailChangeController=require('../controllers/user/emailChangeController')
+const addressController =require('../controllers/user/addressController')
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -38,6 +40,22 @@ router.post('/forgot-otp-verification', preventCache, isLoggedIn, profileControl
 router.post('/resend-forget-otp', preventCache, isLoggedIn, profileController.resendForgetOtp);
 router.get('/reset-password', preventCache, isLoggedIn, profileController.getresetPassword);
 router.post('/reset-password', preventCache, isLoggedIn, profileController.resetPassword);
+router.get('/profile',preventCache,profileController.getProfile)
+router.put('/updateProfile', preventCache, profileController.updateProfile);
+router.put('/updatePassword',preventCache,profileController.updatePassword)
+
+router.get('/addresses',preventCache, addressController.getAddresses);
+router.post('/add-address',preventCache, addressController.addAddress);
+router.delete('/delete-address/:addressId',preventCache,addressController.deleteAddress)
+router.get('/get-address/:addressId', preventCache, addressController.getAddress);
+router.put('/update-address/:addressId', preventCache, addressController.updateAddress);
+
+
+router.get('/email-change', preventCache, emailChangeController.getemailChange);
+router.post('/email-change', preventCache,  emailChangeController.changeEmailValid);
+router.get('/emailChange-otp-verification', preventCache,emailChangeController.getEmailOtpVerification)
+router.post('/emailChange-otp-verification', preventCache, emailChangeController.verifyOtp);
+router.post('/resend-email-otp', preventCache,  emailChangeController.resendEmailOtp);
 
 
 router.get('/product/:id', preventCache,isLoggedIn,userController.getProductDetail);
@@ -46,6 +64,7 @@ router.get('/category/:categoryName', preventCache,isLoggedIn,userController.get
 router.get('/shop',preventCache,userController.loadShoppingPage)
 router.get('/filter',preventCache,userController.filterProduct)
 router.get('/search', preventCache,userController.searchProducts);
+
 
 //product management
 

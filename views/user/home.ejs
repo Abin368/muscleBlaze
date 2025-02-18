@@ -69,13 +69,53 @@
     width: 14px;
     height: 14px;
 }
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}
+
+
 
   </style>
 </head>
 <body>
   <!-- header.ejs -->
   <%- include('../../views/partials/user/header') %>
-  <%- include('./breadcrump') %>
+  <!-- <%- include('./breadcrump') %> -->
+
+  <div class="breadcrumbs">
+    <a href="/">Home</a>
+</div>
 
 
 
@@ -146,7 +186,7 @@
             </div>
             <button class="add-to-cart-btn" onclick="addToCart('<%= product[i]._id %>')">Add to Cart</button>
           </div>
-          <% if ((i + 1) % 5 === 0) { %>
+          <% if ((i + 1) % 4=== 0) { %>
             <div style="width: 100%;"></div> 
           <% } %>
         <% } %>

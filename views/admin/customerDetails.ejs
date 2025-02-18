@@ -19,8 +19,8 @@
             
             <!-- Search Bar -->
             <div class="search-bar">
-                <form action="/admin/users" method="GET">
-                    <input type="text" name="search" placeholder="Search users..." value="<%= search %>">
+                <form action="/admin/users" method="GET" id="searchForm">
+                    <input type="text" name="search" placeholder="Search users..." value="<%= search %>" id="searchInput">
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
@@ -83,7 +83,19 @@
         </div>
     </div>
 
-    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+    searchForm.addEventListener("submit", function (event) {
+      if (!searchInput.value.trim()) {
+        event.preventDefault(); 
+        window.location.href = "/admin/users"; 
+      }
+    });
+  });
+    </script>
     
 </body>
 </html>

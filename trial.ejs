@@ -1,230 +1,116 @@
-const loadShoppingPage = async (req, res) => {
+const User =require('../../models/userSchema')
+const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+
+const loadLogin = async (req, res) => {
     try {
-      const user = req.session.user;
-      const searchQuery = req.query.query || ""; 
-      const selectedFlavor = req.query.flavor || ""; 
-      const selectedCategory = req.query.category || "";
-      const selectedPrice = req.query.price || ""; 
-  
-      console.log("selectedFlavor in controller:", selectedFlavor); 
-  
-      const page = parseInt(req.query.page) || 1;
-      const limit = 9;
-      const skip = (page - 1) * limit;
-  
-     
-      let productFilter = {
-        isBlocked: false,
-        quantity: { $gt: 0 }
-      };
-  
-      if (searchQuery) {
-        productFilter.$or = [
-          { name: { $regex: searchQuery, $options: "i" } }, 
-          { category: { $regex: searchQuery, $options: "i" } },
-          { flavor: { $regex: searchQuery, $options: "i" } } 
-        ];
-      }
-  
-      if (selectedFlavor) {
-        productFilter.flavor = selectedFlavor;
-      }
-  
-      if (selectedCategory) {
-        productFilter.category = selectedCategory;
-      }
-  
-     
-      const product = await Product.find(productFilter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-  
-      const totalProducts = await Product.countDocuments(productFilter);
-      const totalPages = Math.ceil(totalProducts / limit);
-  
-      res.render('user/shop', {
-        user: user ? await User.findById(user).lean() : null,
-        product,
-        categories: await Category.find({ isListed: true }).lean(),
-        flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
-        totalProducts,
-        currentPage: page,
-        totalPages,
-        searchQuery,
-        selectedFlavor, 
-        selectedCategory, 
-        selectedPrice 
-      });
-  
-    } catch (error) {
-      console.error("Error in loadShoppingPage:", error);
-      res.redirect('/pageNotFound');
-    }
-  };
-  
-  //-------------------------------
-  const filterProduct = async (req, res) => {
-    try {
-      const user = req.session.user;
-      const category = req.query.category;
-      const flavor = req.query.flavor;
-      const price = req.query.price;
-  
-      const query = {
-        isBlocked: false,
-        quantity: { $gt: 0 }
-      };
-  
-    
-      if (category) {
-        const findCategory = await Category.findById(category).lean();
-        if (findCategory) {
-          query.category = findCategory._id;
+        if (req.session.admin) {
+          
+            return res.redirect('/admin/dashboard');
+        } else {
+           
+            return res.render('admin/login', { error: null }); 
         }
-      }
-  
-      
-      if (flavor) {
-        query.flavor = flavor;
-      }
-  
-      
-      if (price) {
-        query.salePrice = {
-          "1500": { $lt: 1500 },
-          "2500": { $lt: 2500 },
-          "4000": { $lt: 4000 },
-          "above4000": { $gt: 4000 }
-        }[price] || query.salePrice;
-      }
-  
-     
-      let findProducts = await Product.find(query).sort({ createdAt: -1 }).lean();
-  
-  
-  const uniqueFlavors = await Product.distinct("flavor", {
-    isBlocked: false,
-    quantity: { $gt: 0 }
-  });
-  
-  
-   
-      const categories = await Category.find({ isListed: true }).lean();
-  
-     
-      const itemsPerPage = 6;
-      const currentPage = parseInt(req.query.page) || 1;
-      const totalPages = Math.ceil(findProducts.length / itemsPerPage);
-      const currentProduct = findProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  
-      let userData = null;
-      if (user) {
-        userData = await User.findById(user).lean();
-        if (userData) {
-          const searchEntry = {
-            category: category || null,
-            flavor: flavor || null,
-            price: price || null,
-            searchedOn: new Date()
-          };
-          userData.searchHistory.push(searchEntry);
-          await User.updateOne({ _id: user }, { $push: { searchHistory: searchEntry } });
-        }
-      }
-  
-      req.session.filterProducts = currentProduct;
-  
-      res.render("user/shop", {
-        user: userData,
-        product: currentProduct,
-        categories,
-        flavors: uniqueFlavors.filter(Boolean), 
-        totalPages,
-        currentPage,
-        selectedCategory: category || null,
-        selectedFlavor: flavor || null,
-        selectedPrice: price || null
-      });
-  
     } catch (error) {
-      console.error("Error filtering products:", error);
-      res.redirect("/pageNotFound");
+        console.log('Login failed:', error.message); 
+        return res.redirect('/pagerror'); 
     }
-  };
-  //-----------------------------------------------------------------
-  
-  const searchProducts = async (req, res) => {
+
+};
+//--------------------------------------------------------------
+//admin signin and verification
+
+const login = async (req, res) => {
     try {
-      const user = req.session.user;
-      const query = req.query.query ? req.query.query.trim() : "";
-  
-  
-      const selectedFlavor = req.query.flavor || "";
-      const selectedCategory = req.query.category || "";
-      const selectedPrice = req.query.price || "";
-  
-      console.log("Selected Flavor in Search Controller:", selectedFlavor);
-  
-      
-      const categories = await Category.find({ isListed: true }).lean();
-  
-      let searchCondition = {
-        isBlocked: false,
-        quantity: { $gt: 0 },
-        $or: [
-          { name: { $regex: query, $options: "i" } }, 
-          { description: { $regex: query, $options: "i" } }, 
-        ],
-      };
-  
-      const matchedCategory = await Category.findOne({ name: { $regex: query, $options: "i" } }).lean();
-      if (matchedCategory) {
-        searchCondition.$or.push({ category: matchedCategory._id });
-      }
-  
-    
-      if (selectedFlavor) {
-        searchCondition.flavor = selectedFlavor;
-      }
-  
-      if (selectedCategory) {
-        searchCondition.category = selectedCategory;
-      }
-  
-      // Pagination
-      const page = parseInt(req.query.page) || 1;
-      const limit = 9;
-      const skip = (page - 1) * limit;
-  
+        const { email, password } = req.body;
+
+        const findAdmin = await User.findOne({ email: email, isAdmin: true });
+
      
-      const product = await Product.find(searchCondition)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-  
-      const totalProducts = await Product.countDocuments(searchCondition);
-      const totalPages = Math.ceil(totalProducts / limit);
-  
-      res.render("user/shop", {
-        user: user ? await User.findById(user).lean() : null,
-        product, 
-        categories,
-        flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
-        totalProducts,
-        currentPage: page,
-        totalPages,
-        searchQuery: query,
-        selectedFlavor, 
-        selectedCategory,
-        selectedPrice, 
-      });
-  
+        if (!findAdmin) {
+            return res.render('admin/login', { message: 'Admin not found', error: true });
+        }
+
+        if (findAdmin.isBlocked) {
+            return res.render('admin/login', { message: 'Admin Blocked', error: true });
+        }
+
+     
+        const passwordMatch = await bcrypt.compare(password, findAdmin.password);
+        if (!passwordMatch) {
+            return res.render('admin/login', { message: 'Incorrect Password', error: true });
+        }
+        req.session.admin = {
+            _id: findAdmin._id,
+            username: findAdmin.name,
+            email: findAdmin.email
+        };
+
+        return res.redirect('/admin/dashboard');
     } catch (error) {
-      console.error("Error in searchProducts:", error);
-      res.redirect("/pageNotFound");
+        console.error('Login error:', error);
+        return res.render('admin/login', { message: 'Login failed. Please try again later', error: true });
     }
-  };
-  
+};
+//----------------------------------------------
+
+//admin get to dashboard
+const loadDashboard = async (req, res) => {
+    try {
+      
+        const admin = req.session.admin;
+
+        if (admin) {
+            return res.render('admin/dashboard', { admin: admin });
+        } else {
+           
+            return res.redirect('/admin/login');
+        }
+    } catch (error) {
+        console.log('Error loading dashboard:', error);
+        return res.status(500).send('Server error');
+    }
+};
+
+//----------------------------------------------
+
+//admin logout
+const logout = async (req, res) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                console.log('Session destruction error', err);
+                return res.redirect('/pageNotFound');
+            }
+
+            console.log('Session destroyed successfully'); 
+
+            
+            res.clearCookie('connect.sid'); 
+
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+
+           
+            return res.redirect('/admin/login');
+        });
+    } catch (error) {
+        console.log('Logout error:', error);
+        res.redirect('/pageerror');
+    }
+};
+
+
+//----------------------------------------------
+
+
+
+
+//----------------------------------------------
+module.exports ={
+    loadLogin,
+    login,
+    loadDashboard,
+    logout
+}

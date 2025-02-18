@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="profileDetails.css">
+</head>
+
+
+<body>
+    <div class="profile-details-container">
+        <h2>Hi, <%= user.name %> 👋</h2>
+
+        <div class="profile-card">
+            <!-- Edit Icon (Top Right) -->
+            <button class="edit-icon-btn" onclick="openEditModal()">
+                <i class="fas fa-edit"></i>
+            </button>
+
+            <div class="profile-info">
+                <p><strong>Name:</strong> <span><%= user.name %></span></p>
+                <p><strong>Email:</strong> <span><%= user.email %></span></p>
+                <p><strong>Phone:</strong> <span><%= user.phone %></span></p>
+            </div>
+
+            <!-- Buttons at Bottom -->
+            <div class="profile-actions">
+                <button class="email-btn" onclick="window.location.href='/email-change'">
+                    <i class="fas fa-envelope"></i> Change Email
+                </button>
+                <button class="password-btn" onclick="openPasswordModal()">
+                    <i class="fas fa-lock"></i> Change Password
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content animate">
+            <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            <h3>Edit Your Profile</h3>
+    
+            <!-- Message Box -->
+            <div id="editMessage" class="message-box"></div>
+    
+            <form id="editProfileForm">
+                <div class="input-group">
+                    <label>Name:</label>
+                    <input type="text" id="editName" value="<%= user.name %>" required>
+                </div>
+    
+                <div class="input-group">
+                    <label>Phone:</label>
+                    <input type="text" id="editPhone" value="<%= user.phone %>" required>
+                </div>
+    
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+
+
+  
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content animate">
+            <span class="close-btn" onclick="closePasswordModal()">&times;</span>
+            <h3>Change Password</h3>
+    
+            <form id="editPasswordform" onsubmit="updatePassword(event)">
+                <div class="input-group">
+                    <label>Current Password:</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+    
+                <div class="input-group">
+                    <label>New Password:</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+    
+                <div class="input-group">
+                    <label>Confirm New Password:</label>
+                    <input type="password" id="confirmNewPassword" required>
+                </div>
+    
+                <p id="passwordMessage" style="display:none; font-weight:bold;"></p>
+    
+                <button type="submit" class="save-btn">Update Password</button>
+            </form>
+        </div>
+    </div>
+    
+
+</body>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  
+    document.getElementById("editModal").style.display = "none";
+    document.getElementById("emailModal").style.display = "none";
+    document.getElementById("passwordModal").style.display = "none";
+});
+
+function openEditModal() {
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+}
+
+function openEmailModal() {
+    document.getElementById("emailModal").style.display = "flex";
+}
+
+
+function closeEmailModal() {
+    document.getElementById("emailModal").style.display = "none";
+}
+
+
+function openPasswordModal() {
+    document.getElementById("passwordModal").style.display = "flex";
+}
+
+
+function closePasswordModal() {
+    document.getElementById("passwordModal").style.display = "none";
+}
+
+
+window.onclick = function(event) {
+    if (event.target.classList.contains("modal")) {
+        event.target.style.display = "none";
+    }
+};
+//------------------------------------------------------------------
+$(document).ready(function() {
+    $("#editProfileForm").submit(function(event) {
+        event.preventDefault();
+
+        var name = $("#editName").val();
+        var phone = $("#editPhone").val();
+        var phoneInput = $("#editPhone");
+        var messageBox = $("#editMessage");
+
+  
+        var phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            messageBox.text("Invalid phone number. Enter a valid 10-digit number.")
+                .css("color", "red") 
+                .fadeIn();
+            phoneInput.css("border", "2px solid red"); 
+            return;
+        }
+
+       
+        messageBox.fadeOut();
+        phoneInput.css("border", ""); 
+
+        var updatedData = {
+            id: "<%= user._id %>",
+            name: name,
+            phone: phone
+        };
+
+        $.ajax({
+            url: "/updateProfile",
+            type: "PUT",
+            data: JSON.stringify(updatedData),
+            contentType: "application/json",
+            success: function(response) {
+                showMessage("Profile updated successfully!", "green");
+                setTimeout(() => { location.reload(); }, 2000);
+            },
+            error: function(xhr) {
+                showMessage(" Error updating profile. Try again!", "red");
+            }
+        });
+    });
+});
+
+function showMessage(message, color) {
+    var messageBox = $("#editMessage");
+    messageBox.text(message).css("color", color).fadeIn();
+    setTimeout(() => { messageBox.fadeOut(); }, 3000);
+}
+
+
+//---------------------------------------------------------------
+function updatePassword(event) {
+    event.preventDefault(); 
+
+    var currentPassword = $("#currentPassword").val();
+    var newPassword = $("#newPassword").val();
+    var confirmNewPassword = $("#confirmNewPassword").val();
+
+    // Validation
+    if (newPassword.length < 8) {
+        showError("Password must be at least 8 characters long.");
+        return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+        showError("Password must contain at least one uppercase letter.");
+        return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+        showError("Password must contain at least one number.");
+        return;
+    }
+    if (newPassword !== confirmNewPassword) {
+        showError("New password and confirm password do not match.");
+        return;
+    }
+
+    var passwordData = {
+        id: "<%= user._id %>",
+        currentPassword: currentPassword,
+        newPassword: newPassword
+    };
+
+    $.ajax({
+        url: "/updatePassword",
+        type: "PUT",
+        data: JSON.stringify(passwordData),
+        contentType: "application/json",
+        success: function (response) {
+            showSuccess("Password updated successfully!");
+            setTimeout(() => {
+                $("#passwordModal").hide(); 
+                location.reload();
+            }, 2000);
+        },
+        error: function (xhr) {
+            showError(xhr.responseJSON?.message || "Error updating password. Try again!");
+        }
+    });
+}
+
+function showError(message) {
+    $("#passwordMessage").text(message).css({
+        "color": "red",
+        "display": "block"
+    });
+    $("#passwordModal").show(); 
+}
+
+function showSuccess(message) {
+    $("#passwordMessage").text(message).css({
+        "color": "green",
+        "display": "block"
+    });
+}
+
+
+function showPasswordModal() {
+    $("#passwordModal").fadeIn();
+}
+
+
+function closePasswordModal() {
+    $("#passwordModal").fadeOut();
+    $("#passwordMessage").fadeOut(); 
+}
+//--------------------------------------------
+
+
+    </script>
+</html>

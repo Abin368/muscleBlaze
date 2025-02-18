@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/categoryDetails.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+
+    
        .add-banner-container {
     display: flex;
     justify-content: center;
@@ -39,6 +41,14 @@
 }
 
 
+td img {
+    width: 100px; /* Adjust width */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Optional: rounded corners */
+  
+}
+
+
     </style>
     
     
@@ -56,7 +66,8 @@
                 <tr>
                     <th>Image</th>
                     <th>Title</th>
-                    <th>Description</th>
+                    <th>From</th>
+                    <th>Until</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -66,10 +77,13 @@
                     <% for (let i = 0; i < data.length; i++) { %>
                         <tr>
                             <td>
-                                <img src="/uploads/banner-images/<%= data[i].image %>" alt="Banner Image">
+                                <img src="/uploads/product-images/<%= data[i].image %>" alt="Banner Image">
                             </td>
+
                             <td><%= data[i].title %></td>
-                            <td><%= data[i].description %></td>
+
+                            <td><%= data[i].startDate%></td>
+                            <td><%= data[i].endDate %></td>
 
                           <td>
                               <% if (data[i].startDate <= new Date() && data[i].endDate >= new Date()) { %>

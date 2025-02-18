@@ -1,0 +1,136 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #1a1a1a, #333); /* Dark gradient background */
+color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header {
+    background: rgba(255, 223, 0, 0.9); /* Yellow header with slight transparency */
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #ffcc00; 
+  }
+
+ /* Centering the form elements */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Ensures centering */
+    width: 100%;
+  }
+  
+  /* Input fields */
+  input {
+    width: 30%;  /* Smaller width */
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+    text-align: center;
+  }
+  
+  input:focus {
+    border-color: #FFD700; /* Yellow border on focus */
+  }
+  
+  /* Button */
+  button {
+    width: 32%; /* Match input width */
+    padding: 12px;
+    background-color: #ffcc00; /* Yellow button */
+    color: #1a1a1a; /* Dark text */
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px; /* Spacing between inputs and button */
+  }
+  
+  button:hover {
+    background-color: #e6b800; /* Darker yellow on hover */
+  }
+  
+
+ 
+  h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #FBBC04;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  h1::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: #FBBC04;
+    margin: 10px auto 0;
+  }
+
+  
+  .message {
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  footer {
+    background: rgba(139, 69, 19, 0.9); /* Brown footer with slight transparency */
+    padding: 1rem;
+    text-align: center;
+    margin-top: auto; /* Push footer to the bottom */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  footer p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #fff; /* White text for contrast */
+  }
+  .error-message {
+color: red;
+background-color: #ffe6e6;
+border: 1px solid red;
+padding: 10px;
+border-radius: 5px;
+text-align: center;
+font-weight: bold;
+margin-bottom: 10px;
+}
+/* Style for error messages */
+.error {
+  color: #d32f2f; /* Red color */
+  /* background-color: #fdecea; Light red background */
+ text-align: center;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Style for success messages */
+.success {
+  color: #2e7d32; /* Green color */
+  background-color: #e8f5e9; /* Light green background */
+  border: 1px solid #4caf50; /* Darker green border */
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  font-weight: bold;
+}

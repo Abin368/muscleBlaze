@@ -299,7 +299,7 @@ const loadShoppingPage = async (req, res) => {
     console.log("selectedFlavor in controller:", selectedFlavor); 
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 12;
     const skip = (page - 1) * limit;
 
    
@@ -361,13 +361,15 @@ const filterProduct = async (req, res) => {
     const category = req.query.category;
     const flavor = req.query.flavor;
     const price = req.query.price;
+    const sortBy = req.query.sort || "";
+    const searchQuery = req.query.query ? req.query.query.trim() : ""; 
 
     const query = {
       isBlocked: false,
       quantity: { $gt: 0 }
     };
 
-  
+    
     if (category) {
       const findCategory = await Category.findById(category).lean();
       if (findCategory) {
@@ -375,12 +377,10 @@ const filterProduct = async (req, res) => {
       }
     }
 
-    
     if (flavor) {
       query.flavor = flavor;
     }
 
-    
     if (price) {
       query.salePrice = {
         "1500": { $lt: 1500 },
@@ -390,21 +390,45 @@ const filterProduct = async (req, res) => {
       }[price] || query.salePrice;
     }
 
+    // Search Filter
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } }
+      ];
+
+      const matchedCategory = await Category.findOne({ name: { $regex: searchQuery, $options: "i" } }).lean();
+      if (matchedCategory) {
+        query.$or.push({ category: matchedCategory._id });
+      }
+    }
+
+    // Sorting
+    let sortCondition = { createdAt: -1 };
+    if (sortBy === "low-to-high") {
+      sortCondition = { salePrice: 1 };
+    } else if (sortBy === "high-to-low") {
+      sortCondition = { salePrice: -1 };
+    }else if(sortBy === "aA-zZ"){
+      sortCondition = {name:1}
+    }else if(sortBy === "zZ-aA"){
+      sortCondition = {name:-1}
+    }
+
    
-    let findProducts = await Product.find(query).sort({ createdAt: -1 }).lean();
+    let findProducts = await Product.find(query).sort(sortCondition).lean();
 
+   
+    const uniqueFlavors = await Product.distinct("flavor", {
+      isBlocked: false,
+      quantity: { $gt: 0 }
+    });
 
-const uniqueFlavors = await Product.distinct("flavor", {
-  isBlocked: false,
-  quantity: { $gt: 0 }
-});
-
-
- 
+  
     const categories = await Category.find({ isListed: true }).lean();
 
-   
-    const itemsPerPage = 6;
+    // Pagination
+    const itemsPerPage = 12;
     const currentPage = parseInt(req.query.page) || 1;
     const totalPages = Math.ceil(findProducts.length / itemsPerPage);
     const currentProduct = findProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -430,12 +454,14 @@ const uniqueFlavors = await Product.distinct("flavor", {
       user: userData,
       product: currentProduct,
       categories,
-      flavors: uniqueFlavors.filter(Boolean), 
+      flavors: uniqueFlavors.filter(Boolean),
       totalPages,
       currentPage,
       selectedCategory: category || null,
       selectedFlavor: flavor || null,
-      selectedPrice: price || null
+      selectedPrice: price || null,
+      searchQuery, 
+      selectedSort: sortBy || null 
     });
 
   } catch (error) {
@@ -443,6 +469,7 @@ const uniqueFlavors = await Product.distinct("flavor", {
     res.redirect("/pageNotFound");
   }
 };
+
 //-----------------------------------------------------------------
 
 const searchProducts = async (req, res) => {
@@ -450,14 +477,13 @@ const searchProducts = async (req, res) => {
     const user = req.session.user;
     const query = req.query.query ? req.query.query.trim() : "";
 
-
     const selectedFlavor = req.query.flavor || "";
     const selectedCategory = req.query.category || "";
     const selectedPrice = req.query.price || "";
+    const sortBy = req.query.sort || ""; 
 
     console.log("Selected Flavor in Search Controller:", selectedFlavor);
 
-    
     const categories = await Category.find({ isListed: true }).lean();
 
     let searchCondition = {
@@ -469,6 +495,7 @@ const searchProducts = async (req, res) => {
       ],
     };
 
+    
     const matchedCategory = await Category.findOne({ name: { $regex: query, $options: "i" } }).lean();
     if (matchedCategory) {
       searchCondition.$or.push({ category: matchedCategory._id });
@@ -483,14 +510,31 @@ const searchProducts = async (req, res) => {
       searchCondition.category = selectedCategory;
     }
 
+    if (selectedPrice) {
+      searchCondition.salePrice = {
+        "1500": { $lt: 1500 },
+        "2500": { $lt: 2500 },
+        "4000": { $lt: 4000 },
+        "above4000": { $gt: 4000 }
+      }[selectedPrice] || searchCondition.salePrice;
+    }
+
+    // Sorting
+    let sortCondition = { createdAt: -1 };
+    if (sortBy === "low-to-high") {
+      sortCondition = { salePrice: 1 };
+    } else if (sortBy === "high-to-low") {
+      sortCondition = { salePrice: -1 };
+    }
+
     // Pagination
     const page = parseInt(req.query.page) || 1;
-    const limit = 9;
+    const limit = 12;
     const skip = (page - 1) * limit;
 
-   
+    // Fetch Products
     const product = await Product.find(searchCondition)
-      .sort({ createdAt: -1 })
+      .sort(sortCondition)
       .skip(skip)
       .limit(limit)
       .lean();
@@ -500,16 +544,17 @@ const searchProducts = async (req, res) => {
 
     res.render("user/shop", {
       user: user ? await User.findById(user).lean() : null,
-      product, 
+      product,
       categories,
       flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
       totalProducts,
       currentPage: page,
       totalPages,
       searchQuery: query,
-      selectedFlavor, 
+      selectedFlavor,
       selectedCategory,
-      selectedPrice, 
+      selectedPrice,
+      selectedSort: sortBy || null 
     });
 
   } catch (error) {
@@ -538,12 +583,5 @@ module.exports ={
     loadShoppingPage,
     filterProduct,
     searchProducts
-    
-
-   
-    // handleForgotPassword,
-    // verifyForgotPasswordOtp,
-    // resetPassword,
-    // loadResetPassword,
-    // resendForgetotp
 }
+    

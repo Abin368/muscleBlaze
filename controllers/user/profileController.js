@@ -60,7 +60,7 @@ const sendVerificationEmail = async (email, otp) => {
 };
 
 //------------------------------------------------
-// Render Forgot Password Page
+
 const getForget = async (req, res) => {
     try {
         return res.render("user/forgot-password", { messages: "" });
@@ -81,8 +81,6 @@ const getForgotOtpVerification = (req, res) => {
 
 
 //-------------------------------------------------------
-
-
 const forgotEmailValid = async (req, res) => {
     try {
         const { email } = req.body;
@@ -104,6 +102,7 @@ const forgotEmailValid = async (req, res) => {
             req.session.email = email;
             req.session.otpExpiry = Date.now() + 60000; 
             console.log("OTP:", otp);
+           
 
             return res.status(200).json({ success: true, message: "OTP sent successfully.", redirectUrl: "/forgot-otp-verification" });
         } else {
@@ -118,7 +117,7 @@ const forgotEmailValid = async (req, res) => {
 // Handle OTP Verification
 const verifyOtp = async (req, res) => {
     try {
-        const { otp } = req.body;
+        const { otp,email } = req.body;
 
         if (!req.session.userOtp || !req.session.email || !req.session.otpExpiry) {
             return res.status(400).json({ success: false, message: "Session expired. Please request a new OTP." });
@@ -214,8 +213,114 @@ const resetPassword = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
+//------------------------------------------------
+const getProfile=async(req,res)=>{
+    try{
+        const userId=req.session.user
+        const userData=await User.findById(userId)
+      
+        
+         res.render('user/profile',{
+            user:userData,
+           
+        })
+    }catch(error){
+        console.error('something went wrong',error)
+        res.redirect('/pageNotFound')
+    }
+}
 
 //------------------------------------------------------
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { name, email, phone } = req.body;
+
+        await User.findByIdAndUpdate(userId, { name, email, phone });
+
+        res.status(200).json({ success: true, message: "Profile updated successfully!" });
+    } catch (error) {
+        console.error("Profile update failed:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
+    }
+};
+//----------------------------------------
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const { id, name, phone } = req.body;
+
+        if (!id || !name || !phone) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            { name, phone },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+//--------------------------------------------
+
+
+const updatePassword = async (req, res) => {
+    try {
+        const { id, currentPassword, newPassword } = req.body;
+
+        if (!id || !currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: " All fields are required" });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+       
+        if (!user.password) {
+            return res.status(400).json({ success: false, message: "No password found. Please set a password first." });
+        }
+
+     
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: "Incorrect current password" });
+        }
+
+       
+        if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+            return res.status(400).json({ success: false, message: "Weak password: Must be at least 8 characters, contain 1 uppercase letter, and 1 number." });
+        }
+
+       
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ success: true, message: " Password updated successfully!" });
+    } catch (error) {
+        console.error("Password Update Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+//------------------------------------------------------------------
+
+
+
+
+
+
+
 module.exports = {
     getForget,
     forgotEmailValid,
@@ -223,6 +328,15 @@ module.exports = {
     resendForgetOtp,
     getresetPassword,
     resetPassword,
-    getForgotOtpVerification
+    getForgotOtpVerification,
+    getProfile,
+    updateProfile,
+    updatePassword,
    
+ 
+
+
+   
+ 
+
 };

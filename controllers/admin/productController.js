@@ -51,14 +51,15 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Check if size contains digits (if applicable)
-        if (!/^\d+$/.test(product.size)) {
+        // Check if size contains digits\
+        if (!/^\d+(\.\d{1,3})?$/.test(product.size)) {
             return res.render("admin/addProduct", {
                 categories: await Category.find({ isDeleted: false }),
-                error: "Size must be a valid number (e.g., 1Kg, 2Kg, etc.)",
+                error: "Size must be a valid number (e.g., 0.100Kg, 1Kg, 2.5Kg, etc.)",
                 success: null
             });
         }
+        
 
         // Check if product already exists
         const productExists = await Product.findOne({ productName: product.productName });

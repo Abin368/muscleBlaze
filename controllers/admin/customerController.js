@@ -2,10 +2,10 @@ const User =require("../../models/userSchema")
 
 const customerInfo = async (req, res) => {
     try {
-        // For search button
+       
         let search = req.query.search || "";
 
-        // For pagination
+    
         let page = parseInt(req.query.page) || 1;
         const limit = 5;
 
@@ -66,9 +66,8 @@ const customerunBlocked =async(req,res)=>{
     }
 }
 
-//-----------------------------
 
-//--------------------------
+
 
 
 //--------------------------------

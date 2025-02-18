@@ -12,7 +12,7 @@ const productDetails = async (req, res) => {
             return res.redirect('/shop');
         }
 
-        // Fetch the main product with its category
+      
         const product = await Product.findById(productId).populate('category').lean();
         if (!product) {
             return res.redirect('/shop'); 
@@ -23,11 +23,11 @@ const productDetails = async (req, res) => {
         const totalOffer = productOffer;
         const quantity = product.quantity || 0; 
 
-        // Fetch related products from the same category, excluding the current product
+      
         const relatedProducts = await Product.find({
             category: product.category._id,
             _id: { $ne: productId }
-        }).limit(5).lean(); // Limit the number of related items
+        }).limit(5).lean(); 
 
         res.render('user/productDetails', {
             user: userData,
@@ -35,7 +35,7 @@ const productDetails = async (req, res) => {
             quantity,
             totalOffer,
             category: findCategory,
-            relatedProducts  // Pass related products to the template
+            relatedProducts  
         });
 
     } catch (error) {

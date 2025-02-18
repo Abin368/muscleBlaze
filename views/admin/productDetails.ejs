@@ -19,8 +19,8 @@
             <h1>Product Management</h1>
             
             <!-- Search Bar -->
-            <form action="/admin/products" method="GET" class="search-form">
-                <input type="text" name="search" placeholder="Search product..." value="<%= search || '' %>" class="search-input">
+            <form action="/admin/products" method="GET" class="search-form" id="searchForm">
+                <input type="text" name="search" placeholder="Search product..." value="<%= search || '' %>" class="search-input" id="searchInput">
 
                 <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
@@ -145,6 +145,21 @@
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <!-- <script src="handleFormSubmit.js"></script> -->
    <script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+    searchForm.addEventListener("submit", function (event) {
+      if (!searchInput.value.trim()) {
+        event.preventDefault(); 
+        window.location.href = "/admin/products"; 
+      }
+    });
+  });
+
+
+//-----------------------------
      async function addOffer(productId) {
     const { value: amount } = await Swal.fire({
         title: 'Offer in percentage',

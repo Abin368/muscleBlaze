@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,7 +87,7 @@
 
 /* Product Card */
 .product-card {
-    width: calc(25% - 14px); /* Ensures 4 products per row */
+    width: calc(24% - 14px); /* Ensures 4 products per row */
     min-width: 200px;
     border: 1px solid #ccc;
     padding: 10px;
@@ -180,25 +181,69 @@
     transform: scale(0.95);
 }
 
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
 
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}
 
 
 </style>
 <body>
     <%- include('../../views/partials/user/header') %>
-    <%- include('./breadcrump') %>
+    <!-- <%- include('./breadcrump') %> -->
+
+    <div class="breadcrumbs">
+        <a href="/">Home</a>  <a href="/shop">Shop</a>
+    </div>
+    
 
     <div class="shop-container">
         
         <aside class="sidebar">
             <button onclick="resetFilters()" class="reset-btn">Reset Filters</button>
-
+            
+         
             <h3>Sort By</h3>
             <ul class="categories">
-                <li><a href="/filter?price=1500" class="category-link">Price Lower to Higher</a></li>
-                <li><a href="/filter?price=2500" class="category-link">Price Higher to Lower</a></li>
-
+                <li><a href="#" class="category-link sort-link" data-sort="low-to-high">Price Lower to Higher</a></li>
+                <li><a href="#" class="category-link sort-link" data-sort="high-to-low">Price Higher to Lower</a></li>
             </ul>
+            
+            <ul class="categories">
+                <li><a href="#" class="category-link sort-link" data-sort="aA-zZ">aA-zZ</a></li>
+                <li><a href="#" class="category-link sort-link" data-sort="zZ-aZ">zZ-aA</a></li>
+            </ul>
+            
 
 
             <h3>Categories</h3>
@@ -214,12 +259,7 @@
 <ul class="categories">
     <% if (flavors.length > 0) { %>
         <% flavors.forEach(flavor => { %>
-            <!-- <li>
-                <a href="/filter?flavor=<%= flavor %>" 
-                   class="category-link <%= selectedFlavor === flavor ? 'active' : '' %>">
-                   <%= flavor %>
-                </a>
-            </li> -->
+          
 
             <li>
                 <a href="/filter?flavor=<%= flavor %>" 
@@ -314,8 +354,23 @@
     <script src="/script.js"></script>
     <script>
         function resetFilters() {
-    window.location.href = "/shop";
+    window.location.href = "/filter";
 }
+
+
+document.querySelectorAll(".sort-link").forEach(link => {
+    link.addEventListener("click", function (event) {
+      event.preventDefault(); 
+
+      const sortValue = this.getAttribute("data-sort");
+      const url = new URL(window.location.href); 
+
+      url.searchParams.set("sort", sortValue); 
+      window.location.href = url.toString(); 
+    });
+  });
+
+
     </script>
 </body>
 

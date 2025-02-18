@@ -7,8 +7,8 @@ const customerController =require('../controllers/admin/customerController')
 const  categoryController=require('../controllers/admin/categoryController')
 const  productController=require('../controllers/admin/productController');
 const bannerController=require('../controllers/admin/bannerController')
-const multer = require('multer');  // Import multer
-const { storage, fileFilter } = require('../helpers/multer');  // Import the Multer config from helpers
+const multer = require('multer');  
+const { storage, fileFilter } = require('../helpers/multer');  
 const upload = multer({ storage, fileFilter });  
 
 router.get('/admin/login',preventCache, adminController.loadLogin);

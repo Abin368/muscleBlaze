@@ -257,15 +257,51 @@
           text-decoration: line-through;
          
         }
-        
-        
+        .breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}
         
             </style>
 </head>
 <body>
 
     <%- include('../../views/partials/user/header') %>
-    <%- include('./breadcrump') %>
+    <div class="breadcrumbs">
+      <a href="/">Home</a> <a href="/shop">Shop</a>  <span><%= product.category.name%><span> / <span><%= product.productName%></span>
+  
+  </div>
+  
 
     <div class="product-details-container">
      
