@@ -493,7 +493,7 @@
         hoverBoundingBox: false 
     });
 
-    // Function to change the main image when clicking thumbnails
+    
     function changeMainImage(imageSrc) {
         mainImage.src = "/uploads/product-images/" + imageSrc;
         mainImage.setAttribute('data-zoom', "/uploads/product-images/" + imageSrc);
@@ -502,7 +502,32 @@
     window.changeMainImage = changeMainImage;
 });
 
+//----------------------------
+function addToCart(productId) {
+  fetch('/cart/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ productId }),
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    if (data.success) {
+      alert('Product added to cart!');
+    
+    } else {
+      alert('Error adding product to cart');
+    }
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    alert('Failed to add product to cart');
+  });
+}
+
     </script>
+
 
 
     

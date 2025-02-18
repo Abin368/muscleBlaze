@@ -6,6 +6,7 @@ const userController=require('../controllers/user/userController')
 const productController=require('../controllers/user/productController')
 const emailChangeController=require('../controllers/user/emailChangeController')
 const addressController =require('../controllers/user/addressController')
+const cartController=require('../controllers/user/cartController')
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -70,6 +71,13 @@ router.get('/search', preventCache,userController.searchProducts);
 
 router.get('/productDetails',preventCache,productController.productDetails)
 
+
+//cart management
+
+router.get('/cart', preventCache,cartController.getCart)
+router.post('/cart/add',preventCache,cartController.addToCart);
+router.post('/cart/update-quantity', preventCache,cartController.updateQuantity);
+router.post('/cart/delete', preventCache, cartController.deleteFromCart);
 
 
 
