@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drift-zoom/dist/drift-basic.min.css">
+    <link rel="stylesheet" href="payment.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+    <div class="breadcrumbs">
+        <a href="/">Home</a>  <span>Payment</span>
+    </div>
+
+    
+    <div class="payment-container">
+        <div class="order-summary">
+            <h2>Order Summary</h>
+                <ul>
+                    <% checkoutData.cartItems.forEach(item => { %>
+                        <li class="cart-item">
+                            <div class="item-info">
+                                <strong class="product-name"><%= item.product.productName %></strong>
+                                <span class="quantity">Qty: <%= item.quantity %></span>
+                            </div>
+                            <span class="price">₹<%= item.totalPrice %></span>
+                        </li>
+                    <% }); %>
+                </ul>
+            <h3>Total: ₹<%= checkoutData.grandTotal %></h3>
+        </div>
+        
+        <div class="payment-options">
+            <h2>Choose Payment Method</h2>
+            
+            <div class="address-section">
+                <h3>Delivery Address</h3>
+                <div class="address-box">
+                    <p><strong><%= checkoutData.address.name %></strong></p>
+                    <p><%= checkoutData.address.city %>, <%= checkoutData.address.district %>, <%= checkoutData.address.state %></p>
+                    <p>Pincode: <%= checkoutData.address.pincode %></p>
+                    <p>Phone: <%= checkoutData.address.phone %></p>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <button class="payment-btn" onclick="selectPayment('upi')">Pay Using UPI</button>
+                <button class="payment-btn" onclick="selectPayment('cod')">Cash on Delivery</button>
+                <button class="payment-btn" onclick="selectPayment('card')">Debit/Credit Card</button>
+            </div>
+            
+            <div id="cod-section" style="display: none;">
+                <button class="pay-btn" onclick="confirmCOD()">Pay with COD</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../views/partials/user/footer') %>
+</body>
+<script>
+   function selectPayment(method) {
+        if (method === 'cod') {
+            document.getElementById('cod-section').style.display = 'block';
+        } else {
+            document.getElementById('cod-section').style.display = 'none';
+        }
+    }
+    function confirmCOD() {
+        alert('COD selected. Proceeding with order...');
+    }
+</script>
+</html>

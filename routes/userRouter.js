@@ -8,6 +8,8 @@ const emailChangeController=require('../controllers/user/emailChangeController')
 const addressController =require('../controllers/user/addressController')
 const cartController=require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
+const checkoutController=require('../controllers/user/checkoutController')
+
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -84,6 +86,13 @@ router.post('/cart/delete', preventCache, cartController.deleteFromCart);
 router.get('/wishlist',preventCache,wishlistController.getWishlist)
 router.post('/wishlist/add',preventCache,wishlistController.addToWishlist);
 router.post('/wishlist/remove', preventCache,wishlistController.removeFromWishlist);
+
+//checkout and payment
+router.get('/checkout',preventCache,checkoutController.getCheckout)
+router.post('/proceed-to-payment',preventCache, checkoutController.proceedToPayment);
+router.get('/payment', preventCache,checkoutController.getPayment);
+// router.post('/payment',preventCache,checkoutController.postPayment)
+
 
 
 

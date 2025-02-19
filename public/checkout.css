@@ -1,0 +1,201 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.checkout-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Layout - Flexbox for Order Summary & Address */
+.checkout-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+/* Left Section - Order Summary */
+.checkout-left {
+    flex: 1;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-left h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.summary-details p {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #555;
+}
+
+.summary-details p strong {
+    color: #222;
+}
+
+/* Right Section - Address Selection */
+.checkout-right {
+    flex: 1.5;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.checkout-right h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Address Box Styling */
+.address-box {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.address-box:hover {
+    background: #e9ecef;
+    border-color: #e67e22;
+}
+
+.address-box input {
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.address-box label {
+    flex-grow: 1;
+    font-size: 15px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.address-box strong {
+    font-size: 16px;
+    color: #000;
+}
+
+/* Edit Address Button */
+.edit-btn {
+    text-decoration: none;
+    color: #ffcc00;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    background: black;
+    transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+    background: #e67e22;
+    color: white;
+}
+
+/* Add Address Button */
+.add-address-btn {
+   
+    display: block;
+    text-align: center;
+    background-color: white;
+    color: black;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin: 15px 0;
+    font-size: 16px;
+    font-weight: 500;
+    border: 2px dotted black;
+    transition: all 0.3s ease-in-out;
+
+}
+
+.add-address-btn:hover {
+    background-color: white;
+}
+
+/* Proceed to Pay Button */
+.checkout-btn {
+    width: 100%;
+    background-color: #ffcc00;
+    color: black;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    margin-top: 15px;
+}
+
+.checkout-btn:hover {
+    background-color: #e67e22;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .checkout-wrapper {
+        flex-direction: column;
+    }
+    .checkout-left,
+    .checkout-right {
+        width: 100%;
+    }
+}
+
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}

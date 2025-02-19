@@ -1,0 +1,247 @@
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 1rem;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.quantity {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.price {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+
+
+/* Main container */
+.payment-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Order Summary Section */
+.order-summary {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 380px;
+    border-left: 5px solid #FBBC04;
+}
+
+.order-summary h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    border-bottom: 2px solid #eef2f7;
+    padding-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.order-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.order-summary li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 1rem;
+}
+
+.order-summary h3 {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid #eef2f7;
+    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Payment Options Section */
+.payment-options {
+    flex: 2;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.payment-options h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+/* Address Section */
+.address-section {
+    margin-bottom: 2rem;
+}
+
+.address-section h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.address-box {
+    background: linear-gradient(135deg, #f8fafc, #eef2f7);
+    border: 1px solid #cbd5e0;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.address-box:hover {
+    background: linear-gradient(135deg, #eef2f7, #dbeafe);
+    transform: scale(1.02);
+}
+
+.address-box p {
+    margin: 0.5rem 0;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+/* Payment Methods */
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.payment-btn {
+    background: #f8fafc;
+    border: 2px solid #cbd5e0;
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-weight: 600;
+}
+
+.payment-btn:hover {
+    background: #eef2f7;
+    border-color: #FBBC04;
+    color: #4299e1;
+    transform: scale(1.02);
+}
+
+.payment-btn:active {
+    transform: scale(0.98);
+}
+
+/* COD Section */
+#cod-section {
+    margin-top: 1.5rem;
+}
+
+.pay-btn {
+    background: #FBBC04;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s ease, transform 0.2s;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.pay-btn:hover {
+    background: #e6b800;
+    transform: translateY(-2px);
+}
+
+.pay-btn:active {
+    background: #e6b800;
+    transform: translateY(1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .payment-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .order-summary {
+        max-width: 100%;
+    }
+}
+
+
+.breadcrumbs {
+    font-size: 21px;
+    margin-bottom: 15px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.breadcrumbs a {
+    text-decoration: none;
+    color: black; /* Yellow color */
+    font-weight: 600;
+    transition: color 0.3s ease-in-out;
+}
+
+.breadcrumbs a:hover {
+    color: #e6b800; /* Darker yellow */
+    text-decoration: none;
+}
+
+/* Add a separator (like a slash or arrow) between items */
+.breadcrumbs a::after {
+    content: "›"; /* Arrow separator */
+    margin: 0 8px;
+    color: #999;
+    font-weight: bold;
+}
+
+.breadcrumbs a:last-child::after {
+    content: ""; /* Remove separator after last item */
+}
