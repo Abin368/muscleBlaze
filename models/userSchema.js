@@ -48,7 +48,7 @@ const userSchema = new Schema({
     }],
     orderHistory:[{
         type:Schema.Types.ObjectId,
-        ref:"order"
+        ref:"Order"
     }],
     createdOn:{
         type:Date,

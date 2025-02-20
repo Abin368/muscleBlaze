@@ -205,6 +205,7 @@
   <!-- footer.ejs -->
   <%- include('../../views/partials/user/footer') %>
   <script src="/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  <script>
   let currentSlide = 0;
   const slides = document.querySelectorAll(".banner-slide");
@@ -252,18 +253,30 @@
   .then((response) => response.json())
   .then((data) => {
     if (data.success) {
-      alert('Product added to cart!');
-    
+      Swal.fire({
+        icon: "success",
+        title: "Added to Cart!",
+        text: "The product has been added to your cart.",
+        showConfirmButton: false,
+        timer: 2000
+      });
     } else {
-      alert('Error adding product to cart');
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Failed to add product to cart. Please try again.",
+      });
     }
   })
   .catch((error) => {
     console.error('Error:', error);
-    alert('Failed to add product to cart');
+    Swal.fire({
+      icon: "error",
+      title: "Oops!",
+      text: "Something went wrong. Please try again later.",
+    });
   });
 }
-
 //----------------------------------
 function addToWishlist(productId) {
     fetch('/wishlist/add', {
@@ -276,19 +289,43 @@ function addToWishlist(productId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Product added to wishlist ✅');
+            Swal.fire({
+                icon: "success",
+                title: "Added to Wishlist! ❤️",
+                text: "The product has been added to your wishlist.",
+                showConfirmButton: false,
+                timer: 2000
+            });
+
             document.getElementById(`wishlist-icon-${productId}`).classList.add('wishlist-added');
+
         } else if (data.message === 'Product already in wishlist') {
-            alert('This product is already in your wishlist 🛒');
+            Swal.fire({
+                icon: "info",
+                title: "Already in Wishlist!",
+                text: "This product is already in your wishlist.",
+                showConfirmButton: false,
+                timer: 2000
+            });
+
         } else {
-            alert('Error adding product to wishlist ⚠️');
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Failed to add product to wishlist. Please try again.",
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to add product to wishlist ❌');
+        Swal.fire({
+            icon: "error",
+            title: "Oops!",
+            text: "Something went wrong. Please try again later.",
+        });
     });
 }
+
 
 
 

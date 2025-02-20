@@ -89,10 +89,12 @@ router.post('/wishlist/remove', preventCache,wishlistController.removeFromWishli
 
 //checkout and payment
 router.get('/checkout',preventCache,checkoutController.getCheckout)
-router.post('/proceed-to-payment',preventCache, checkoutController.proceedToPayment);
-router.get('/payment', preventCache,checkoutController.getPayment);
-// router.post('/payment',preventCache,checkoutController.postPayment)
-
+router.post('/proceed-to-payment', preventCache, checkoutController.proceedToPayment);
+router.get('/payment', preventCache, checkoutController.getPayment);
+router.post('/payment/proceed', preventCache, checkoutController.confirmPayment);
+router.get('/order-summary/:orderId', preventCache, checkoutController.getSummary);
+router.get('/orders',preventCache, checkoutController.getOrders)
+router.post('/order/cancel/:id', preventCache, checkoutController.cancelOrder);
 
 
 

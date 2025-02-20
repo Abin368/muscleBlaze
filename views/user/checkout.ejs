@@ -302,7 +302,7 @@ document.querySelectorAll(".edit-btn").forEach(button => {
     });
 });
 
-
+//-----------------------------------------------------------------
 
 document.querySelector("#editAddressForm").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -358,7 +358,7 @@ function proceedToPayment() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = "/payment"; // Navigate to payment page
+            window.location.href = "/payment"; 
         } else {
             Swal.fire({ icon: "error", title: "Error", text: "Something went wrong. Try again." });
         }

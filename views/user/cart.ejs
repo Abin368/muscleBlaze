@@ -79,6 +79,7 @@
    
     <%- include('../../views/partials/user/footer') %>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     
 function updateQuantity(productId, action) {
@@ -178,19 +179,43 @@ function addToWishlist(productId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Product added to wishlist ✅');
+            Swal.fire({
+                icon: "success",
+                title: "Added to Wishlist! ❤️",
+                text: "The product has been added to your wishlist.",
+                showConfirmButton: false,
+                timer: 2000
+            });
+
             document.getElementById(`wishlist-icon-${productId}`).classList.add('wishlist-added');
+
         } else if (data.message === 'Product already in wishlist') {
-            alert('This product is already in your wishlist 🛒');
+            Swal.fire({
+                icon: "info",
+                title: "Already in Wishlist!",
+                text: "This product is already in your wishlist.",
+                showConfirmButton: false,
+                timer: 2000
+            });
+
         } else {
-            alert('Error adding product to wishlist ⚠️');
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Failed to add product to wishlist. Please try again.",
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to add product to wishlist ❌');
+        Swal.fire({
+            icon: "error",
+            title: "Oops!",
+            text: "Something went wrong. Please try again later.",
+        });
     });
 }
+
 
 </script>
 </html>

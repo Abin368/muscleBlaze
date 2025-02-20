@@ -1,6 +1,7 @@
 const User = require('../../models/userSchema');
 const Product = require("../../models/productSchema");
 const Wishlist = require('../../models/wishlistSchema')
+const mongoose = require('mongoose');
 const mongodb = require("mongodb");
 
 const getWishlist = async (req, res) => {
@@ -26,7 +27,7 @@ const getWishlist = async (req, res) => {
 
 
 //----------------------------------------
-const mongoose = require('mongoose');
+
 
 const addToWishlist = async (req, res) => {
     try {

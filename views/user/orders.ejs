@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="styles.css">
+
+ 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="orders.css">
+</head>
+
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+<div class="profile-container">
+    <%- include('../../views/partials/user/profileSidebar') %>  
+  
+    <div class="orders-container">
+        <h1>Your Orders</h1>
+
+        <% if (orders.length === 0) { %>
+            <p>No orders found.</p>
+        <% } else { %>
+            <% orders.forEach(order => { %>
+                <div class="order-card">
+                    <!-- Left side: Products -->
+                    <div class="order-left">
+                        <% order.orderItems.forEach(item => { %>
+                            <div class="product-info">
+                                <img src="/uploads/product-images/<%= item.product.productImage[0] || 'default-image.jpg' %>" 
+                                alt="<%= item.product.name %>" 
+                                style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+
+                                <div class="details">
+                                    <h4><%= item.product.productName %></h4>
+                                    <p><strong>Weight:</strong> <%= item.product.size %>Kg</p>
+                                    <p><strong>Flavor:</strong> <%= item.product.flavor %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                  
+                    <div class="order-right">
+                        <h4>Order ID: <%= order.orderId %></h4>
+                        <p><strong>Status:</strong> <%= order.status %></p>
+                        <p><strong>Total Items:</strong> <%= order.orderItems.reduce((total, item) => total + item.quantity, 0) %></p>
+                        <p><strong>Total Price:</strong> ₹<%= order.finalAmount %></p>
+
+                        <div class="order-actions">
+                            <a href="/order/details/<%= order._id %>" class="btn">View Details</a>
+                            <% if (order.status === 'Pending') { %>
+                                <button class="btn cancel" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../../views/partials/user/footer') %>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function cancelOrder(orderId) {
+    console.log("Cancel button clicked for order:", orderId); // Debugging log
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to cancel this order?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, Cancel It!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/order/cancel/${orderId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Cancel Order Response:", data);
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Cancelled!",
+                        text: "Your order has been cancelled successfully.",
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    
+
+                   
+                    const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+                    if (orderElement) {
+                        orderElement.querySelector(".status").innerText = "Cancelled"; 
+                        const cancelButton = orderElement.querySelector(".cancel");
+                        if (cancelButton) cancelButton.style.display = "none"; 
+                    }
+                    location.reload(); 
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error cancelling order:", error);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
+
+
+    </script>
+    
+
+</html>
