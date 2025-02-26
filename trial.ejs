@@ -1,116 +1,82 @@
-const User =require('../../models/userSchema')
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
-
-const loadLogin = async (req, res) => {
+const confirmPayment = async (req, res) => {
     try {
-        if (req.session.admin) {
-          
-            return res.redirect('/admin/dashboard');
-        } else {
-           
-            return res.render('admin/login', { error: null }); 
-        }
-    } catch (error) {
-        console.log('Login failed:', error.message); 
-        return res.redirect('/pagerror'); 
-    }
+        const userId = req.session.user?._id || req.body.userId;
+        console.log("Extracted userId:", userId);
+        console.log("Received Checkout Data:", req.body);
 
-};
-//--------------------------------------------------------------
-//admin signin and verification
-
-const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const findAdmin = await User.findOne({ email: email, isAdmin: true });
-
-     
-        if (!findAdmin) {
-            return res.render('admin/login', { message: 'Admin not found', error: true });
+        if (!userId) {
+            console.error("User ID is missing from session or request.");
+            return res.status(400).json({ success: false, error: "User not logged in." });
         }
 
-        if (findAdmin.isBlocked) {
-            return res.render('admin/login', { message: 'Admin Blocked', error: true });
+        const { addressId, cartItems, productId, quantity, grandTotal, paymentMethod } = req.body;
+
+        if (!addressId || !grandTotal || !paymentMethod) {
+            return res.status(400).json({ success: false, error: 'Missing required fields' });
         }
 
-     
-        const passwordMatch = await bcrypt.compare(password, findAdmin.password);
-        if (!passwordMatch) {
-            return res.render('admin/login', { message: 'Incorrect Password', error: true });
+        const validPaymentMethods = ['cod', 'credit_card', 'paypal'];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({ success: false, error: 'Invalid payment method' });
         }
-        req.session.admin = {
-            _id: findAdmin._id,
-            username: findAdmin.name,
-            email: findAdmin.email
-        };
 
-        return res.redirect('/admin/dashboard');
-    } catch (error) {
-        console.error('Login error:', error);
-        return res.render('admin/login', { message: 'Login failed. Please try again later', error: true });
-    }
-};
-//----------------------------------------------
+        let orderItems = [];
 
-//admin get to dashboard
-const loadDashboard = async (req, res) => {
-    try {
-      
-        const admin = req.session.admin;
-
-        if (admin) {
-            return res.render('admin/dashboard', { admin: admin });
-        } else {
-           
-            return res.redirect('/admin/login');
-        }
-    } catch (error) {
-        console.log('Error loading dashboard:', error);
-        return res.status(500).send('Server error');
-    }
-};
-
-//----------------------------------------------
-
-//admin logout
-const logout = async (req, res) => {
-    try {
-        req.session.destroy((err) => {
-            if (err) {
-                console.log('Session destruction error', err);
-                return res.redirect('/pageNotFound');
+        if (cartItems && cartItems.length > 0) {
+            orderItems = cartItems.map(item => ({
+                product: item.product._id,
+                quantity: item.quantity,
+                price: item.price
+            }));
+        } else if (productId && quantity) {
+            const product = await Product.findById(productId);
+            if (!product) {
+                return res.status(404).json({ success: false, error: 'Product not found' });
             }
+            if (product.stock < quantity) {
+                return res.status(400).json({ success: false, error: 'Insufficient stock' });
+            }
+            orderItems.push({
+                product: productId,
+                quantity: quantity,
+                price: product.price * quantity
+            });
+        } else {
+            return res.status(400).json({ success: false, error: 'Invalid order data' });
+        }
 
-            console.log('Session destroyed successfully'); 
+        const finalAmount = grandTotal;
 
-            
-            res.clearCookie('connect.sid'); 
-
-            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-            res.setHeader('Pragma', 'no-cache');
-            res.setHeader('Expires', '0');
-
-           
-            return res.redirect('/admin/login');
+        const newOrder = new Order({
+            userId: userId,  // ✅ Fixed field name
+            orderItems: orderItems,
+            totalPrice: grandTotal,
+            paymentMethod: paymentMethod,
+            finalAmount: finalAmount,
+            address: addressId,
+            status: 'Pending',
+            createdAt: new Date(),
+            invoiceDate: new Date()
         });
+
+        const savedOrder = await newOrder.save();
+
+        for (const item of orderItems) {
+            await Product.findByIdAndUpdate(
+                item.product,
+                { $inc: { stock: -item.quantity } }  // ✅ Fixed stock decrement
+            );
+        }
+
+        await User.findByIdAndUpdate(userId, {
+            $push: { orderHistory: savedOrder._id }
+        });
+
+        console.log('Order saved successfully:', savedOrder);
+
+        res.status(200).json({ success: true, orderId: savedOrder._id });
     } catch (error) {
-        console.log('Logout error:', error);
-        res.redirect('/pageerror');
+        console.error('Error processing payment:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
 };
-
-
-//----------------------------------------------
-
-
-
-
-//----------------------------------------------
-module.exports ={
-    loadLogin,
-    login,
-    loadDashboard,
-    logout
-}

@@ -1,6 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
+const Wallet=require('../../MuscleBlaze/models/walletSchema')
 require('dotenv').config(); 
 
 
@@ -29,7 +30,8 @@ passport.use(
 
          
           await user.save();
-         
+          const wallet = new Wallet({ userId: user._id });
+          await wallet.save();
 
           return done(null, user);
         }

@@ -5,39 +5,45 @@ const mongodb = require("mongodb");
 
 
 const getCart = async (req, res) => {
-    try {
+  try {
       const userId = req.session.user; 
       if (!userId) {
-        return res.redirect('/login'); 
+          return res.redirect('/login'); 
       }
-  
-     
+
       const cart = await Cart.findOne({ userId }).populate('items.productId'); 
-  
-      if (!cart) {
-        return res.render('user/cart', { items: [], grandTotal: 0, quantity: 0 }); 
+      if (!cart || cart.items.length === 0) {
+          return res.render('user/cart', { items: [], grandTotal: 0, quantity: 0, swalMessage: null }); 
       }
-  
-   
+
       let totalQuantity = 0;
       let grandTotal = 0;
+      let outOfStockMessages = [];
+
       cart.items.forEach(item => {
-        totalQuantity += item.quantity;
-        grandTotal += item.totalPrice; 
+          if (!item.productId) {
+              return;
+          }
+          if (item.quantity > item.productId.quantity) {
+              outOfStockMessages.push(`${item.productId.productName} is out of stock. Please remove it from the cart.`);
+          }
+          totalQuantity += item.quantity;
+          grandTotal += item.totalPrice;
       });
-  
- 
+
       res.render('user/cart', {
-        items: cart.items,
-        grandTotal: grandTotal,
-        quantity: totalQuantity
+          items: cart.items,
+          grandTotal: grandTotal,
+          quantity: totalQuantity,
+          swalMessage: outOfStockMessages.length > 0 ? outOfStockMessages.join('\n') : null
       });
-    } catch (error) {
+
+  } catch (error) {
       console.error('Error fetching cart:', error);
       res.redirect('/pageNotFound');
-    }
-  };
-  
+  }
+};
+
 
 //----------------------------------------
 

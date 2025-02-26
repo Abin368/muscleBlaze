@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+ 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    /* styles.css */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #D4D4D4;
+  height: 100px;
+  padding: 0 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.logo .m {
+  color: black;
+}
+
+.logo .b {
+  color: #FBBC04;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.nav-links li {
+  margin: 0 20px;
+  position: relative;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #FBBC04;
+}
+
+.nav-links li a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: #FBBC04;
+  bottom: -5px;
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.nav-links li a:hover::after {
+  width: 100%;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 25px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-bar input:focus {
+  border-color: #FBBC04;
+}
+
+.search-bar button {
+  background: #FBBC04;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 15px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-bar button:hover {
+  background: #e0a800;
+}
+
+.search-bar button i {
+  color: white;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+  position: relative; /* Ensure proper absolute positioning inside */
+  gap: 15px;
+}
+
+.icons a {
+  color: black;
+  font-size: 20px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.icons a:hover {
+  color: #FBBC04;
+}
+
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.hamburger .line {
+  width: 25px;
+  height: 3px;
+  background-color: black;
+  margin: 4px 0;
+  transition: all 0.3s ease;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  header {
+    padding: 0 20px;
+    height: 80px;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 80px;
+    right: 0;
+    background-color: #D4D4D4;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
+
+  .nav-links.active {
+    height: 250px; /* Adjust based on content */
+  }
+
+  .nav-links li {
+    margin: 15px 0;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .search-bar {
+    display: none; /* Hide search bar on smaller screens */
+  }
+
+  .icons {
+    margin-left: auto; /* Push icons to the right */
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 24px;
+  }
+
+  .icons a {
+    margin: 0 10px;
+    font-size: 18px;
+  }
+}
+
+/* Footer Styles */
+footer {
+  background-color: black;
+  color: white;
+  padding: 40px 20px;
+  font-family: 'Arial', sans-serif;
+  margin-top: 40px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 20px;
+}
+
+.footer-section h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #FBBC04; /* Accent color for headings */
+}
+
+.footer-section p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-section.links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section.links ul li {
+  margin-bottom: 10px;
+}
+
+.footer-section.links ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-section.links ul li a:hover {
+  color: #FBBC04;
+}
+
+.footer-section.social .social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-section.social .social-icons a {
+  color: white;
+  font-size: 20px;
+  transition: color 0.3s ease;
+}
+
+.footer-section.social .social-icons a:hover {
+  color: #FBBC04;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+  font-size: 14px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-section {
+    min-width: 100%;
+  }
+
+  .footer-section.links ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-section.social .social-icons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-section h3 {
+    font-size: 16px;
+  }
+
+  .footer-section p,
+  .footer-section.links ul li a,
+  .footer-bottom p {
+    font-size: 12px;
+  }
+
+  .footer-section.social .social-icons a {
+    font-size: 18px;
+  }
+}
+/* Dropdown Container */
+.profile-dropdown {
+  position: absolute;
+  display: inline-block;
+  transition: transform 0.3s ease; /* Add smooth hover effect */
+  z-index: 1000;
+  margin-left: -30px;
+}
+.profile-dropdown:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* Profile Icon */
+.profile-icon {
+  color: black;
+  font-size: 24px;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease; /* Added transform transition */
+}
+.profile-icon:hover {
+  color: #FBBC04; /* Highlight color on hover */
+  transform: rotate(360deg); /* Smooth rotation on hover */
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #ffffff;
+  min-width: 200px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Larger shadow for depth */
+  border-radius: 12px; /* Softer rounded corners */
+  z-index: 100;
+  padding: 15px 0;
+  margin-top: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease; /* Smooth dropdown animation */
+}
+
+/* Show Dropdown on Hover (with animation) */
+.profile-dropdown:hover .dropdown-content {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* User's Name in Dropdown */
+.dropdown-content p {
+  padding: 12px 24px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 2px solid #eee; /* Thicker separator line */
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.dropdown-content p:hover {
+  background-color: #f5f5f5; /* Subtle hover effect for the user's name */
+}
+
+/* Dropdown Links */
+.dropdown-content a {
+  display: block;
+  padding: 12px 24px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: background-color 0.3s ease, padding-left 0.3s ease; /* Added padding transition */
+  border-radius: 6px;
+  margin: 4px 0; /* Space between links */
+}
+.dropdown-content a:hover {
+  background-color: #FBBC04; /* Elegant background color on hover */
+  color: white; /* Text color changes when hovered */
+  padding-left: 30px; /* Indentation effect */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dropdown-content {
+    right: -60px; /* Adjust position for smaller screens */
+    min-width: 180px; /* Slightly narrower for mobile */
+  }
+  .profile-icon {
+    font-size: 28px; /* Larger icon on small screens */
+  }
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 40px;
+  position: relative;
+}
+h1::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background-color: #FBBC04;
+  margin: 10px auto 0;
+}
+.products-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  text-align: center;
+  width: calc(25% - 15px); /* 4 products per row (25% width minus gap) */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  cursor: pointer;
+  border-bottom: 2px solid #eee;
+}
+.product-name {
+  font-size: 1.3rem; /* Slightly larger */
+  margin: 15px 0;
+  color: #000000;
+  font-weight: bold; /* Bold text */
+}
+.product-details {
+  font-size: 1rem; /* Slightly larger */
+  color: #666;
+  margin: 8px 0; /* Increased margin */
+  font-weight: bold; /* Bold text */
+}
+.wishlist-icon {
+  font-size: 1.2rem;
+  color: #ff4757;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: color 0.3s ease;
+}
+.wishlist-icon:hover {
+  color: #ff6b81;
+}
+.add-to-cart-btn {
+  background-color: #FBBC04;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin: 10px 0;
+}
+.add-to-cart-btn:hover {
+  background-color: #dca500;
+}
+.clearfix {
+  clear: both;
+}
+@media (max-width: 1200px) {
+  .product-card {
+    width: calc(33.33% - 15px); /* 3 products per row on smaller screens */
+  }
+}
+@media (max-width: 768px) {
+  .product-card {
+    width: calc(50% - 15px); /* 2 products per row on tablets */
+  }
+}
+@media (max-width: 480px) {
+  .product-card {
+    width: 100%; /* 1 product per row on mobile */
+  }
+}
+.product-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.zoom-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.magnifier {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  pointer-events: none;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  display: none;
+}
+.offer-text {
+  color: green;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+
+
+.orders-container {
+    max-width: 1100px; /* Increased width */
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff; /* White background */
+    border-radius: 12px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+    font-family: 'Arial', sans-serif;
+    border-left: 8px solid #FBBC04; /* Highlighted left border */
+}
+
+.orders-container h1 {
+    text-align: center;
+    color: #222;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.orders-container h3 {
+    color: #333;
+    font-size: 22px;
+    margin-top: 20px;
+    border-bottom: 3px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.orders-container p {
+    font-size: 18px;
+    color: #555;
+    margin: 8px 0;
+}
+
+.orders-container strong {
+    color: #000;
+}
+
+/* Products List */
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-item img {
+    width: 100px; /* Product image size */
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+/* Address Formatting */
+.address-box {
+    background: #f1f3f5;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+/* Cancel Message */
+.cancel-message {
+    color: red;
+    font-weight: bold;
+    background: #ffe6e6;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Back Button */
+.back-button {
+    display: block;
+    width: 200px;
+    text-align: center;
+    background: #FBBC04;
+    color: black;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 30px auto 0;
+    transition: background 0.3s ease;
+}
+
+.back-button:hover {
+    background: #FBBC04;
+}
+
+
+
+</style>
+
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+
+    <div class="profile-container">
+        <%- include('../../views/partials/user/profileSidebar') %>  
+      
+        <div class="orders-container">
+            <h1>Your Order Details</h1>
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Status:</strong> <%= order.status %></p>
+            <p><strong>Order Date:</strong> <%= orderDate %></p>
+            <% if (order.status !== 'Cancelled') { %>
+                <p><strong>Estimated Delivery:</strong> <%= deliveryDate %></p>
+            <% } %>
+            <p><strong>Total Price:</strong> <%= order.totalPrice %></p>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod%></p>
+        
+            <h3>Products Ordered:</h3>
+            <div class="product-list">
+                <% order.orderItems.forEach(item => { %>
+                    <div class="product-item">
+                        <img src="/uploads/product-images/<%= item.product ? item.product.productImage[0] : 'default-image.jpg' %>" 
+                             alt="<%= item.product ? item.product.productName : 'Product' %>">
+                        <div>
+                            <p><strong>Product:</strong> <%= item.product ? item.product.productName : "Unknown" %></p>
+                            <p><strong>Quantity:</strong> <%= item.quantity %></p>
+                            <p><strong>Price:</strong> ₹<%= item.product.salePrice || item.product.price %></p>
+                        
+
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        
+            <h3>Shipping Address:</h3>
+            <div class="address-box">
+                <p><%= address ? `${address.name}, ${address.landmark}, ${address.city}, ${address.district}, ${address.state} - ${address.pincode} | Phone: ${address.phone}` : "Address not available" %></p>
+            </div>
+        
+            <% if (order.status === 'Cancelled' && cancelMessage) { %>
+                <h3>Admin Message:</h3>
+                <p class="cancel-message"><strong>Reason:</strong> <%= cancelMessage %></p>
+            <% } %>
+        
+            <!-- Back to Orders Button -->
+            <a href="/orders" class="back-button">⬅ Back to Orders</a>
+        </div>
+        
+        
+        
+        
+    </div>
+    
+    <%- include('../../views/partials/user/footer') %>
+    
+
+
+
+    
+</body>
+</html>
+
+

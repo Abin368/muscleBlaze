@@ -7,6 +7,7 @@ const customerController =require('../controllers/admin/customerController')
 const  categoryController=require('../controllers/admin/categoryController')
 const  productController=require('../controllers/admin/productController');
 const bannerController=require('../controllers/admin/bannerController')
+const orderController=require('../controllers/admin/orderController')
 const multer = require('multer');  
 const { storage, fileFilter } = require('../helpers/multer');  
 const upload = multer({ storage, fileFilter });  
@@ -62,5 +63,14 @@ router.post('/admin/addBanner',adminAuth,upload.fields([
 
 ]),bannerController.addBanner)
 router.get('/admin/deleteBanner',adminAuth,bannerController.deleteBanner)
+
+
+//order management
+router.get('/admin/orders',adminAuth,orderController.getOrder)
+router.get('/admin/ordersPage/:orderId', adminAuth,orderController.getOrderDetails);
+router.post('/admin/updateOrderStatus/:orderId', adminAuth, orderController.updateOrderStatus);
+router.post("/admin/approve-return", adminAuth, orderController.approveReturn);
+
+
 
 module.exports=router

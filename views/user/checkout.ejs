@@ -41,7 +41,14 @@
                 <% if (Array.isArray(addresses) && addresses.length > 0) { %>
                     <% addresses.forEach((address, index) => { %>
                         <div class="address-box">
-                            <input type="radio" name="selectedAddress" id="address-<%= index %>" value="<%= address._id %>" required>
+                            <input 
+                                type="radio" 
+                                name="selectedAddress" 
+                                id="address-<%= index %>" 
+                                value="<%= address._id %>" 
+                                required 
+                                <%= index === 0 ? 'checked' : '' %>  <!-- ✅ First address checked by default -->
+                            
                             <label for="address-<%= index %>">
                                 <strong><%= address.name %></strong><br>
                                 <%= address.landmark %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %><br>
@@ -54,10 +61,11 @@
                     <p>No addresses found. Redirecting...</p>
                     <script>
                         setTimeout(() => {
-                            window.location.href = "/addresses"; // Redirect if no addresses
+                            window.location.href = "/addresses";
                         }, 2000);
                     </script>
                 <% } %>
+                
     
                 <!-- Add Address Button -->
                 <a  class="add-address-btn" id="addAddressBtn" ><i class="fa fa-plus"></i> Add New Address</a>

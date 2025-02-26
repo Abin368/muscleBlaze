@@ -10,8 +10,15 @@ const connectDB = require('./config/db');
 const bannerMiddleware = require('./middlewares/bannerMiddleware')
 const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
+const helmet = require('helmet');  
+const morgan = require('morgan'); 
 
 connectDB(); 
+
+
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(morgan('dev'));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

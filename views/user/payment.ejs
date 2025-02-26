@@ -44,18 +44,21 @@
                     <p><%= checkoutData.address.city %>, <%= checkoutData.address.district %>, <%= checkoutData.address.state %></p>
                     <p>Pincode: <%= checkoutData.address.pincode %></p>
                     <p>Phone: <%= checkoutData.address.phone %></p>
+                  
                 </div>
             </div>
-            
-            <div id="checkout-data"
+        
+        <div id="checkout-data"
+            data-user-id="<%= checkoutData.userId %>" 
             data-address-id="<%= checkoutData.address._id %>"
             data-cart-items='<%= JSON.stringify(checkoutData.cartItems) %>'
             data-grand-total="<%= checkoutData.grandTotal %>"
             data-quantity="<%= checkoutData.cartItems.reduce((sum, item) => sum + item.quantity, 0) %>"
        ></div>
+       
 
             <div class="payment-methods">
-                <button class="payment-btn" onclick="selectPayment('upi')">Pay Using UPI</button>
+                <button class="payment-btn" onclick="selectPayment('razorpay')">Pay Using UPI</button>
                 <button class="payment-btn" onclick="selectPayment('cod')">Cash on Delivery</button>
                 <button class="payment-btn" onclick="selectPayment('card')">Debit/Credit Card</button>
             </div>
@@ -64,20 +67,27 @@
                 <button class="pay-btn" onclick="confirmPayment()">Confirm Payment</button>
             </div>
             
+            <div id="razorpay-section" style="display: none;">
+                <button class="pay-btn" onclick="confirmPayment()">Proceed with Razorpay</button>
+            </div>
+            
         </div>
     </div>
 
     <%- include('../../views/partials/user/footer') %>
 </body>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
-  let paymentMethod = '';
+  let paymentMethod = null;
 
 function selectPayment(method) {
     paymentMethod = method;
     document.getElementById('cod-section').style.display = method === 'cod' ? 'block' : 'none';
+    document.getElementById('razorpay-section').style.display = method === 'razorpay' ? 'block' : 'none';
 }
 
-function confirmPayment() {
+async function confirmPayment() {
     if (!paymentMethod) {
         Swal.fire({
             icon: 'warning',
@@ -107,6 +117,7 @@ function confirmPayment() {
         const parsedCartItems = cartItems ? JSON.parse(cartItems) : [];
 
         const checkoutData = {
+            userId: checkoutDataElement.getAttribute('data-user-id') || null,
             addressId: checkoutDataElement.getAttribute('data-address-id') || null,
             cartItems: parsedCartItems,
             grandTotal: parseFloat(checkoutDataElement.getAttribute('data-grand-total')) || 0,
@@ -122,56 +133,147 @@ function confirmPayment() {
             allowOutsideClick: false,
             allowEscapeKey: false,
             didOpen: () => {
-                Swal.showLoading(); 
+                Swal.showLoading();
             }
         });
 
-        fetch('/payment/proceed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(checkoutData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Response Data:', data); 
-
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Order Placed Successfully!',
-                    text: 'Redirecting to order summary...',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-
-                setTimeout(() => {
-                    window.location.href = `/order-summary/${data.orderId}`;
-                }, 2000);
-            } else {
+        if (paymentMethod === "cod") {
+           
+            fetch('/payment/proceed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(checkoutData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close(); 
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed Successfully!',
+                        text: 'Redirecting to order summary...',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    setTimeout(() => {
+                        window.location.href = `/order-summary/${data.orderId}`;
+                    }, 2000);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: data.error || 'Something went wrong. Please try again!',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Try Again'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close(); 
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Payment Failed',
-                    text: data.error || 'Something went wrong. Please try again!',
+                    title: 'Network Error',
+                    text: 'There was an issue with your order. Please check your connection and try again.',
                     confirmButtonColor: '#d33',
-                    confirmButtonText: 'Try Again'
+                    confirmButtonText: 'OK'
                 });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Network Error',
-                text: 'There was an issue with your order. Please check your connection and try again.',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'OK'
             });
-        });
+        } else if (paymentMethod === "razorpay") {
+         
+            fetch('/payment/razorpay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(checkoutData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close(); 
+                if (data.success) {
+                    sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+                    const options = {
+                        key: "rzp_test_v6v5TA0H0GYZBO",
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.razorpayOrderId,
+                        prefill: {
+                            name: checkoutDataElement.getAttribute('data-user-name') || "Guest User",
+                            email: checkoutDataElement.getAttribute('data-user-email') || "guest@example.com",
+                            contact: checkoutDataElement.getAttribute('data-user-phone') || "0000000000"
+                        },
+                        handler: function (response) {
+                            console.log("Payment Success:", response);
+                            const storedCheckoutData = JSON.parse(sessionStorage.getItem("checkoutData")) || {};
 
+                            fetch("/payment/verify", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    userId: storedCheckoutData.userId,
+                                    addressId: storedCheckoutData.addressId,
+                                    orderItems: storedCheckoutData.cartItems,
+                                    grandTotal: storedCheckoutData.grandTotal,
+                                     paymentMethod: "Razorpay"
+
+                                })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Payment Successful!',
+                                        text: 'Redirecting to order summary...',
+                                        showConfirmButton: false,
+                                        timer: 2000
+                                    });
+                                    setTimeout(() => {
+                                        window.location.href = `/order-summary/${data.orderId}`;
+                                    }, 2000);
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Payment Failed',
+                                        text: 'Your transaction could not be verified.',
+                                        confirmButtonColor: '#d33',
+                                        confirmButtonText: 'Try Again'
+                                    });
+                                }
+                            });
+                        }
+                    };
+
+                    const rzp1 = new Razorpay(options);
+                    rzp1.open();
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: data.error || 'Something went wrong. Please try again!',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Try Again'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close(); 
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'There was an issue with your order. Please check your connection and try again.',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
     } catch (error) {
-        console.error("Parsing Error:", error);
+        console.error("Processing Error:", error);
+        Swal.close();
         Swal.fire({
             icon: 'error',
             title: 'Processing Error',

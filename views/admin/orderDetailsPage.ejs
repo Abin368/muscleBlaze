@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlaze</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/orderDetails.css">
+    <style>
+       
+
+    </style>
+</head>
+<body>
+
+  
+      
+       
+       
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+    
+        <div class="content">
+            <h1>Order Details</h1>
+    
+            <div class="order-info">
+                <p><strong>Order ID:</strong> <%= order._id %></p>
+                <p><strong>Order Date:</strong> <%= orderDate %></p>
+                <p><strong>Delivery Date:</strong> <%= deliveryDate %></p>
+                <p><strong>User:</strong> <%= order.userId.name %> (<%= order.userId.email %>)</p>
+                <p><strong>Total Items:</strong> <%= totalItems %></p>
+                <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
+    
+               
+                <h3>Shipping Address</h3>
+                <% if (address) { %>
+                    <p><strong>Delivery Address:</strong> 
+                        <%= address.name %>, <%= address.landmark %>, <%= address.city %>, 
+                        <%= address.district %>, <%= address.state %> - <%= address.pincode %>.
+                        Phone: <%= address.phone %>
+                    </p>
+                <% } else { %>
+                    <p>No address found.</p>
+                <% } %>
+                
+
+    
+                <!-- Status Update -->
+                <p><strong>Status:</strong> 
+                    <form id="statusForm">
+                        <select id="statusSelect" class="status-dropdown">
+                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        </select>
+                        <button type="submit" class="update-btn">Update</button>
+                    </form>
+                </p>
+
+                <% if (order.status === 'Return Requested') { %>
+                    <h3>Return Request Details</h3>
+                    <ul>
+                        <% order.orderItems.forEach(item => { %>
+                            <% if (item.returnStatus === 'Requested') { %>
+                                <li>
+                                    <input type="checkbox" name="returnItems" value="<%= item.product._id %>">
+                                    <strong>Product:</strong> <%= item.product.productName %> <br>
+                                    <strong>Reason:</strong> <%= item.returnReason %> <br>
+                                    <strong>Qnty:</strong>  <%= item.quantity %>
+                                </li>
+                            <% } %>
+                        <% }) %>
+                    </ul>
+                
+                    <button class="approve-btn" onclick="approveReturn('<%= order._id %>')">
+                        Approve Selected Returns
+                    </button>
+                <% } %>
+                
+            <a href="/admin/orders" class="back-btn">Back to Orders</a>
+        </div>
+    </div>
+
+ 
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById("statusForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const statusSelect = document.getElementById("statusSelect");
+    const newStatus = statusSelect.value;
+    let cancelMessage = "";
+
+    if (newStatus === "Cancelled") {
+        const { value: message } = await Swal.fire({
+            title: "Cancel Order",
+            input: "text",
+            inputLabel: "Enter the reason for cancellation:",
+            inputPlaceholder: "Type here...",
+            showCancelButton: true,
+            confirmButtonText: "Submit",
+            cancelButtonText: "Cancel",
+            inputValidator: (value) => {
+                if (!value) {
+                    return "Cancellation reason is required!";
+                }
+            }
+        });
+
+        if (!message) return;  
+
+        cancelMessage = message;
+    }
+
+    const response = await fetch("/admin/updateOrderStatus/<%= order._id %>", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: newStatus, cancelMessage })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+        Swal.fire({
+            icon: "success",
+            title: "Success!",
+            text: "Order status updated successfully!",
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => location.reload());
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Error!",
+            text: "Failed to update order status."
+        });
+    }
+});
+//------------------------------------------------
+
+function approveReturn(orderId) {
+    let returnItems = [...document.querySelectorAll("input[name='returnItems']:checked")]
+                        .map(input => input.value);
+
+    if (returnItems.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Products Selected",
+            text: "Please select at least one product to approve for return.",
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: "Approve Return?",
+        text: "Are you sure you want to approve the selected product(s) for return?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Approve",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/admin/approve-return", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId, returnItems }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Return Approved",
+                        text: `₹${data.refundAmount} credited to wallet.`,
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Approval Failed",
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error approving return:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong. Please try again later.",
+                });
+            });
+        }
+    });
+}
+
+
+
+
+</script>
+</html>

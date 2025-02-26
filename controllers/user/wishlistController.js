@@ -1,4 +1,5 @@
 const User = require('../../models/userSchema');
+const Cart = require('../../models/cartSchema')
 const Product = require("../../models/productSchema");
 const Wishlist = require('../../models/wishlistSchema')
 const mongoose = require('mongoose');
@@ -13,6 +14,7 @@ const getWishlist = async (req, res) => {
 
     
         const wishlist = await Wishlist.findOne({ userId }).populate('products.productId'); 
+        
 
         res.render('user/wishlist', { 
             wishlist: wishlist ? wishlist.products : [] 

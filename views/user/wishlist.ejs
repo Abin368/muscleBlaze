@@ -16,36 +16,36 @@
     </div>
 
     <div class="container">
-        <div class="wishlist-left">
-            <h1>Your Wishlist</h1>
-    
-            <% if (wishlist && wishlist.length > 0) { %>
-                <% wishlist.forEach(item => { %>
-                    <div class="wishlist-item-box">
-                        <div class="wishlist-item-image">
-                            <img src="/uploads/product-images/<%= item.productId.productImage[0] || 'default-image.jpg' %>" alt="<%= item.productId.name %>">
-                        </div>
-    
-                        <div class="wishlist-item-details">
-                            <h3><%= item.productId.productName %></h3>
-                            <p><strong>Weight:</strong> <%= item.productId.size %>Kg</p>
-                            <p><strong>Flavor:</strong> <%= item.productId.flavor %></p>
-                            <p class="price"><strong>Price:</strong> ₹<%= item.productId.salePrice %></p>
-                            <button class="add-to-cart-btn" onclick="addToCart('<%= item.productId._id %>')">Add to Cart</button>
-                        </div>
-    
-                        <div class="wishlist-actions">
-                            <i class="fas fa-trash delete-icon" onclick="removeFromWishlist('<%= item.productId._id %>')"></i>
-                            <p class="added-date"><strong>Added On:</strong> <%= new Date(item.addedOn).toLocaleDateString() %></p>
-                        </div>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <p>Your wishlist is empty.</p>
-            <% } %>
-        </div>
-    </div>
-    
+      <div class="wishlist-left">
+          <h1>Your Wishlist</h1>
+  
+          <% if (wishlist && wishlist.length > 0) { %>
+              <% wishlist.forEach(item => { %>
+                  <div class="wishlist-item-box" data-product-id="<%= item.productId._id %>">
+                      <div class="wishlist-item-image">
+                          <img src="/uploads/product-images/<%= item.productId.productImage[0] || 'default-image.jpg' %>" alt="<%= item.productId.name %>">
+                      </div>
+  
+                      <div class="wishlist-item-details">
+                          <h3><%= item.productId.productName %></h3>
+                          <p><strong>Weight:</strong> <%= item.productId.size %>Kg</p>
+                          <p><strong>Flavor:</strong> <%= item.productId.flavor %></p>
+                          <p class="price"><strong>Price:</strong> ₹<%= item.productId.salePrice %></p>
+                          <button class="add-to-cart-btn" onclick="addToCart('<%= item.productId._id %>')">Add to Cart</button>
+                      </div>
+  
+                      <div class="wishlist-actions">
+                          <i class="fas fa-trash delete-icon" onclick="removeFromWishlist('<%= item.productId._id %>')"></i>
+                          <p class="added-date"><strong>Added On:</strong> <%= new Date(item.addedOn).toLocaleDateString() %></p>
+                      </div>
+                  </div>
+              <% }) %>
+          <% } else { %>
+              <p>Your wishlist is empty.</p>
+          <% } %>
+      </div>
+  </div>
+  
     
     
 
@@ -64,25 +64,43 @@
     },
     body: JSON.stringify({ productId }),
   })
-  .then((response) => response.json())
-  .then((data) => {
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Remove the item from the wishlist
+      return fetch('/wishlist/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      });
+    } else {
+      throw new Error("Failed to add product to cart.");
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
     if (data.success) {
       Swal.fire({
         icon: "success",
         title: "Added to Cart!",
-        text: "The product has been added to your cart.",
+        text: "The product has been added to your cart and removed from your wishlist.",
         showConfirmButton: false,
         timer: 2000
       });
+
+      // Fix: Correctly select and remove the wishlist item
+      const wishlistItem = document.querySelector(`.wishlist-item-box[data-product-id="${productId}"]`);
+      if (wishlistItem) {
+        wishlistItem.remove();
+      }
+      
     } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: "Failed to add product to cart. Please try again.",
-      });
+      throw new Error("Failed to remove product from wishlist.");
     }
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('Error:', error);
     Swal.fire({
       icon: "error",
@@ -91,6 +109,8 @@
     });
   });
 }
+
+
 
 //------------------------------------------
 function removeFromWishlist(productId) {

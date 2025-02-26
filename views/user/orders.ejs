@@ -1,128 +1,437 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MuscleBlaze</title>
     <link rel="stylesheet" href="styles.css">
 
- 
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="orders.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="orders.css">
+    <style>
+#returnOrderModal {
+    display: none; /* Hidden on load */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+}
+
+.return-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.return-modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 400px;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Close Button */
+.return-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.return-close:hover {
+    color: red;
+}
+
+/* Title & Description */
+.return-title {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.return-description {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Form Elements */
+.return-label {
+    font-weight: 600;
+    display: block;
+    margin: 10px 0 5px;
+    color: #444;
+}
+
+.return-textarea {
+    width: 100%;
+    height: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: none;
+    font-size: 14px;
+}
+
+/* Submit Button */
+.return-submit-btn {
+    background: #ffcc00;
+    color: black;
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+}
+
+.return-submit-btn:hover {
+    background: #ffcc00;
+}
+
+/* Return Items Container */
+.return-items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Individual Return Item */
+.return-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+/* Checkbox Styling */
+.return-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #ffcc00;
+}
+
+/* Return Item Text */
+.return-item-text {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+    </style>
 </head>
 
 <body>
     <%- include('../../views/partials/user/header') %>
 
-<div class="profile-container">
-    <%- include('../../views/partials/user/profileSidebar') %>  
-  
-    <div class="orders-container">
-        <h1>Your Orders</h1>
+        <div class="profile-container">
+            <%- include('../../views/partials/user/profileSidebar') %>
 
-        <% if (orders.length === 0) { %>
-            <p>No orders found.</p>
-        <% } else { %>
-            <% orders.forEach(order => { %>
-                <div class="order-card">
-                    <!-- Left side: Products -->
-                    <div class="order-left">
-                        <% order.orderItems.forEach(item => { %>
-                            <div class="product-info">
-                                <img src="/uploads/product-images/<%= item.product.productImage[0] || 'default-image.jpg' %>" 
-                                alt="<%= item.product.name %>" 
-                                style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+                <div class="orders-container">
+                    <h1>Your Orders</h1>
 
-                                <div class="details">
-                                    <h4><%= item.product.productName %></h4>
-                                    <p><strong>Weight:</strong> <%= item.product.size %>Kg</p>
-                                    <p><strong>Flavor:</strong> <%= item.product.flavor %></p>
+                    <% if (orders.length===0) { %>
+                        <p>No orders found.</p>
+                        <% } else { %>
+                            <% orders.forEach(order=> { %>
+                                <div class="order-card">
+                                    <!-- Left side: Products -->
+                                    <div class="order-left">
+                                        <% order.orderItems.forEach(item=> { %>
+                                            <div class="product-info">
+                                                <img src="/uploads/product-images/<%= item.product.productImage[0] || 'default-image.jpg' %>"
+                                                    alt="<%= item.product.name %>"
+                                                    style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+
+                                                <div class="details">
+                                                    <h4>
+                                                        <%= item.product.productName %>
+                                                    </h4>
+                                                    <p><strong>Weight:</strong>
+                                                        <%= item.product.size %>Kg
+                                                    </p>
+                                                    <p><strong>Flavor:</strong>
+                                                        <%= item.product.flavor %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <% }) %>
+                                    </div>
+
+
+                                    <div class="order-right">
+                                        <h4>Order ID: <%= order.orderId %>
+                                        </h4>
+                                        <p><strong>Status:</strong>
+                                            <%= order.status %>
+                                        </p>
+                                        <p><strong>Total Items:</strong>
+                                            <%= order.orderItems.reduce((total, item)=> total + item.quantity, 0) %>
+                                        </p>
+                                        <p><strong>Total Price:</strong> ₹<%= order.finalAmount %>
+                                        </p>
+
+                                        <div class="order-actions">
+                                            <a href="/order/details/<%= order._id %>" class="btn">View Details</a>
+                                            <% if (order.status !='Cancelled' && order.status!='Delivered' && order.status!='Returned'&& order.status!='Return Requested' &&order.status!='Partially Returned'  ) { %>
+                                                <button class="btn cancel"
+                                                    onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                                                <% } %>
+                                                    <% if (order.status=='Delivered' ) { %>
+                                                        <button class="btn cancel" data-order-id="<%= order._id %>"
+                                                            data-order-items='<%= JSON.stringify(order.orderItems) %>'
+                                                            onclick="returnOrder(this)">
+                                                            Return Order
+                                                        </button>
+
+                                                        <% } %>
+
+                                        </div>
+
+
+                                        <% if (order.status==="Cancelled" && order.cancelMessage) { %>
+                                            <p style="color: red;"><strong>Cancellation Reason:</strong>
+                                                <%= order.cancelMessage %>
+                                            </p>
+                                            <% } %>
+
+                                    </div>
                                 </div>
-                            </div>
-                        <% }) %>
-                    </div>
-
-                  
-                    <div class="order-right">
-                        <h4>Order ID: <%= order.orderId %></h4>
-                        <p><strong>Status:</strong> <%= order.status %></p>
-                        <p><strong>Total Items:</strong> <%= order.orderItems.reduce((total, item) => total + item.quantity, 0) %></p>
-                        <p><strong>Total Price:</strong> ₹<%= order.finalAmount %></p>
-
-                        <div class="order-actions">
-                            <a href="/order/details/<%= order._id %>" class="btn">View Details</a>
-                            <% if (order.status === 'Pending') { %>
-                                <button class="btn cancel" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
-                            <% } %>
-                        </div>
-                    </div>
+                                <% }) %>
+                                    <% } %>
                 </div>
-            <% }) %>
-        <% } %>
-    </div>
-</div>
+        </div>
+        <!-- Return Order Modal -->
+        <div id="returnOrderModal" class="return-modal">
+            <div class="return-modal-content">
+                <span class="return-close" onclick="closeReturnModal()">&times;</span>
+                <h2 class="return-title">Return Products</h2>
+                <p class="return-description">Select the products you want to return:</p>
+        
+                <form id="returnOrderForm">
+                    <div id="returnOrderItems" class="return-items-container"></div>
+        
+                    <label for="returnReason" class="return-label">Return Reason:</label>
+                    <textarea id="returnReason" name="returnReason" class="return-textarea" required></textarea>
+        
+                    <button type="submit" class="return-submit-btn">Submit Return Request</button>
+                </form>
+            </div>
+        </div>
+        
 
-<%- include('../../views/partials/user/footer') %>
+
+        <%- include('../../views/partials/user/footer') %>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        function cancelOrder(orderId) {
-    console.log("Cancel button clicked for order:", orderId); // Debugging log
+<script>
+    function cancelOrder(orderId) {
+        console.log("Cancel button clicked for order:", orderId);
 
-    Swal.fire({
-        title: "Are you sure?",
-        text: "Do you really want to cancel this order?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, Cancel It!"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/order/cancel/${orderId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Cancel Order Response:", data);
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to cancel this order?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, Cancel It!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/order/cancel/${orderId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Cancel Order Response:", data);
 
-                if (data.success) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Cancelled!",
-                        text: "Your order has been cancelled successfully.",
-                        showConfirmButton: false,
-                        timer: 2000
+                        if (data.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Cancelled!",
+                                text: "Your order has been cancelled successfully.",
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+
+
+
+                            const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
+                            if (orderElement) {
+                                orderElement.querySelector(".status").innerText = "Cancelled";
+                                const cancelButton = orderElement.querySelector(".cancel");
+                                if (cancelButton) cancelButton.style.display = "none";
+                            }
+                            location.reload();
+                        } else {
+                            Swal.fire("Error", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error cancelling order:", error);
+                        Swal.fire("Error", "Something went wrong!", "error");
                     });
-                    
+            }
+        });
+    }
+    //----------------------------------------------------
+    function returnOrder(button) {
+    const orderId = button.getAttribute("data-order-id");
+    const orderItems = JSON.parse(button.getAttribute("data-order-items")); 
 
-                   
-                    const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
-                    if (orderElement) {
-                        orderElement.querySelector(".status").innerText = "Cancelled"; 
-                        const cancelButton = orderElement.querySelector(".cancel");
-                        if (cancelButton) cancelButton.style.display = "none"; 
-                    }
-                    location.reload(); 
-                } else {
-                    Swal.fire("Error", data.message, "error");
-                }
-            })
-            .catch(error => {
-                console.error("Error cancelling order:", error);
-                Swal.fire("Error", "Something went wrong!", "error");
-            });
-        }
+    const modal = document.getElementById("returnOrderModal");
+    const returnOrderItems = document.getElementById("returnOrderItems");
+
+    if (!modal || !returnOrderItems) {
+        console.error("Modal or returnOrderItems container not found!");
+        return;
+    }
+
+    // Clear previous items
+    returnOrderItems.innerHTML = "";
+
+    // Add items dynamically
+    orderItems.forEach(item => {
+        returnOrderItems.innerHTML += `
+            <div class="return-item">
+                <input type="checkbox" class="return-checkbox" name="returnItems" value="${item.product._id}">
+                <span class="return-item-text">${item.product.productName} - ₹${item.product.salePrice} (Qty: ${item.quantity})</span>
+            </div>
+        `;
     });
+
+    // Handle form submission
+    document.getElementById("returnOrderForm").onsubmit = function (event) {
+        event.preventDefault();
+
+        const selectedProducts = [...document.querySelectorAll('input[name="returnItems"]:checked')]
+                                    .map(input => input.value);
+
+        if (selectedProducts.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "No Products Selected",
+                text: "Please select at least one product to return.",
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: "Submit Return Request?",
+            text: "Are you sure you want to request a return for the selected product(s)?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Submit",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const returnReason = document.getElementById("returnReason").value;
+
+                fetch("/order/return", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orderId,
+                        returnItems: selectedProducts,
+                        returnReason
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Return Requested",
+                            text: "Your return request has been submitted successfully.",
+                        }).then(() => {
+                            closeReturnModal(); // Close modal after success
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Request Failed",
+                            text: data.message,
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error submitting return:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Something went wrong. Please try again.",
+                    });
+                });
+            }
+        });
+    };
+
+    modal.style.display = "flex";
 }
 
+// Close modal function
+function closeReturnModal() {
+    document.getElementById("returnOrderModal").style.display = "none";
+}
 
-    </script>
-    
+// Close modal when clicking outside
+window.onclick = function (event) {
+    const modal = document.getElementById("returnOrderModal");
+    if (event.target === modal) {
+        closeReturnModal();
+    }
+};
+
+
+</script>
+
 
 </html>

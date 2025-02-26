@@ -1,13 +1,17 @@
-const mongoose=require('mongoose')
-const {Schema} =mongoose;
-
-const {v4:uuidv4} =require('uuid');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
 const orderSchema = new Schema({
     orderId: {
         type: String,
         default: () => uuidv4(),
         unique: true
+    },
+    userId: {   
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     orderItems: [{
         product: {
@@ -22,6 +26,24 @@ const orderSchema = new Schema({
         price: {
             type: Number,
             default: 0
+        },
+        status: {  
+            type: String,
+            enum: ['Ordered', 'Cancelled','Return Requested','Partially Returned'],
+            default: 'Ordered'
+        },
+        cancelMessage: { 
+            type: String,
+            default: ''
+        },
+        returnStatus: {  
+            type: String,
+            enum: ['Not Requested', 'Requested', 'Approved', 'Rejected', 'Returned','Partially Returned'],
+            default: 'Not Requested'
+        },
+        returnReason: {  
+            type: String,
+            default: ''
         }
     }],
     totalPrice: {
@@ -47,7 +69,11 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return request', 'Returned']
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','Paid','Return Requested','Partially Returned']
+    },
+    cancelMessage: {  
+        type: String,
+        default: ''
     },
     createdAt: {
         type: Date,
@@ -60,7 +86,7 @@ const orderSchema = new Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cod', 'UPI', 'Card'],
+        enum: ['cod', 'UPI', 'Card','Razorpay'],
         required: true
     },
     paymentStatus: {
@@ -74,6 +100,5 @@ const orderSchema = new Schema({
     }
 });
 
-
-const Order =mongoose.model('Order',orderSchema);
-module.exports =Order;
+const Order = mongoose.model('Order', orderSchema);
+module.exports = Order;

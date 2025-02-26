@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MuscleBlze</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+</head>
+
+
+<body>
+    <div class="container">
+      
+        <%- include('../../views/partials/admin/sidebar') %>
+       
+        <div class="main-content">
+            <h1>User Management</h1>
+            
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <form action="/admin/orders" method="GET" id="searchForm">
+                    <input type="text" name="search" placeholder="Search orders..." value="<%= search %>" id="searchInput">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            
+
+         
+
+            <% if (orders.length > 0) { %>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User Name</th>
+                            <th>Products</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Action</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <td><%= order.orderId %></td>
+                                <td><%= order.userId ? order.userId.name : "N/A" %></td>
+                                <td>
+                                    <ul>
+                                        <% order.orderItems.forEach(item => { %>
+                                            <li>
+                                                <%= item.product ? item.product.productName : "N/A" %>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <% order.orderItems.forEach(item => { %>
+                                            <li>
+                                                <%= item.quantity %>
+                                            </li>
+                                        <% }) %>
+                                    </ul>
+                                </td>
+                                <td><%= order.status %></td>
+                                <td>
+                                   
+                                    <a href="/admin/ordersPage/<%= order._id %>" title="View Details">
+                                        <i class="fas fa-info-circle"></i>  
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p>No orders found.</p>
+            <% } %>
+            
+
+            
+<div class="pagination">
+    <% if (page > 1) { %>
+        <a href="?page=<%= page - 1 %>&search=<%= search %>">Previous</a>
+    <% } %>
+
+    <% for (let i = 1; i <= Math.ceil(totalOrders / limit); i++) { %>  
+        <a href="?page=<%= i %>&search=<%= search %>" 
+           class="<%= i === page ? 'active' : '' %>">
+           <%= i %>
+        </a>
+    <% } %>
+
+    <% if (page < totalPages) { %>
+        <a href="?page=<%= page + 1 %>&search=<%= search %>">Next</a>
+    <% } %>
+</div>
+
+            
+        </div>
+    </div>
+</body>
+</html>

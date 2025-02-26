@@ -114,7 +114,7 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Create New Product
+      
         const newProduct = new Product({
             productName: product.productName,
             description: product.description,
@@ -206,7 +206,7 @@ const getAllProducts = async (req, res) => {
 const addProductOffer = async (req, res) => {
     try {
         const { productId, percentage } = req.body;
-        console.log('Product ID:', productId, 'Percentage:', percentage); // Debugging log
+        console.log('Product ID:', productId, 'Percentage:', percentage); 
         
         const findProduct = await Product.findOne({ _id: productId });
         if (!findProduct) {

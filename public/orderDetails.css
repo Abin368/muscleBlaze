@@ -1,0 +1,179 @@
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #1A1C23;
+    color: rgb(174, 32, 32);
+    display: flex;
+    height: 100vh;
+}
+
+
+
+/* Main container layout */
+.container {
+    display: flex;
+    width: 100%;
+}
+
+/* Content Section */
+.content {
+    flex: 1;
+    padding: 30px;
+    background: #1A1C23;
+    min-height: 100vh;
+}
+
+/* Order Details Title */
+h1 {
+    text-align: center;
+    color: white;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+/* Order Info Section */
+.order-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.order-info p {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #555;
+}
+
+.order-info strong {
+    color: #333;
+}
+
+/* Order Status Styling */
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+}
+
+.status.pending {
+    background: #f39c12;
+}
+
+.status.delivered {
+    background: #28a745;
+}
+
+.status.cancelled {
+    background: #dc3545;
+}
+
+/* Product List (Cards) */
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.product-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-details {
+    flex: 1;
+}
+
+.product-card h4 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.product-card p {
+    font-size: 14px;
+    color: #555;
+    margin: 3px 0;
+}
+
+/* Back Button */
+.back-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 18px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    background: #0056b3;
+}
+
+/* Address Section */
+.address-info {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 15px;
+    font-size: 15px;
+    color: #333;
+}
+
+.address-info h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #222;
+}
+/* Status Dropdown */
+.status-dropdown {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.update-btn {
+    padding: 8px 12px;
+    font-size: 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: 0.3s;
+}
+
+.update-btn:hover {
+    background: #0056b3;
+}
+
+.approve-btn {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.approve-btn:hover {
+    background-color: #45a049; /* Darker Green */
+    transform: scale(1.05);
+}
+
+.approve-btn:active {
+    transform: scale(0.98);
+}

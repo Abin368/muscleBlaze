@@ -2,6 +2,8 @@ const User =require("../../models/userSchema")
 const Category =require('../../models/categorySchema')
 const Product = require('../../models/productSchema')
 const Banner= require('../../models/bannerSchema')
+const Wallet = require('../../models/walletSchema')
+
 const bcrypt = require("bcrypt");
 const { sendOTPEmail } = require("../../services/emailService");
 const { generateOTP,validateInput, ERROR_MESSAGES } = require("../../utils/validation");
@@ -154,6 +156,9 @@ const signup = async (req, res) => {
         password: hashedPassword,
       });
       await newUser.save();
+
+      const wallet = new Wallet({ userId: user._id });
+      await wallet.save();
   
      
       req.session.otpData = null;

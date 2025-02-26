@@ -9,7 +9,7 @@ const addressController =require('../controllers/user/addressController')
 const cartController=require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
 const checkoutController=require('../controllers/user/checkoutController')
-
+const returnController=require('../controllers/user/returnController')
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -92,9 +92,16 @@ router.get('/checkout',preventCache,checkoutController.getCheckout)
 router.post('/proceed-to-payment', preventCache, checkoutController.proceedToPayment);
 router.get('/payment', preventCache, checkoutController.getPayment);
 router.post('/payment/proceed', preventCache, checkoutController.confirmPayment);
+router.post('/payment/razorpay', preventCache, checkoutController.createRazorpayOrder);
+router.post('/payment/verify', preventCache, checkoutController.verifyRazorpayPayment);
+
 router.get('/order-summary/:orderId', preventCache, checkoutController.getSummary);
 router.get('/orders',preventCache, checkoutController.getOrders)
 router.post('/order/cancel/:id', preventCache, checkoutController.cancelOrder);
+router.get("/order/details/:orderId", preventCache, checkoutController.getUserOrderDetails);
+
+//return product
+router.post('/order/return',preventCache, returnController.requestReturn);
 
 
 
