@@ -1,7 +1,7 @@
 
    const ensureAuthenticated = (req, res, next) => {
       if (req.isAuthenticated()) {
-        return res.redirect('/'); // Redirect if user is already logged in
+        return res.redirect('/'); 
       }
       next();
     };
@@ -9,14 +9,14 @@
   
   const isLoggedIn = (req, res, next) => {
     if (req.session.user) {
-        return res.redirect('/'); // Redirect to home if already logged in
+        return res.redirect('/'); 
     }
     next();
 };
 
 const isNotLoggedIn = (req, res, next) => {
     if (!req.session.user) {
-        return res.redirect('/login'); // Redirect to login if not authenticated
+        return res.redirect('/login'); 
     }
     next();
 };

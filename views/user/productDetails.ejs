@@ -259,10 +259,18 @@ function addToCart(productId) {
 }
 //-------------------------------------
 
+// function buyNow(productId) {
+//     const quantity = document.getElementById('quantity').value; 
+//     window.location.href = `/checkout?productId=${productId}&quantity=${quantity}`;
+// }
+
+
 function buyNow(productId) {
-    const quantity = document.getElementById('quantity').value; 
+    const quantity = document.getElementById('quantity') ? document.getElementById('quantity').value : 1;
+    console.log("Buying Now | Product ID:", productId, "| Quantity:", quantity);
     window.location.href = `/checkout?productId=${productId}&quantity=${quantity}`;
 }
+
 
 
     </script>

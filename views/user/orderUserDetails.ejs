@@ -653,6 +653,33 @@ h1::after {
 .back-button:hover {
     background: #FBBC04;
 }
+.invoice-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: black;
+    background: linear-gradient(135deg, #FBBC04, #FBBC04);
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+}
+
+.invoice-btn:hover {
+    background: linear-gradient(135deg, #FBBC04, #FBBC04);
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+.no-invoice {
+    font-size: 14px;
+    color: #777;
+    font-style: italic;
+}
+
 
 
 
@@ -667,7 +694,7 @@ h1::after {
       
         <div class="orders-container">
             <h1>Your Order Details</h1>
-            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Order ID:</strong> <%= order.orderId %></p>
             <p><strong>Status:</strong> <%= order.status %></p>
             <p><strong>Order Date:</strong> <%= orderDate %></p>
             <% if (order.status !== 'Cancelled') { %>
@@ -686,6 +713,7 @@ h1::after {
                             <p><strong>Product:</strong> <%= item.product ? item.product.productName : "Unknown" %></p>
                             <p><strong>Quantity:</strong> <%= item.quantity %></p>
                             <p><strong>Price:</strong> ₹<%= item.product.salePrice || item.product.price %></p>
+                            <p><strong>Status:</strong> <%= item.status %></p>
                         
 
                         </div>
@@ -702,6 +730,18 @@ h1::after {
                 <h3>Admin Message:</h3>
                 <p class="cancel-message"><strong>Reason:</strong> <%= cancelMessage %></p>
             <% } %>
+
+
+
+            <!-- <% if (invoiceUrl) { %>
+              <a href="<%= invoiceUrl %>" class="invoice-btn" target="_blank">Download Invoice</a>
+          <% } else { %>
+              <p class="no-invoice">No invoice available</p>
+          <% } %>
+           -->
+           <a href="/invoice/<%= order._id %>" class="btn invoice-btn" target="_blank">View Invoice</a>
+
+
         
             <!-- Back to Orders Button -->
             <a href="/orders" class="back-button">⬅ Back to Orders</a>

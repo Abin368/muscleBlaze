@@ -181,7 +181,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-    const cropperInstances = {}; // Store cropper instances for each image
+    const cropperInstances = {}; 
     const imageInputs = ["input1", "input2", "input3"];
     const croppedImages = ["croppedImg1", "croppedImg2", "croppedImg3"];
     const saveButtons = ["saveButton1", "saveButton2", "saveButton3"];
@@ -236,7 +236,7 @@
         });
     });
 
-    // Form Validation Before Submission
+    
     window.validateAndSubmit = function () {
         const productName = document.querySelector("input[name='productName']").value.trim();
         const regularPrice = document.querySelector("input[name='regularPrice']").value;

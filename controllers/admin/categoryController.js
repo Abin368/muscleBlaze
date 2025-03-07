@@ -1,6 +1,6 @@
 const Category = require("../../models/categorySchema");
 const { getPaginatedCategories } = require("../../helpers/categoryHelpers");
-
+const Product = require("../../models/productSchema");
 
 const categoryInfo = async (req, res) => {
     const search = req.query.search || "";
@@ -160,6 +160,84 @@ const deleteCategory = async (req, res) => {
         return res.redirect(`/admin/categories?search=${search}&page=${page}`);
     }
 };
+//--------------------------------
+const addCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, percentage } = req.body;  
+        console.log('Category ID:', categoryId, 'Percentage:', percentage); 
+        
+        const findCategory = await Category.findOne({ _id: categoryId });
+        if (!findCategory) {
+            return res.status(404).json({ status: false, message: "Category not found" });
+        }
+
+       
+        if (findCategory.categoryOffer > 0) {
+            return res.json({ status: false, message: "This category already has a category offer" });
+        }
+
+       
+        findCategory.categoryOffer = parseInt(percentage);  
+        await findCategory.save();
+
+        
+        const productsInCategory = await Product.find({ category: categoryId });
+
+        for (let product of productsInCategory) {
+            let categoryDiscount = Math.floor(product.regularPrice * (percentage / 100));
+            let productDiscount = product.productOffer ? Math.floor(product.regularPrice * (product.productOffer / 100)) : 0;
+
+            let highestDiscount = Math.max(categoryDiscount, productDiscount); 
+            product.salePrice = product.regularPrice - highestDiscount;
+
+           
+            product.highestOffer = highestDiscount === categoryDiscount ? percentage : product.productOffer || 0;
+
+            await product.save();
+        }
+
+        res.json({ status: true, message: "Category offer applied successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
+
+//------------------------------------
+const removeCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId } = req.body;
+        
+      
+        const findCategory = await Category.findOne({ _id: categoryId });
+        
+        if (!findCategory) {
+            return res.status(404).json({ status: false, message: "Category not found" });
+        }
+
+        
+        findCategory.categoryOffer = 0;
+        await findCategory.save();
+
+        
+        const productsInCategory = await Product.find({ category: categoryId });
+
+        for (let product of productsInCategory) {
+            let productDiscount = product.productOffer ? Math.floor(product.regularPrice * (product.productOffer / 100)) : 0;
+            product.salePrice = product.regularPrice - productDiscount;
+
+           
+            product.highestOffer = product.productOffer || 0;
+
+            await product.save();
+        }
+
+        res.json({ status: true, message: "Category offer removed successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Internal server error" });
+    }
+};
 
 
 
@@ -171,5 +249,7 @@ module.exports = {
     getUnlistCategory,
     getEditCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    addCategoryOffer,
+    removeCategoryOffer
 };

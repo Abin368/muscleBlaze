@@ -6,6 +6,10 @@ const Order= require('../../models/orderSchema')
 const mongodb = require("mongodb");
 const mongoose = require('mongoose');
 const Wallet = require('../../models/walletSchema')
+const puppeteer = require("puppeteer");
+const path = require("path");
+const ejs = require("ejs");
+const stream = require('stream')
 
 const requestReturn = async (req, res) => {
     try {
@@ -46,7 +50,47 @@ const requestReturn = async (req, res) => {
         res.status(500).json({ success: false, message: "Error processing return request." });
     }
 }
+//------------------------------------------------
+const generateInvoice = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.orderId)
+        .populate('userId')
+        .populate('orderItems.product')
+      
+    
+
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+        const addressId = order.address; 
+        console.log("Address ID from Order:", addressId);
+
+      
+        const addressDoc = await Address.findOne({ "address._id": addressId }, { "address.$": 1 });
+        const selectedAddress = addressDoc ? addressDoc.address[0] : null;
+
+        if (!selectedAddress) {
+            console.log("No matching address found!");
+        }
+
+
+        res.render('user/invoiceTemplate', { order,  address: selectedAddress || null});
+    } catch (error) {
+        console.error("Error fetching invoice:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+
+
+//------------------------------------------
+
+
+
 
 module.exports ={
-    requestReturn
+    requestReturn,
+    generateInvoice
+
 }

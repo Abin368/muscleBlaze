@@ -6,49 +6,65 @@ const Wallet = require('../../models/walletSchema')
 
 const getOrder = async (req, res) => {
     try {
-        const searchQuery = req.query.search?.trim() || "";  
-        const page = parseInt(req.query.page) || 1; 
-        const limit = 10;  
-        const skip = (page - 1) * limit;  
+        const searchQuery = req.query.search?.trim() || "";
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
 
-      
         let filter = {};
         if (searchQuery) {
             filter = {
                 $or: [
-                    { orderId: { $regex: searchQuery, $options: "i" } },  
-                    { status: { $regex: searchQuery, $options: "i" } },  
-                    { "userId.name": { $regex: searchQuery, $options: "i" } },  
-                    { "userId.email": { $regex: searchQuery, $options: "i" } },  
-                    { "orderItems.product.productName": { $regex: searchQuery, $options: "i" } }  
+                    { orderId: { $regex: searchQuery, $options: "i" } },
+                    { status: { $regex: searchQuery, $options: "i" } },
+                    { "userId.name": { $regex: searchQuery, $options: "i" } },
+                    { "userId.email": { $regex: searchQuery, $options: "i" } },
+                    { "orderItems.product.productName": { $regex: searchQuery, $options: "i" } }
                 ]
             };
         }
 
-       
         const totalOrders = await Order.countDocuments(filter);
-
-      
         const orders = await Order.find(filter)
-            .populate("userId", "name email")  
-            .populate("orderItems.product", "productName price")  
-            .skip(skip) 
-            .limit(limit) 
+            .populate("userId", "name email")
+            .populate("orderItems.product", "productName price")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .lean();
 
-        res.render("admin/orderDetails", {  
-            orders, 
-            search: searchQuery, 
-            page, 
-            limit, 
-            totalOrders,  
-            totalPages: Math.ceil(totalOrders / limit)  
-        }); 
+     
+        if (req.xhr || req.headers.accept.indexOf("json") > -1) {
+            res.render("admin/orderDetails", {
+                orders,
+                search: searchQuery,
+                page,
+                limit,
+                totalOrders,
+                totalPages: Math.ceil(totalOrders / limit)
+            }, (err, html) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ success: false, message: "Error rendering partial content" });
+                }
+                res.send(html);
+            });
+        } else {
+            res.render("admin/orderDetails", {
+                orders,
+                search: searchQuery,
+                page,
+                limit,
+                totalOrders,
+                totalPages: Math.ceil(totalOrders / limit)
+            });
+        }
     } catch (error) {
         console.error("Error fetching orders:", error);
         res.status(500).json({ success: false, message: "Failed to fetch orders" });
     }
 };
+
 
 
 
@@ -170,6 +186,7 @@ const approveReturn = async (req, res) => {
                 item.returnStatus = "Approved";
                 refundAmount += item.product.salePrice * item.quantity;
                 hasReturnedItems = true;
+                item.status='Returned'
 
              
                 await Product.findByIdAndUpdate(item.product._id, {

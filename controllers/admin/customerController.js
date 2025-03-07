@@ -2,12 +2,9 @@ const User =require("../../models/userSchema")
 
 const customerInfo = async (req, res) => {
     try {
-       
         let search = req.query.search || "";
-
-    
         let page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 10;
 
         const userData = await User.find({
             isAdmin: false,
@@ -28,12 +25,15 @@ const customerInfo = async (req, res) => {
             ],
         });
 
+        const totalPages = Math.ceil(count / limit); 
+
         res.render("admin/customerDetails", { 
             data: userData, 
             count, 
             page, 
             limit, 
-            search 
+            search,
+            totalPages 
         });
 
     } catch (error) {
@@ -41,6 +41,7 @@ const customerInfo = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
 
 
 //-----------------------------

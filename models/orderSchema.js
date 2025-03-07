@@ -29,7 +29,7 @@ const orderSchema = new Schema({
         },
         status: {  
             type: String,
-            enum: ['Ordered', 'Cancelled','Return Requested','Partially Returned'],
+            enum: ['Ordered', 'Cancelled','Return Requested','Partially Returned','Returned'],
             default: 'Ordered'
         },
         cancelMessage: { 
@@ -69,7 +69,7 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','Paid','Return Requested','Partially Returned']
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','Paid','Return Requested','Partially Returned','Partially Cancelled']
     },
     cancelMessage: {  
         type: String,
@@ -84,9 +84,12 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
+    couponName:{
+        type:String
+    },
     paymentMethod: {
         type: String,
-        enum: ['cod', 'UPI', 'Card','Razorpay'],
+        enum: ['cod', 'UPI', 'Card','Razorpay','wallet'],
         required: true
     },
     paymentStatus: {
@@ -97,6 +100,9 @@ const orderSchema = new Schema({
     trackingInfo: {
         type: String,
         default: null
+    },
+    invoiceUrl :{
+        type:String
     }
 });
 

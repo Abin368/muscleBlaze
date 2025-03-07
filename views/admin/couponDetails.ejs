@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+    <link rel="stylesheet" href="/couponAdmin.css">
+    <style>
+       /* Hide modal by default */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* Initially hidden */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Show modal when active */
+.modal.active {
+    display: flex; /* Make it visible */
+}
+
+/* Modal content box */
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    text-align: center;
+}
+
+/* Close button */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #555;
+}
+
+.close:hover {
+    color: red;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+        <div class="main-content">
+            <h1>Coupon Management</h1>
+    
+            <!-- Search Bar -->
+            <form action="/admin/coupons" method="GET" class="search-form" id="searchForm">
+                <input type="text" name="search" placeholder="Search coupon..." value="<%= search %>" class="search-input" id="searchInput">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+    
+            <!-- Coupon Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Coupon Name</th>
+                        <th>Discount Type</th>
+                        <th>Discount Value</th>
+                        <th>Minimum Price</th>
+                        <th>Expiry Date</th>
+                        <th>List/Unlist</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="couponTableBody">
+                    <% coupons.forEach((coupon, index) => { %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= coupon.name %></td>
+                            <td><%= coupon.discountType %></td>
+                            <td><%= coupon.discountValue %></td>
+                            <td><%= coupon.minimumPrice %></td>
+                            <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
+    
+                            <td>
+                                <% if (coupon.isList) { %>
+                                    <button class="custom-btn red " >
+                                        <a href="/admin/listCoupon?id=<%= coupon._id %>" class="text-white" style="text-decoration: none;">Unlist</a>
+                                    </button>
+                                <% } else { %>
+                                    <button class="custom-btn green">
+                                        <a href="/admin/unlistCoupon?id=<%= coupon._id %>" class="text-white" style="text-decoration: none;">List</a>
+                                    </button>
+                                <% } %>
+                            </td>
+    
+                            <td>
+                                <button style="color: black;" class="action-btn orange edit-btn" 
+        data-id="<%= coupon._id %>" 
+        data-name="<%= coupon.name %>" 
+        data-discounttype="<%= coupon.discountType %>"
+        data-discountvalue="<%= coupon.discountValue %>"
+        data-minimumprice="<%= coupon.minimumPrice %>"
+        data-expireon="<%= coupon.expireOn.toISOString().split('T')[0] %>">
+    <i class="fas fa-edit"></i> Edit
+</button>
+
+                                
+                                
+                                    <button class="action-btn red" onclick="confirmDelete('<%= coupon._id %>')">
+                                        Delete
+                                    </button>
+                                
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+    
+            <!-- Pagination -->
+            <div class="pagination">
+                <% if (currentPage > 1) { %>
+                    <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
+                <% } %>
+            
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="#" class="page-link <%= i === currentPage ? 'active' : '' %>" data-page="<%= i %>"><%= i %></a>
+                <% } %>
+            
+                <% if (currentPage < totalPages) { %>
+                    <a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
+                <% } %>
+            </div>
+            
+    
+            <!-- Add Coupon Form -->
+            <div class="add-category-form">
+                <h2>Add New Coupon</h2>
+                <div class="messageBox" id="messageBox"></div>
+                <form id="couponForm">
+                    <div class="input-group">
+                        <input type="text" name="name" placeholder="Coupon Name" required />
+                    </div>
+                    <div class="input-group">
+                        <select name="discountType" required>
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" name="discountValue" placeholder="Discount Value" required />
+                    </div>
+                    <div class="input-group">
+                        <input type="number" name="minimumPrice" placeholder="Minimum Order Price" required />
+                    </div>
+                    <div class="input-group">
+                        <input type="date" name="expireOn" required />
+                    </div>
+                    <button type="submit" class="submit-btn">Add Coupon</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="editCouponModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 style="color: black;">Edit Coupon</h2>
+            <form id="editCouponForm">
+                <input type="hidden" id="couponId">
+                
+                <div class="input-group">
+                    <input type="text" id="editName" name="name" required />
+                </div>
+                <div class="input-group">
+                    <select id="editDiscountType" name="discountType" required>
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (₹)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="editDiscountValue" name="discountValue" required />
+                </div>
+                <div class="input-group">
+                    <input type="number" id="editMinimumPrice" name="minimumPrice" required />
+                </div>
+                <div class="input-group">
+                    <input type="date" id="editExpireOn" name="expireOn" required />
+                </div>
+                <button type="submit" class="submit-btn">Update Coupon</button>
+            </form>
+        </div>
+    </div>
+    
+    
+    <script src="/js/coupon.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    
+    
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        fetchCoupons(1);
+    });
+
+    document.body.addEventListener("click", function (e) {
+        if (e.target.classList.contains("page-link")) {
+            e.preventDefault();
+            let page = e.target.getAttribute("data-page");
+            fetchCoupons(page);
+        }
+    });
+
+    function fetchCoupons(page) {
+        let searchInput = document.getElementById("searchInput").value;
+        fetch(`/admin/coupons?page=${page}&search=${encodeURIComponent(searchInput)}`, {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let tableBody = document.getElementById("couponTableBody");
+            let paginationContainer = document.querySelector(".pagination");
+
+          
+            let couponHtml = data.coupons.map((coupon, index) => `
+                <tr>
+                    <td>${(data.currentPage - 1) * 5 + index + 1}</td>
+                    <td>${coupon.name}</td>
+                    <td>${coupon.discountType}</td>
+                    <td>${coupon.discountValue}</td>
+                    <td>${coupon.minimumPrice}</td>
+                    <td>${new Date(coupon.expireOn).toLocaleDateString()}</td>
+                    <td>
+                        ${coupon.isList 
+                            ? `<button class="custom-btn red"><a href="/admin/listCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">Unlist</a></button>`
+                            : `<button class="custom-btn green"><a href="/admin/unlistCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">List</a></button>`}
+                    </td>
+                    <td>
+                        <button style="color: black;" class="action-btn orange edit-btn" 
+                            data-id="${coupon._id}" 
+                            data-name="${coupon.name}" 
+                            data-discounttype="${coupon.discountType}"
+                            data-discountvalue="${coupon.discountValue}"
+                            data-minimumprice="${coupon.minimumPrice}"
+                            data-expireon="${new Date(coupon.expireOn).toISOString().split('T')[0]}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn red" onclick="confirmDelete('${coupon._id}')">Delete</button>
+                    </td>
+                </tr>
+            `).join("");
+
+            tableBody.innerHTML = couponHtml;
+
+          
+            let paginationHtml = "";
+            if (data.currentPage > 1) {
+                paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage - 1}">Previous</a>`;
+            }
+            for (let i = 1; i <= data.totalPages; i++) {
+                paginationHtml += `<a href="#" class="page-link ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</a>`;
+            }
+            if (data.currentPage < data.totalPages) {
+                paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage + 1}">Next</a>`;
+            }
+
+            paginationContainer.innerHTML = paginationHtml;
+        })
+        .catch(error => console.error("Error fetching coupons:", error));
+    }
+});
+
+
+
+
+
+//----------------------------------------------------------------
+        document.getElementById("couponForm").addEventListener("submit", async function (event) {
+    event.preventDefault(); 
+
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch("/admin/addCoupon", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        showMessage(result.message, result.success);
+
+        if (result.success) {
+            addCouponToTable(result.coupon);
+            this.reset(); 
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        showMessage("Something went wrong!", false);
+    }
+});
+
+
+function showMessage(message, isSuccess) {
+    const messageBox = document.getElementById("messageBox");
+    messageBox.innerHTML = message;
+    messageBox.style.display = "block";
+    messageBox.className = isSuccess ? "messageBox success-message" : "messageBox error-message";
+
+    setTimeout(() => {
+        messageBox.style.display = "none";
+    }, 3000);
+}
+
+
+function addCouponToTable(coupon) {
+    const tableBody = document.getElementById("couponTableBody");
+    const newRow = document.createElement("tr");
+
+    newRow.innerHTML = `
+        <td>${tableBody.rows.length + 1}</td>
+        <td>${coupon.name}</td>
+        <td>${coupon.discountType}</td>
+        <td>${coupon.discountValue}</td>
+        <td>${coupon.minimumPrice}</td>
+        <td>${new Date(coupon.expireOn).toLocaleDateString()}</td>
+        <td>
+            <button class="custom-btn red">
+                <a href="/admin/listCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">Unlist</a>
+            </button>
+        </td>
+        <td>
+            <button class="action-btn orange">
+                <a href="/admin/editCoupon/${coupon._id}" class="text-white" style="text-decoration: none;">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </button>
+            <button class="action-btn red">
+                <a href="/admin/deleteCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">Delete</a>
+            </button>
+        </td>
+    `;
+
+    tableBody.appendChild(newRow);
+}
+//------------------------------------------------
+function confirmDelete(couponId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/deleteCoupon?id=${couponId}`;
+            }
+        });
+    }
+
+//--------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+    const editButtons = document.querySelectorAll(".edit-btn");
+    const modal = document.getElementById("editCouponModal");
+    const closeModal = document.querySelector(".close");
+    const editForm = document.getElementById("editCouponForm");
+
+    editButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            document.getElementById("couponId").value = button.getAttribute("data-id");
+            document.getElementById("editName").value = button.getAttribute("data-name");
+            document.getElementById("editDiscountType").value = button.getAttribute("data-discounttype");
+            document.getElementById("editDiscountValue").value = button.getAttribute("data-discountvalue");
+            document.getElementById("editMinimumPrice").value = button.getAttribute("data-minimumprice");
+            document.getElementById("editExpireOn").value = button.getAttribute("data-expireon");
+
+            modal.classList.add("active");
+        });
+    });
+
+    closeModal.addEventListener("click", () => {
+        modal.classList.remove("active");
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.classList.remove("active");
+        }
+    });
+
+    editForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const couponId = document.getElementById("couponId").value;
+
+    
+        const formData = {
+            name: document.getElementById("editName").value,
+            discountType: document.getElementById("editDiscountType").value,
+            discountValue: document.getElementById("editDiscountValue").value,
+            minimumPrice: document.getElementById("editMinimumPrice").value,
+            expireOn: document.getElementById("editExpireOn").value,
+        };
+
+        console.log("Form Data Being Sent:", formData); 
+
+        fetch(`/admin/editCoupon/${couponId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Success", "Coupon updated successfully!", "success").then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire("Error", data.message || "Error updating coupon!", "error");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+//--------------------------------------
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>

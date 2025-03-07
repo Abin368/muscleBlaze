@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Category Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+    <link rel="stylesheet" href="/categoryDetails.css">
+    <style>
+        .view-transactions-link {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #28a745, #28a745);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.view-transactions-link:hover {
+    background: linear-gradient(135deg, #218838, #218838);
+    transform: translateY(-1px);
+}
+
+.view-transactions-link i {
+    margin-right: 6px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+            <div class="main-content">
+                <h1>Wallet Management</h1>
+
+                <form action="/admin/wallet" method="GET" class="search-form" id="searchForm">
+                    <input type="text" name="search" placeholder="Search by user..." value="<%= search || '' %>"
+                        class="search-input" id="searchInput">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+
+                <div class="wallet-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% wallets.forEach(wallet => { %>
+                                <tr>
+                                    <td><%= wallet.userId.name %></td>
+                                    <td><%= wallet.userId.email %></td>
+                                    <td>₹<%= wallet.balance.toFixed(2) %></td>
+                                    <td>
+                                        <a href="/admin/wallet/<%= wallet.userId._id %>" class="view-transactions-link">
+                                            <i class="fas fa-wallet"></i> View Transactions
+                                        </a>
+                                    </td>
+                                    
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                
+
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <% if (currentPage> 1) { %>
+                        <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
+                        <% } %>
+
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <a href="#" class="page-link <%= i === currentPage ? 'active' : '' %>"
+                                    data-page="<%= i %>">
+                                    <%= i %>
+                                </a>
+                                <% } %>
+
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
+                                        <% } %>
+                </div>
+
+            </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    function fetchWallets(page = 1, search = "") {
+        fetch(`/admin/wallet?page=${page}&search=${encodeURIComponent(search)}`)
+            .then(response => response.text())
+            .then(data => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(data, "text/html");
+
+               
+                document.querySelector(".wallet-container").innerHTML =
+                    doc.querySelector(".wallet-container").innerHTML;
+                document.querySelector(".pagination").innerHTML =
+                    doc.querySelector(".pagination").innerHTML;
+            })
+            .catch(error => console.error("Error fetching wallets:", error));
+    }
+
+   
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        e.preventDefault(); 
+        let search = document.getElementById("searchInput").value;
+        fetchWallets(1, search); 
+    });
+
+    
+    document.body.addEventListener("click", function (e) {
+        if (e.target.classList.contains("page-link")) {
+            e.preventDefault();
+            let page = e.target.getAttribute("data-page");
+            let search = document.getElementById("searchInput").value;
+            fetchWallets(page, search);
+        }
+    });
+});
+
+    </script>
+
+
+</body>
+
+</html>

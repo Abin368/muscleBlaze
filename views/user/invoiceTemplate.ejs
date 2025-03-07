@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .invoice-container { max-width: 800px; margin: auto; border: 1px solid #ddd; padding: 20px; }
+        h2 { text-align: center; color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .total { font-weight: bold; text-align: right; }
+        .print-btn { display: block; margin: 20px auto; padding: 10px 20px; background: blue; color: white; border: none; cursor: pointer; }
+        
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.logo .m {
+  color: black;
+}
+
+.logo .b {
+  color: #FBBC04;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="invoice-container">
+    <div class="logo">
+        <span class="m">M</span><span class="b">B</span>
+      </div>
+    <h2>INVOICE</h2>
+    <p><strong>Order ID:</strong> <%= order.orderId %></p>
+    <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+    <p><strong>Customer:</strong> <%= order.userId.name %></p>
+    <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+    <p><strong>Address:</strong> <%= address ? `${address.name}, ${address.landmark}, ${address.city}, ${address.district}, ${address.state} - ${address.pincode} | Phone: ${address.phone}` : "Address not available" %></p>
+    <p><strong>Status:</strong> <%= order.status%></p>
+
+    <h3>Order Details</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% order.orderItems.forEach(item => { %>
+                <tr>
+                    <td><%= item.product.productName%></td>
+                    <td><%= item.quantity %></td>
+                    <td><%= item.status %></td>
+                    <td>₹<%= item.price %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <h3>Order Summary</h3>
+        <table>
+            <tr>
+                <td><strong>Total Amount:</strong></td>
+                <td>₹<%= order.totalPrice %></td>
+            </tr>
+            <tr>
+                <td><strong>Discount:</strong></td>
+                <td>₹<%= order.discount %></td>
+            </tr>
+            <tr>
+                <td><strong>Coupon Applied:</strong></td>
+                <td><%= order.couponApplied ? "Yes" : "No" %></td>
+            </tr>
+            <tr>
+                <td><strong>Final Amount:</strong></td>
+                <td><strong>₹<%= order.finalAmount %></strong></td>
+            </tr>
+        </table>
+
+    <button class="print-btn" onclick="window.print()">Print Invoice</button>
+</div>
+
+</body>
+</html>

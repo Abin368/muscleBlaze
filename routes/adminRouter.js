@@ -8,6 +8,8 @@ const  categoryController=require('../controllers/admin/categoryController')
 const  productController=require('../controllers/admin/productController');
 const bannerController=require('../controllers/admin/bannerController')
 const orderController=require('../controllers/admin/orderController')
+const couponController=require('../controllers/admin/couponController')
+const WalletController=require('../controllers/admin/walletController')
 const multer = require('multer');  
 const { storage, fileFilter } = require('../helpers/multer');  
 const upload = multer({ storage, fileFilter });  
@@ -31,6 +33,8 @@ router.get('/admin/unlistCategory',adminAuth,categoryController.getUnlistCategor
 router.get('/admin/editCategory/:id', adminAuth, categoryController.getEditCategory);
 router.post('/admin/updateCategory', adminAuth, categoryController.updateCategory);
 router.get('/admin/deleteCategory',adminAuth,categoryController.deleteCategory)
+router.post('/admin/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
+router.post('/admin/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
 
 //product management
 router.get('/admin/addproducts',adminAuth,productController.getProductAddPage)
@@ -72,5 +76,17 @@ router.post('/admin/updateOrderStatus/:orderId', adminAuth, orderController.upda
 router.post("/admin/approve-return", adminAuth, orderController.approveReturn);
 
 
+//coupon management
+router.get('/admin/coupons',adminAuth, couponController.getAllCoupons);
+router.post('/admin/addCoupon',adminAuth, couponController.addCoupon)
+router.get('/admin/deleteCoupon',adminAuth, couponController.deleteCoupon);
+router.post('/admin/editCoupon/:couponId', adminAuth, couponController.editCoupon);
+router.get('/admin/listCoupon',adminAuth, couponController.getListCoupon)
+router.get('/admin/unlistCoupon',adminAuth,couponController.getUnlistCoupon)
+
+
+//wallet management
+router.get("/admin/wallet", adminAuth,WalletController.getWallets);
+router.get("/admin/wallet/:userId", adminAuth,WalletController.getWalletTransaction);
 
 module.exports=router

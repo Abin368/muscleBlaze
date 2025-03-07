@@ -19,13 +19,14 @@
         <div class="main-content">
             <h1>User Management</h1>
             
-            <!-- Search Bar -->
+          
             <div class="search-bar">
-                <form action="/admin/orders" method="GET" id="searchForm">
-                    <input type="text" name="search" placeholder="Search orders..." value="<%= search %>" id="searchInput">
+                <form id="searchForm">
+                    <input type="text" id="searchInput" name="search" placeholder="Search orders..." value="<%= search %>">
                     <button type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
+            
             
 
          
@@ -82,25 +83,64 @@
             
 
             
-<div class="pagination">
-    <% if (page > 1) { %>
-        <a href="?page=<%= page - 1 %>&search=<%= search %>">Previous</a>
-    <% } %>
-
-    <% for (let i = 1; i <= Math.ceil(totalOrders / limit); i++) { %>  
-        <a href="?page=<%= i %>&search=<%= search %>" 
-           class="<%= i === page ? 'active' : '' %>">
-           <%= i %>
-        </a>
-    <% } %>
-
-    <% if (page < totalPages) { %>
-        <a href="?page=<%= page + 1 %>&search=<%= search %>">Next</a>
-    <% } %>
-</div>
+            <div class="pagination">
+                <% if (page > 1) { %>
+                    <a href="#" class="page-link" data-page="<%= page - 1 %>">Previous</a>
+                <% } %>
+            
+                <% for (let i = 1; i <= totalPages; i++) { %>  
+                    <a href="#" class="page-link <%= i === page ? 'active' : '' %>" data-page="<%= i %>">
+                        <%= i %>
+                    </a>
+                <% } %>
+            
+                <% if (page < totalPages) { %>
+                    <a href="#" class="page-link" data-page="<%= page + 1 %>">Next</a>
+                <% } %>
+            </div>
+            
+            
 
             
         </div>
     </div>
 </body>
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+   
+    searchForm.addEventListener("submit", function (event) {
+        event.preventDefault(); 
+        fetchOrders(1); 
+    });
+
+  
+    document.body.addEventListener("click", function (event) {
+        if (event.target.classList.contains("page-link")) {
+            event.preventDefault();
+            let page = event.target.getAttribute("data-page");
+            fetchOrders(page);
+        }
+    });
+
+    function fetchOrders(page) {
+        let searchQuery = searchInput.value;
+        
+        fetch(`/admin/orders?page=${page}&search=${encodeURIComponent(searchQuery)}`)
+            .then(response => response.text())
+            .then(data => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(data, "text/html");
+
+                document.querySelector("tbody").innerHTML = doc.querySelector("tbody").innerHTML;
+                document.querySelector(".pagination").innerHTML = doc.querySelector(".pagination").innerHTML;
+            })
+            .catch(error => console.error("Error fetching orders:", error));
+    }
+});
+
+</script>
+
 </html>

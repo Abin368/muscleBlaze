@@ -38,6 +38,10 @@ app.use(session({
     }
 }));
 
+//--------------------------------------
+
+//--------------------------------------
+
 app.use(bannerMiddleware.loadBanners)
 
 
@@ -64,7 +68,7 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
-    res.locals.admin = req.session.admin || null; // Add admin session to locals
+    res.locals.admin = req.session.admin || null; 
     next();
 });
 

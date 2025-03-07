@@ -161,6 +161,146 @@
     }
 }
 
+
+
+
+/* Modal Wrapper */
+.cancel-modal-wrapper {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position to cover the entire screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+    z-index: 9999; /* Ensure modal is on top of other content */
+    justify-content: center; /* Center the modal content horizontally */
+    align-items: center; /* Center the modal content vertically */
+    overflow: auto;
+    animation: cancelSlideIn 0.5s ease-out;
+}
+
+/* Modal Box (Main Modal Container) */
+.cancel-modal-box {
+    background-color: #fff; /* White background */
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 550px;
+    width: 90%; /* Ensure it doesn't overflow on small screens */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Close Button */
+.cancel-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+}
+
+.cancel-modal-close:hover {
+    color: #333;
+}
+
+/* Modal Title */
+.cancel-modal-title {
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Order Item List */
+.cancel-order-items-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.cancel-order-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.cancel-order-item input {
+    margin-right: 10px;
+}
+
+/* Cancel Reason Textarea */
+
+
+
+.swal2-container {
+    z-index: 99999 !important; /* Make sure it has a higher z-index */
+} 
+.cancel-button:hover {
+    background-color: #e25a4e;
+}
+
+.cancel-confirm-cancel-button {
+    background-color: #1d87e8; /* Soft blue */
+    color: #fff;
+    border: none;
+}
+
+.cancel-confirm-cancel-button:hover {
+    background-color: #1c76c2;
+}
+
+/* Animation for Modal Appearance */
+@keyframes cancelSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+    }
+
+.pagination a {
+    text-decoration: none;
+    background-color: #ffcc00;
+    color: black;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+    font-size: 14px;
+}
+
+.pagination a:hover {
+    background-color: #e67e22;
+}
+
+.pagination span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.pagination .prev,
+.pagination .next {
+    font-weight: bold;
+}
+
     </style>
 </head>
 
@@ -215,12 +355,36 @@
                                         </p>
 
                                         <div class="order-actions">
+
                                             <a href="/order/details/<%= order._id %>" class="btn">View Details</a>
-                                            <% if (order.status !='Cancelled' && order.status!='Delivered' && order.status!='Returned'&& order.status!='Return Requested' &&order.status!='Partially Returned'  ) { %>
+
+                                            <!-- <% if (order.status !='Cancelled' && order.status!='Delivered' && order.status!='Returned'&& order.status!='Return Requested' &&order.status!='Partially Returned'  ) { %>
                                                 <button class="btn cancel"
                                                     onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                                                <% } %> -->
+
+                                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Return Requested' && order.status !== 'Partially Returned') { %>
+                                                    <button class="btn cancel-button"
+                                                        data-order-id="<%= order._id %>"
+                                                        data-order-items="<%- encodeURIComponent(JSON.stringify(order.orderItems)) %>"
+                                                        onclick="openCancelModal(this)">Cancel Items</button>
                                                 <% } %>
-                                                    <% if (order.status=='Delivered' ) { %>
+                                                
+                                                <!-- Cancel Modal -->
+                                                <div id="cancelOrderModal" class="cancel-modal-wrapper">
+                                                    <div class="cancel-modal-box">
+                                                        <span class="cancel-modal-close" onclick="closeCancelModal()">&times;</span>
+                                                        <h2 class="cancel-modal-title">Cancel Order Items</h2>
+                                                        <div id="cancelOrderItems" class="cancel-order-items-list"></div>
+                                                        <textarea id="cancelReason" class="cancel-reason" placeholder="Enter the reason for cancellation"></textarea>
+                                                        <button class="btn cancel-confirm-cancel-button" onclick="submitCancelRequest()">Submit</button>
+                                                    </div>
+                                                </div>
+                                                
+                                                
+                                                
+
+                                                    <% if (order.status=='Delivered' || order.status=='Partially Returned' ) { %>
                                                         <button class="btn cancel" data-order-id="<%= order._id %>"
                                                             data-order-items='<%= JSON.stringify(order.orderItems) %>'
                                                             onclick="returnOrder(this)">
@@ -261,6 +425,22 @@
                 </form>
             </div>
         </div>
+
+
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
+            <% } %>
+        
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="#" class="page-link <%= i === currentPage ? 'active' : '' %>" data-page="<%= i %>"><%= i %></a>
+            <% } %>
+        
+            <% if (currentPage < totalPages) { %>
+                <a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
+            <% } %>
+        </div>
+        
         
 
 
@@ -270,56 +450,163 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function cancelOrder(orderId) {
-        console.log("Cancel button clicked for order:", orderId);
 
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you really want to cancel this order?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, Cancel It!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/order/cancel/${orderId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" }
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".page-link").forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault(); 
+
+            let page = this.getAttribute("data-page");
+
+            fetch(`/orders?page=${page}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.querySelector(".orders-container").innerHTML = 
+                        new DOMParser().parseFromString(data, "text/html")
+                        .querySelector(".orders-container").innerHTML;
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Cancel Order Response:", data);
-
-                        if (data.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Cancelled!",
-                                text: "Your order has been cancelled successfully.",
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
-
-
-
-                            const orderElement = document.querySelector(`[data-order-id="${orderId}"]`);
-                            if (orderElement) {
-                                orderElement.querySelector(".status").innerText = "Cancelled";
-                                const cancelButton = orderElement.querySelector(".cancel");
-                                if (cancelButton) cancelButton.style.display = "none";
-                            }
-                            location.reload();
-                        } else {
-                            Swal.fire("Error", data.message, "error");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error cancelling order:", error);
-                        Swal.fire("Error", "Something went wrong!", "error");
-                    });
-            }
+                .catch(error => console.error("Error fetching orders:", error));
         });
+    });
+});
+
+
+
+//------------------------------------------------
+  function openCancelModal(button) {
+    const orderId = button.getAttribute("data-order-id");
+    const orderItemsData = decodeURIComponent(button.getAttribute("data-order-items")); 
+
+    console.log("Order ID:", orderId);
+    console.log("Raw Order Items Data:", orderItemsData);
+
+    let orderItems;
+    try {
+        orderItems = JSON.parse(orderItemsData);
+        console.log("Parsed Order Items:", orderItems);
+    } catch (error) {
+        console.error("JSON Parse Error:", error);
+        return;
     }
+
+    const modal = document.getElementById("cancelOrderModal");
+    const cancelOrderItems = document.getElementById("cancelOrderItems");
+
+    if (!modal || !cancelOrderItems) {
+        console.error("Modal or cancelOrderItems container not found!");
+        return;
+    }
+
+    cancelOrderItems.innerHTML = "";
+
+
+    orderItems
+    .filter(item => item.status !== "Cancelled") 
+    .forEach(item => {
+        cancelOrderItems.innerHTML += `
+            <div class="cancel-item">
+                <input type="checkbox" class="cancel-checkbox" name="cancelItems" value="${item.product._id}">
+                <span class="cancel-item-text">${item.product.productName} - ₹${item.product.salePrice} (Qty: ${item.quantity})</span>
+            </div>
+        `;
+    });
+
+    modal.setAttribute("data-order-id", orderId);
+
+    modal.style.display = "flex";
+}
+
+function closeCancelModal() {
+    const modal = document.getElementById("cancelOrderModal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function (event) {
+    const modal = document.getElementById("cancelOrderModal");
+    if (event.target === modal) {
+        closeCancelModal();
+    }
+};
+
+function submitCancelRequest() {
+    const selectedProducts = [...document.querySelectorAll('input[name="cancelItems"]:checked')]
+        .map(input => input.value);
+
+    const cancelReason = document.getElementById("cancelReason").value.trim();
+
+    if (selectedProducts.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "No Items Selected",
+            text: "Please select at least one product to cancel.",
+        });
+        return;
+    }
+
+    if (!cancelReason) {
+        Swal.fire({
+            icon: "warning",
+            title: "Cancellation Reason Required",
+            text: "Please provide a reason for cancellation.",
+        });
+        return;
+    }
+
+    const orderId = document.getElementById("cancelOrderModal").getAttribute("data-order-id");
+
+    Swal.fire({
+        title: "Confirm Cancellation?",
+        text: "Are you sure you want to cancel the selected items?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Cancel",
+        cancelButtonText: "No",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("/order/cancel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    orderId: orderId,
+                    cancelItems: selectedProducts,
+                    cancelReason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Cancelled",
+                        text: "Your selected items have been cancelled successfully.",
+                    }).then(() => {
+                        closeCancelModal();
+                        location.reload(); 
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Cancellation Failed",
+                        text: data.message,
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error cancelling items:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong. Please try again.",
+                });
+            });
+        }
+    });
+}
+
+
     //----------------------------------------------------
     function returnOrder(button) {
     const orderId = button.getAttribute("data-order-id");
@@ -333,20 +620,23 @@
         return;
     }
 
-    // Clear previous items
+   
     returnOrderItems.innerHTML = "";
 
-    // Add items dynamically
-    orderItems.forEach(item => {
+   
+  orderItems.forEach(item => {
+    if (item.status !== "Returned" || item.status=='Cancelled') {  
         returnOrderItems.innerHTML += `
             <div class="return-item">
                 <input type="checkbox" class="return-checkbox" name="returnItems" value="${item.product._id}">
                 <span class="return-item-text">${item.product.productName} - ₹${item.product.salePrice} (Qty: ${item.quantity})</span>
             </div>
         `;
-    });
+    }
+});
 
-    // Handle form submission
+
+   
     document.getElementById("returnOrderForm").onsubmit = function (event) {
         event.preventDefault();
 
@@ -391,7 +681,7 @@
                             title: "Return Requested",
                             text: "Your return request has been submitted successfully.",
                         }).then(() => {
-                            closeReturnModal(); // Close modal after success
+                            closeReturnModal();
                             location.reload();
                         });
                     } else {

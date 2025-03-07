@@ -18,7 +18,7 @@
 
     
     <div class="payment-container">
-        <div class="order-summary">
+        <!-- <div class="order-summary">
             <h2>Order Summary</h>
                 <ul>
                     <% checkoutData.cartItems.forEach(item => { %>
@@ -32,8 +32,47 @@
                     <% }); %>
                 </ul>
             <h3>Total: ₹<%= checkoutData.grandTotal %></h3>
+        </div> -->
+        
+
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <% if (checkoutData && checkoutData.cartItems && checkoutData.cartItems.length > 0) { %>
+                <ul>
+                    <% checkoutData.cartItems.forEach(item => { %>
+                        <li class="cart-item">
+                            <div class="item-info">
+                                <strong class="product-name"><%= item.product.productName %></strong>
+                                <span class="quantity">Qty: <%= item.quantity %></span>
+                            </div>
+                            <span class="price">₹<%= item.totalPrice.toFixed(2) %></span>
+                        </li>
+                    <% }); %>
+                </ul>
+                
+                <p><strong>Original Total:</strong> ₹<span id="originalTotal"><%= checkoutData.originalTotal.toFixed(2) %></span></p>
+        
+                <% if (checkoutData.discount && checkoutData.discount > 0) { %>
+                    <p id="couponApplied"><strong>Coupon Applied:</strong> <%= checkoutData.couponCode %></p>
+                    <p><strong>Discount:</strong> - ₹<span id="discountAmount"><%= checkoutData.discount.toFixed(2) %></span></p>
+                <% } else { %>
+                    <p id="couponApplied"><strong>Coupon Applied:</strong> None</p>
+                    <p><strong>Discount:</strong> - ₹<span id="discountAmount">0.00</span></p>
+                <% } %>
+        
+                <h3>Final Payable Amount: ₹<%= checkoutData.grandTotal.toFixed(2) %></h3>
+            <% } else { %>
+                <p>No items in cart.</p>
+            <% } %>
         </div>
         
+
+
+
+
+
+
+
         <div class="payment-options">
             <h2>Choose Payment Method</h2>
             
@@ -54,13 +93,15 @@
             data-cart-items='<%= JSON.stringify(checkoutData.cartItems) %>'
             data-grand-total="<%= checkoutData.grandTotal %>"
             data-quantity="<%= checkoutData.cartItems.reduce((sum, item) => sum + item.quantity, 0) %>"
+            data-coupon-code="<%= checkoutData.couponCode || '' %>"
+
        ></div>
        
 
             <div class="payment-methods">
                 <button class="payment-btn" onclick="selectPayment('razorpay')">Pay Using UPI</button>
                 <button class="payment-btn" onclick="selectPayment('cod')">Cash on Delivery</button>
-                <button class="payment-btn" onclick="selectPayment('card')">Debit/Credit Card</button>
+                <button class="payment-btn" onclick="selectPayment('wallet')">Wallet</button>
             </div>
             
             <div id="cod-section" style="display: none;">
@@ -69,6 +110,10 @@
             
             <div id="razorpay-section" style="display: none;">
                 <button class="pay-btn" onclick="confirmPayment()">Proceed with Razorpay</button>
+            </div>
+
+            <div id="wallet-section" style="display: none;">
+                <button class="pay-btn" onclick="confirmPayment()">Confirm Payment with Wallet</button>
             </div>
             
         </div>
@@ -85,6 +130,7 @@ function selectPayment(method) {
     paymentMethod = method;
     document.getElementById('cod-section').style.display = method === 'cod' ? 'block' : 'none';
     document.getElementById('razorpay-section').style.display = method === 'razorpay' ? 'block' : 'none';
+    document.getElementById('wallet-section').style.display = method === 'wallet' ? 'block' : 'none';
 }
 
 async function confirmPayment() {
@@ -122,7 +168,8 @@ async function confirmPayment() {
             cartItems: parsedCartItems,
             grandTotal: parseFloat(checkoutDataElement.getAttribute('data-grand-total')) || 0,
             quantity: parseInt(checkoutDataElement.getAttribute('data-quantity')) || 1,
-            paymentMethod: paymentMethod
+            paymentMethod: paymentMethod,
+            couponCode: checkoutDataElement.getAttribute('data-coupon-code') || null
         };
 
         console.log('Checkout Data:', checkoutData);
@@ -271,6 +318,54 @@ async function confirmPayment() {
                 });
             });
         }
+//---------------------------
+        else if (paymentMethod === "wallet") {
+            fetch('/payment/wallet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(checkoutData)
+})
+    .then(response => response.json())
+    .then(data => {
+        Swal.close();
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Payment Successful!',
+                text: 'Redirecting to order summary...',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            setTimeout(() => {
+                window.location.href = `/order-summary/${data.orderId}`;
+            }, 2000);
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Failed',
+                text: data.error || 'Insufficient wallet balance!',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Try Another Payment Method'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.close();
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'There was an issue with your order. Please check your connection and try again.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+        });
+    });
+}
+
+
+//---------------------------------------
+
+
     } catch (error) {
         console.error("Processing Error:", error);
         Swal.close();
@@ -284,6 +379,7 @@ async function confirmPayment() {
     }
 }
 
+//-------------------------------------------------------------------
 
 
 </script>

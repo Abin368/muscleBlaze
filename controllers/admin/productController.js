@@ -33,7 +33,7 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Validate that price, quantity, and size are not negative
+       
         if (product.regularPrice < 0 || product.salePrice < 0 || product.quantity < 0 || product.size < 0) {
             return res.render("admin/addProduct", {
                 categories: await Category.find({ isDeleted: false }),
@@ -42,7 +42,7 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Ensure sale price is less than regular price
+       
         if (product.salePrice >= product.regularPrice) {
             return res.render("admin/addProduct", {
                 categories: await Category.find({ isDeleted: false }),
@@ -61,7 +61,7 @@ const addProducts = async (req, res) => {
         }
         
 
-        // Check if product already exists
+       
         const productExists = await Product.findOne({ productName: product.productName });
         if (productExists) {
             return res.render("admin/addProduct", { 
@@ -71,7 +71,7 @@ const addProducts = async (req, res) => {
             });
         }
 
-        // Find category ID
+      
         const categoryId = await Category.findOne({ _id: product.category });
         if (!categoryId) {
             return res.render("admin/addProduct", { 
@@ -152,14 +152,14 @@ const getAllProducts = async (req, res) => {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = 5;
 
-        
+       
         const matchingCategories = await Category.find({
             name: { $regex: new RegExp(".*" + search + ".*", "i") }
         }).select('_id');
 
         const categoryIds = matchingCategories.map(cat => cat._id);
 
-        
+      
         const productData = await Product.find({
             isDeleted: false,  
             $or: [
@@ -181,13 +181,14 @@ const getAllProducts = async (req, res) => {
             ],
         });
 
+        const totalPages = Math.ceil(count / limit);
         const category = await Category.find({ isListed: true });
 
         if (category) {
             res.render("admin/productDetails", {
                 data: productData,
                 currentPage: page,
-                totalPages: Math.ceil(count / limit),
+                totalPages,
                 cat: category,
                 search 
             });
@@ -214,18 +215,26 @@ const addProductOffer = async (req, res) => {
         }
 
         const findCategory = await Category.findOne({ _id: findProduct.category });
-        if (findCategory.categoryOffer > percentage) {
-            return res.json({ status: false, message: "This Product category already has a category offer" });
-        }
 
-        findProduct.salePrice = findProduct.salePrice - Math.floor(findProduct.regularPrice * (percentage / 100));
+       
+        const productDiscount = Math.floor(findProduct.regularPrice * (percentage / 100));
+
+        
+        const categoryDiscount = findCategory.categoryOffer 
+            ? Math.floor(findProduct.regularPrice * (findCategory.categoryOffer / 100)) 
+            : 0;
+
+       
+        const highestDiscount = Math.max(productDiscount, categoryDiscount);
+
+        
+        findProduct.salePrice = findProduct.regularPrice - highestDiscount;
         findProduct.productOffer = parseInt(percentage);
+        findProduct.highestOffer = (highestDiscount === productDiscount) ? percentage : findCategory.categoryOffer;
+
         await findProduct.save();
 
-        findCategory.categoryOffer = 0;
-        await findCategory.save();
-
-        res.json({ status: true });
+        res.json({ status: true, message: "Product offer applied successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ status: false, message: "Internal server error" });
@@ -245,12 +254,23 @@ const removeProductOffer = async (req, res) => {
             return res.status(404).json({ status: false, message: "Product not found" });
         }
 
-        const percentage = findProduct.productOffer;
-        findProduct.salePrice = findProduct.salePrice + Math.floor(findProduct.regularPrice * (percentage / 100));
+        const findCategory = await Category.findOne({ _id: findProduct.category });
+
+        
         findProduct.productOffer = 0;
+
+        
+        const categoryDiscount = findCategory?.categoryOffer
+            ? Math.floor(findProduct.regularPrice * (findCategory.categoryOffer / 100))
+            : 0;
+
+       
+        findProduct.salePrice = findProduct.regularPrice - categoryDiscount;
+        findProduct.highestOffer = findCategory?.categoryOffer || 0; 
+
         await findProduct.save();
 
-        res.json({ status: true });
+        res.json({ status: true, message: "Product offer removed successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ status: false, message: "Internal server error" });

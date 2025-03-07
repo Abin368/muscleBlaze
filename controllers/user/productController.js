@@ -20,7 +20,9 @@ const productDetails = async (req, res) => {
 
         const findCategory = product.category || null;
         const productOffer = product.productOffer || 0;
-        const totalOffer = productOffer;
+        const categoryOffer=findCategory ? findCategory.categoryOffer || 0 :0;
+        const highestOffer = Math.max(productOffer, categoryOffer);
+       
         const quantity = product.quantity || 0; 
 
       
@@ -33,7 +35,7 @@ const productDetails = async (req, res) => {
             user: userData,
             product,
             quantity,
-            totalOffer,
+            highestOffer, 
             category: findCategory,
             relatedProducts  
         });

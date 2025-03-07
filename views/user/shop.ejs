@@ -95,13 +95,22 @@
                         <div class="product-name"><%= product[i].productName %></div>
                         <div class="product-details">Size: <%= product[i].size ? product[i].size + ' kg' : 'N/A' %></div>
                         <div class="product-details">Flavor: <%= product[i].flavor || 'N/A' %></div>
-                        <div class="product-details">
+                        <!-- <div class="product-details">
                             Price: ₹<%= product[i].salePrice ? product[i].salePrice.toFixed(2) : '0.00' %> 
                             <% if (product[i].productOffer && product[i].productOffer > 0) { %>
                                 <span class="offer-text">(<%= product[i].productOffer %>% off)</span>
                             <% } %>
+                        </div> -->
+                        
+                        <div class="product-details">
+                            Price: ₹<%= product[i].salePrice ? product[i].salePrice.toFixed(2) : '0.00' %> 
+                            <% if (product[i].highestOffer > 0) { %>
+                                <span class="offer-text">(<%= product[i].highestOffer %>% off)</span>
+                            <% } %>
                         </div>
                         
+
+
                         <div class="product-details">
                             <% if (product[i].quantity === 0) { %>
                                 <span style="color: red; font-weight: bold;">Out of stock</span>

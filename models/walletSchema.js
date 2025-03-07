@@ -5,7 +5,7 @@ const walletSchema = new Schema({
     userId:{
     type: Schema.Types.ObjectId,
     ref:'User',
-    require:true,
+    required:true,
     unique:true
     },
     balance:{
@@ -25,7 +25,7 @@ const walletSchema = new Schema({
         },
         reason:{
             type:String,
-            required:true
+           
         },
         orderId:{
             type:Schema.Types.ObjectId,

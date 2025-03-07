@@ -10,6 +10,8 @@ const cartController=require('../controllers/user/cartController')
 const wishlistController=require('../controllers/user/wishlistController')
 const checkoutController=require('../controllers/user/checkoutController')
 const returnController=require('../controllers/user/returnController')
+const walletController=require('../controllers/user/walletController')
+const couponController=require('../controllers/user/couponController')
 
 const { ensureAuthenticated, isLoggedIn, isNotLoggedIn } = require('../middlewares/authMiddleware');
 const {preventCache} = require('../middlewares/cacheControl')
@@ -97,13 +99,21 @@ router.post('/payment/verify', preventCache, checkoutController.verifyRazorpayPa
 
 router.get('/order-summary/:orderId', preventCache, checkoutController.getSummary);
 router.get('/orders',preventCache, checkoutController.getOrders)
-router.post('/order/cancel/:id', preventCache, checkoutController.cancelOrder);
+router.post("/order/cancel", preventCache, checkoutController.cancelOrder);
 router.get("/order/details/:orderId", preventCache, checkoutController.getUserOrderDetails);
 
 //return product
 router.post('/order/return',preventCache, returnController.requestReturn);
+router.get('/invoice/:orderId',preventCache, returnController.generateInvoice);
+// router.get('/invoice/:orderId',preventCache, returnController.getInvoice);
 
+//wallet management
+router.get('/wallet',preventCache, walletController.getWallet);
+router.post('/payment/wallet', preventCache, walletController.processWalletPayment);
 
+//coupon management
+router.get('/coupons',preventCache, couponController.getCoupon);
+router.post('/apply-coupon',preventCache, checkoutController.applyCoupon);
 
 
 

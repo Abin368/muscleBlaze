@@ -71,13 +71,15 @@ const signup = async (req, res) => {
    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already exists. Please use a different email." });
+      return res.status(400).json({ success: false, message: "Email already exists. Please log in or use a different email." });
     }
 
+  
     if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
       return res.status(400).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
     }
 
+    
     const otp = generateOTP();
     try {
       await sendOTPEmail(email, otp);
@@ -86,10 +88,11 @@ const signup = async (req, res) => {
       return res.status(500).json({ success: false, message: "Failed to send OTP, please try again." });
     }
 
+    
     req.session.otpData = { name, email, phone, password, otp, timestamp: Date.now() };
     req.session.otpExpiry = Date.now() + 60000; 
+
     console.log("Generated OTP:", otp);
-    // console.log("Redirecting user to: /otp-verification");  
 
     return res.status(200).json({
       success: true,
@@ -130,46 +133,53 @@ const signup = async (req, res) => {
   };
     //---------------------------------------------------
  
-  const verifySignupOtp = async (req, res) => {
-    try {
-      const { otp } = req.body;
-      const otpData = req.session.otpData;
+    const verifySignupOtp = async (req, res) => {
+      try {
+          const { otp } = req.body;
+          const otpData = req.session.otpData;
   
-      
-      if (!otpData || Date.now() - otpData.timestamp > 1 * 60 * 1000) {
-        return res.json({ success: false, message: "Invalid or expired OTP!" });
+        
+          if (!otpData || Date.now() - otpData.timestamp > 1 * 60 * 1000) {
+              return res.json({ success: false, message: "Invalid or expired OTP!" });
+          }
+  
+        
+          if (otpData.otp !== otp) {
+              return res.json({ success: false, message: "Invalid OTP!" });
+          }
+  
+        
+          const existingUser = await User.findOne({ email: otpData.email });
+          if (existingUser) {
+              return res.status(400).json({ success: false, message: "Email already exists. Please log in." });
+          }
+  
+        
+          const hashedPassword = await bcrypt.hash(otpData.password, 10);
+  
+       
+          const newUser = new User({
+              name: otpData.name,
+              email: otpData.email,
+              phone: otpData.phone,
+              password: hashedPassword,
+          });
+          await newUser.save();
+  
+       
+          const wallet = new Wallet({ userId: newUser._id });
+          await wallet.save();
+  
+       
+          req.session.otpData = null;
+  
+          res.json({ success: true, message: "OTP verified successfully! Redirecting to login..." });
+      } catch (error) {
+          console.error("Error verifying OTP:", error);
+          res.status(500).json({ success: false, message: "Internal Server Error. Please try again!" });
       }
-  
-     
-      if (otpData.otp !== otp) {
-        return res.json({ success: false, message: "Invalid OTP!" });
-      }
-  
-     
-      const hashedPassword = await bcrypt.hash(otpData.password, 10);
-  
-      
-      const newUser = new User({
-        name: otpData.name,
-        email: otpData.email,
-        phone: otpData.phone,
-        password: hashedPassword,
-      });
-      await newUser.save();
-
-      const wallet = new Wallet({ userId: user._id });
-      await wallet.save();
-  
-     
-      req.session.otpData = null;
-  
-      res.json({ success: true, message: "OTP verified successfully! Redirecting to login..." });
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      res.status(500).json({ success: false, message: "Internal Server Error. Please try again!" });
-    }
   };
-
+  
   //---------------------------------------------------
   const login = async (req, res) => {
     try {
@@ -261,6 +271,9 @@ const logout =  async (req,res)=>{
         res.redirect('/pageNotfound')
     }
 }
+//-----------------------------------------
+
+
 
 //---------------------------------------------------
 
@@ -307,7 +320,6 @@ const loadShoppingPage = async (req, res) => {
     const limit = 12;
     const skip = (page - 1) * limit;
 
-   
     let productFilter = {
       isBlocked: false,
       quantity: { $gt: 0 }
@@ -329,19 +341,45 @@ const loadShoppingPage = async (req, res) => {
       productFilter.category = selectedCategory;
     }
 
-   
-    const product = await Product.find(productFilter)
+    // Fetch the products
+    const products = await Product.find(productFilter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+
+   
+    if (!products || products.length === 0) {
+      return res.render('user/shop', {
+        user: user ? await User.findById(user).lean() : null,
+        productt: [], 
+        categories: await Category.find({ isListed: true }).lean(),
+        flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
+        totalProducts: 0,
+        currentPage: page,
+        totalPages: 0,
+        searchQuery,
+        selectedFlavor, 
+        selectedCategory, 
+        selectedPrice 
+      });
+    }
+
+    
+    const productsWithOffers = await Promise.all(products.map(async (product) => {
+      const category = await Category.findById(product.category).lean(); 
+      const productOffer = product.productOffer || 0;
+      const categoryOffer = category ? category.categoryOffer || 0 : 0;
+      const highestOffer = Math.max(productOffer, categoryOffer); 
+      return { ...product, highestOffer }; 
+    }));
 
     const totalProducts = await Product.countDocuments(productFilter);
     const totalPages = Math.ceil(totalProducts / limit);
 
     res.render('user/shop', {
       user: user ? await User.findById(user).lean() : null,
-      product,
+      product: productsWithOffers,
       categories: await Category.find({ isListed: true }).lean(),
       flavors: await Product.distinct("flavor", { isBlocked: false, quantity: { $gt: 0 } }),
       totalProducts,
@@ -358,6 +396,7 @@ const loadShoppingPage = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
 
 //-------------------------------
 const filterProduct = async (req, res) => {

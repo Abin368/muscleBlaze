@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Category Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/sidebar.css">
+    <link rel="stylesheet" href="/customerDetails.css">
+    <link rel="stylesheet" href="/categoryDetails.css">
+    <style>
+.view-order-link {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #28a745, #218838);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.view-order-link:hover {
+    background: linear-gradient(135deg, #218838, #1e7e34);
+    transform: translateY(-1px);
+}
+
+.view-order-link i {
+    margin-right: 6px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.no-order {
+    color: #888;
+    font-style: italic;
+}
+
+        
+        .back-to-wallets {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #2c3e50, #2c3e50);
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+.back-to-wallets:hover {
+    background: linear-gradient(135deg, #2c3e50, #2c3e50);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.back-to-wallets i {
+    margin-right: 10px;
+    font-size: 18px;
+    vertical-align: middle;
+}
+
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <%- include('../../views/partials/admin/sidebar') %>
+        <div class="main-content">
+            <h1>Wallet Management</h1>
+
+             
+
+            <h2>Wallet Transactions for <%= wallet.userId.name %> (<%= wallet.userId.email %>)</h2>
+
+            <form action="/admin/wallet/<%= wallet.userId._id %>/transactions" method="GET" class="search-form" id="searchForm">
+                <input type="text" name="search" placeholder="Search by Transaction ID or Type..." 
+                       value="<%= search || '' %>" class="search-input" id="searchInput">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+        
+            <div class="transactions-container">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Source</th>
+                            <th>Order</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% transactions.forEach(transaction => { %>
+                            <tr>
+                                <td><%= transaction._id %></td>
+                                <td><%= new Date(transaction.createdAt).toDateString() %></td>
+                                <td><%= transaction.type %></td>
+                                <td>₹<%= transaction.amount.toFixed(2) %></td>
+                                <td><%= transaction.reason || "N/A" %></td>
+                                <td>
+                                    <% if (transaction.orderId) { %>
+                                        <a href="/admin/ordersPage/<%= transaction.orderId %>" class="view-order-link">
+                                            <i class="fas fa-receipt"></i> View Order
+                                        </a>
+                                    <% } else { %>
+                                        <span class="no-order">N/A</span>
+                                    <% } %>
+                                </td>
+                                
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        
+            <!-- Pagination -->
+            <div class="pagination">
+                <% if (currentPage> 1) { %>
+                    <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
+                    <% } %>
+
+                        <% for (let i=1; i <=totalPages; i++) { %>
+                            <a href="#" class="page-link <%= i === currentPage ? 'active' : '' %>"
+                                data-page="<%= i %>">
+                                <%= i %>
+                            </a>
+                            <% } %>
+
+                                <% if (currentPage < totalPages) { %>
+                                    <a href="#" class="page-link" data-page="<%= currentPage + 1 %>">Next</a>
+                                    <% } %>
+            </div>
+        
+            <a href="/admin/wallet" class="back-to-wallets">
+                <i class="fas fa-arrow-left"></i> Back to Wallets
+            </a>
+            
+        </div>
+        
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="handleFormSubmit.js"></script>
+   <script>
+   document.addEventListener("DOMContentLoaded", function () {
+    function fetchTransactions(page = 1, search = "") {
+        const userId = "<%= wallet.userId._id %>"; 
+        fetch(`/admin/wallet/${userId}?page=${page}&search=${encodeURIComponent(search)}`)
+            .then(response => response.text())
+            .then(data => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(data, "text/html");
+
+              
+                document.querySelector(".transactions-container").innerHTML = 
+                    doc.querySelector(".transactions-container").innerHTML;
+
+             
+                document.querySelector(".pagination").innerHTML = 
+                    doc.querySelector(".pagination").innerHTML;
+            })
+            .catch(error => console.error("Error fetching transactions:", error));
+    }
+
+   
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        let search = document.getElementById("searchInput").value;
+        fetchTransactions(1, search);
+    });
+
+   
+    document.body.addEventListener("click", function (e) {
+        if (e.target.classList.contains("page-link")) {
+            e.preventDefault();
+            let page = e.target.getAttribute("data-page");
+            let search = document.getElementById("searchInput").value;
+            fetchTransactions(page, search);
+        }
+    });
+});
+
+
+
+    </script>
+    
+</body>
+</html>
