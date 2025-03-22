@@ -252,6 +252,7 @@
   })
   .then((response) => response.json())
   .then((data) => {
+    fetchCartWishlistCount(); 
     if (data.success) {
       Swal.fire({
         icon: "success",
@@ -289,6 +290,7 @@ function addToWishlist(productId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+          fetchCartWishlistCount(); 
             Swal.fire({
                 icon: "success",
                 title: "Added to Wishlist! ❤️",

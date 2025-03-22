@@ -1,5 +1,5 @@
 document.getElementById("productForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault(); 
 
     const formData = new FormData(this);
 
@@ -16,7 +16,7 @@ document.getElementById("productForm").addEventListener("submit", async function
             messageContainer.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
         } else {
             messageContainer.innerHTML = `<div class="alert alert-success">${result.success}</div>`;
-            this.reset(); // Clear form on success
+            this.reset();
         }
     } catch (error) {
         console.error("Error submitting form:", error);

@@ -1,4 +1,5 @@
 const User =require("../../models/userSchema")
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 const customerInfo = async (req, res) => {
     try {
@@ -38,7 +39,7 @@ const customerInfo = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 

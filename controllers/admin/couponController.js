@@ -1,6 +1,6 @@
 const Coupon=require('../../models/couponSchema')
 const mongoose = require('mongoose');
-
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 
 const getAllCoupons = async (req, res) => {
@@ -12,7 +12,7 @@ const getAllCoupons = async (req, res) => {
 
         const query = search ? { name: { $regex: ".*" + search + ".*", $options: "i" } } : {};
         
-        const coupons = await Coupon.find(query).skip(skip).limit(limit);
+        const coupons = await Coupon.find(query).sort({createdOn:-1}).skip(skip).limit(limit);
         const totalCoupons = await Coupon.countDocuments(query);
         const totalPages = Math.ceil(totalCoupons / limit);
 
@@ -30,7 +30,7 @@ const getAllCoupons = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching coupons:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -39,19 +39,47 @@ const addCoupon = async (req, res) => {
     try {
         const { name, discountType, discountValue, minimumPrice, expireOn } = req.body;
 
+    
         const existingCoupon = await Coupon.findOne({ name });
         if (existingCoupon) {
             return res.json({ success: false, message: "Coupon already exists" });
         }
 
+        const expirationDate = new Date(expireOn);
+        const currentDate = new Date();
 
-        const newCoupon = new Coupon({ name, discountType, discountValue, minimumPrice, expireOn });
+    
+        if (discountValue < 0) {
+            return res.json({ success: false, message: "Discount value cannot be negative" });
+        }
+
+        if (minimumPrice < 0) {
+            return res.json({ success: false, message: "Minimum price cannot be negative" });
+        }
+
+        if (discountType === "fixed" && Number(discountValue) > Number(minimumPrice)) {
+            return res.json({ success: false, message: "For fixed discount, discount value should be less than minimum price." });
+        }
+        
+        if (discountType === "percentage" && discountValue > 100) {
+            return res.json({ success: false, message: "Percentage discount cannot exceed 100%." });
+        }
+        
+        if (isNaN(expirationDate.getTime())) {
+            return res.json({ success: false, message: "Invalid date format" });
+        }
+
+        if (expirationDate <= currentDate) {
+            return res.json({ success: false, message: "Expiration date must be in the future" });
+        }
+
+        const newCoupon = new Coupon({ name, discountType, discountValue, minimumPrice, expireOn: expirationDate });
         await newCoupon.save();
 
         return res.json({
             success: true,
             message: "Coupon added successfully!",
-            coupon: newCoupon, 
+            coupon: newCoupon,
         });
 
     } catch (error) {
@@ -66,7 +94,7 @@ const deleteCoupon = async (req, res) => {
     try {
         const { id } = req.query;
 
-        // Find and delete the coupon
+     
         const deletedCoupon = await Coupon.findByIdAndDelete(id);
         if (!deletedCoupon) {
             req.session.errorMessage = 'Coupon not found!';
@@ -112,7 +140,7 @@ const editCoupon = async (req, res) => {
 
     } catch (error) {
         console.error("Error updating coupon:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal server error" });
     }
 };
 //-------------------------------------------------------------

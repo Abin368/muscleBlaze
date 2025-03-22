@@ -27,6 +27,14 @@
     
             <div class="order-info">
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
+                <p><strong>Order Items:</strong></p>
+<ul>
+    <% order.orderItems.forEach(item => { %>
+        <li><%= item.product.productName %> - ₹<%= item.product.salePrice %></li>
+    <% }); %>
+</ul>
+
+                
                 <p><strong>Order Date:</strong> <%= orderDate %></p>
                 <p><strong>Delivery Date:</strong> <%= deliveryDate %></p>
                 <p><strong>User:</strong> <%= order.userId.name %> (<%= order.userId.email %>)</p>

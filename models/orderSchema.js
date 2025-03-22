@@ -103,6 +103,16 @@ const orderSchema = new Schema({
     },
     invoiceUrl :{
         type:String
+    },
+    razorpayOrderId: {
+        type: String,
+        unique: true
+    },
+    razorpayPaymentId: {
+        type: String
+    },
+    razorpaySignature: {
+        type: String
     }
 });
 

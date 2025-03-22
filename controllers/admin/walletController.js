@@ -1,5 +1,6 @@
 const Wallet=require('../../models/walletSchema')
 const User=require('../../models/userSchema')
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 
 
@@ -47,7 +48,7 @@ const getWallets = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching wallets:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 //---------------------------------
@@ -93,7 +94,7 @@ const getWalletTransaction = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching transactions:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 

@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const env = require("dotenv").config();
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 //---------------------------------------------
 
@@ -66,7 +67,7 @@ const getForget = async (req, res) => {
         return res.render("user/forgot-password", { messages: "" });
     } catch (error) {
         console.error("Error rendering forgot-password:", error);
-        res.status(500).send("Server error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Server error");
     }
 };
 
@@ -87,11 +88,11 @@ const forgotEmailValid = async (req, res) => {
         const findUser = await User.findOne({ email });
 
         if (!findUser) {
-            return res.status(400).json({ success: false, message: "Email not found. Please enter a registered email." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Email not found. Please enter a registered email." });
         }
 
         if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
         }
 
         const otp = generateOtp();
@@ -104,13 +105,13 @@ const forgotEmailValid = async (req, res) => {
             console.log("OTP:", otp);
            
 
-            return res.status(200).json({ success: true, message: "OTP sent successfully.", redirectUrl: "/forgot-otp-verification" });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "OTP sent successfully.", redirectUrl: "/forgot-otp-verification" });
         } else {
-            return res.status(500).json({ success: false, message: "Failed to send OTP, please try again." });
+            return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to send OTP, please try again." });
         }
     } catch (error) {
         console.error("Error in forgotEmailValid:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 //--------------------------------------------------------
@@ -120,22 +121,22 @@ const verifyOtp = async (req, res) => {
         const { otp,email } = req.body;
 
         if (!req.session.userOtp || !req.session.email || !req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "Session expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Session expired. Please request a new OTP." });
         }
 
         if (Date.now() > req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "OTP expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "OTP expired. Please request a new OTP." });
         }
 
         if (otp.toString() === req.session.userOtp.toString()) {
             req.session.isVerified = true;
-            return res.status(200).json({ success: true, message: "OTP verified successfully." });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "OTP verified successfully." });
         } else {
-            return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Invalid OTP. Please try again." });
         }
     } catch (error) {
         console.error("Error verifying OTP:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 
@@ -146,12 +147,12 @@ const resendForgetOtp = async (req, res) => {
     try {
         const email = req.session.email;
         if (!email) {
-            return res.status(400).json({ success: false, message: "Session expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Session expired. Please request a new OTP." });
         }
 
        
         if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "Please wait until the timer ends before resending OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Please wait until the timer ends before resending OTP." });
         }
 
         const otp = generateOtp();
@@ -161,13 +162,13 @@ const resendForgetOtp = async (req, res) => {
             req.session.userOtp = otp;
             req.session.otpExpiry = Date.now() + 60000; 
 
-            return res.status(200).json({ success: true, message: "New OTP has been sent!" });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "New OTP has been sent!" });
         } else {
-            return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again." });
+            return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to resend OTP. Please try again." });
         }
     } catch (error) {
         console.error("Error in Resend OTP:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 
@@ -210,7 +211,7 @@ const resetPassword = async (req, res) => {
         
     } catch (error) {
         console.error("Error resetting password:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 //------------------------------------------------
@@ -238,10 +239,10 @@ const updateProfile = async (req, res) => {
 
         await User.findByIdAndUpdate(userId, { name, email, phone });
 
-        res.status(200).json({ success: true, message: "Profile updated successfully!" });
+        res.status(HTTP_STATUS.OK).json({ success: true, message: "Profile updated successfully!" });
     } catch (error) {
         console.error("Profile update failed:", error);
-        res.status(500).json({ success: false, message: "Something went wrong" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Something went wrong" });
     }
 };
 //----------------------------------------
@@ -251,7 +252,7 @@ exports.updateProfile = async (req, res) => {
         const { id, name, phone } = req.body;
 
         if (!id || !name || !phone) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "All fields are required" });
         }
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -261,13 +262,13 @@ exports.updateProfile = async (req, res) => {
         );
 
         if (!updatedUser) {
-            return res.status(404).json({ success: false, message: "User not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "User not found" });
         }
 
-        res.status(200).json({ success: true, message: "Profile updated successfully", user: updatedUser });
+        res.status(HTTP_STATUS.OK).json({ success: true, message: "Profile updated successfully", user: updatedUser });
     } catch (error) {
         console.error("Update Error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
     }
 };
 //--------------------------------------------
@@ -278,28 +279,28 @@ const updatePassword = async (req, res) => {
         const { id, currentPassword, newPassword } = req.body;
 
         if (!id || !currentPassword || !newPassword) {
-            return res.status(400).json({ success: false, message: " All fields are required" });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: " All fields are required" });
         }
 
         const user = await User.findById(id);
         if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "User not found" });
         }
 
        
         if (!user.password) {
-            return res.status(400).json({ success: false, message: "No password found. Please set a password first." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "No password found. Please set a password first." });
         }
 
      
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: "Incorrect current password" });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Incorrect current password" });
         }
 
        
         if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-            return res.status(400).json({ success: false, message: "Weak password: Must be at least 8 characters, contain 1 uppercase letter, and 1 number." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Weak password: Must be at least 8 characters, contain 1 uppercase letter, and 1 number." });
         }
 
        
@@ -307,10 +308,10 @@ const updatePassword = async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        res.status(200).json({ success: true, message: " Password updated successfully!" });
+        res.status(HTTP_STATUS.OK).json({ success: true, message: " Password updated successfully!" });
     } catch (error) {
         console.error("Password Update Error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
     }
 };
 //------------------------------------------------------------------

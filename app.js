@@ -12,6 +12,7 @@ const userRouter = require('./routes/userRouter');
 const adminRouter = require('./routes/adminRouter');
 const helmet = require('helmet');  
 const morgan = require('morgan'); 
+// const cartWishlistCounter =require('./middlewares/cartWishlistCounter')
 
 connectDB(); 
 
@@ -22,6 +23,7 @@ app.use(morgan('dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+//---------------------------------------------
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -38,6 +40,9 @@ app.use(session({
     }
 }));
 
+
+
+
 //--------------------------------------
 
 //--------------------------------------
@@ -45,7 +50,8 @@ app.use(session({
 app.use(bannerMiddleware.loadBanners)
 
 
-// app.use(flash());
+// app.use(cartWishlistCounter);
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -55,11 +61,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use((req, res, next) => {
-//     res.locals.success = req.flash('success');
-//     res.locals.error = req.flash('error');
-//     next();
-// });
+
 app.use((req, res, next) => {
     res.locals.searchQuery = req.query.query || ""; 
     next();

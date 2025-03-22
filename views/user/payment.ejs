@@ -60,7 +60,8 @@
                     <p><strong>Discount:</strong> - ₹<span id="discountAmount">0.00</span></p>
                 <% } %>
         
-                <h3>Final Payable Amount: ₹<%= checkoutData.grandTotal.toFixed(2) %></h3>
+                <h3>Final Payable Amount: ₹<%= checkoutData.grandTotal !== undefined ? checkoutData.grandTotal.toFixed(2) : '0.00' %></h3>
+
             <% } else { %>
                 <p>No items in cart.</p>
             <% } %>

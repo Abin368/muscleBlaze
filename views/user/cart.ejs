@@ -48,12 +48,13 @@
                   <span class="quantity" id="quantity-<%= item.productId._id %>"><%= item.quantity %></span>
     
                   <button 
-                    class="quantity-increase" 
-                    data-product-id="<%= item.productId._id %>"
-                    onclick="updateQuantity('<%= item.productId._id %>', 'increase')" 
-                    data-stock="<%= item.productId.stock %>"
-                    <%= item.quantity >= 5 || item.quantity >= item.productId.stock ? 'disabled' : '' %>
-                  >+</button>
+  class="quantity-increase" 
+  data-product-id="<%= item.productId._id %>"
+  onclick="updateQuantity('<%= item.productId._id %>', 'increase')" 
+  data-stock="<%= item.productId.quantity %>"
+  <%= item.quantity >= 5 || item.quantity >= item.productId.quantity ? 'disabled' : '' %>
+>+</button>
+
                 </div>
                 <p class="total-price" id="total-price-<%= item.productId._id %>">₹<%= (item.productId.salePrice * item.quantity).toFixed(2) %></p>
                 <div class="cart-item-actions">
@@ -70,7 +71,8 @@
       <div class="cart-right">
         <h2>Order Summary</h2>
         <div class="summary-details">
-          <p><strong>Total Items:</strong> <%= items.reduce((sum, item) => sum + item.quantity, 0) %></p>
+          <p><strong>Total Items:</strong> <span id="total-items"><%= items.reduce((sum, item) => sum + item.quantity, 0) %></span></p>
+
           <p><strong>Grand Total:</strong> <span id="grand-total">₹<%= items.reduce((sum, item) => sum + (item.productId.salePrice * item.quantity), 0).toFixed(2) %></span></p>
         </div>
         <button class="checkout-btn" onclick="window.location.href='/checkout'">Proceed to Checkout</button>
@@ -182,16 +184,21 @@ function updateButtonStates(productId, quantity, stock) {
 
 
 function updateGrandTotal() {
-  let grandTotal = 0;
-  document.querySelectorAll(".cart-item-box").forEach(item => {
-    const totalPriceElement = item.querySelector(".total-price");
-    if (totalPriceElement) {
-      grandTotal += parseFloat(totalPriceElement.innerText.replace("₹", "")) || 0;
-    }
-  });
+    let grandTotal = 0;
+    let totalItems = 0;
 
+    document.querySelectorAll(".cart-item-box").forEach(item => {
+        const totalPriceElement = item.querySelector(".total-price");
+        const quantityElement = item.querySelector(".quantity");
 
-  document.getElementById("grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
+        if (totalPriceElement && quantityElement) {
+            grandTotal += parseFloat(totalPriceElement.innerText.replace("₹", "")) || 0;
+            totalItems += parseInt(quantityElement.innerText, 10) || 0;
+        }
+    });
+
+    document.getElementById("grand-total").innerText = `₹${grandTotal.toFixed(2)}`;
+    document.getElementById("total-items").innerText = totalItems; 
 }
 
 

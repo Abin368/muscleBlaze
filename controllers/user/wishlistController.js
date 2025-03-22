@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Wishlist = require('../../models/wishlistSchema')
 const mongoose = require('mongoose');
 const mongodb = require("mongodb");
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 const getWishlist = async (req, res) => {
     try {

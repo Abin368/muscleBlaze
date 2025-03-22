@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - MuscleBlaze</title>
+    
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(145deg, #1a1a1a 0%, #f97316 100%);
+            color: #fff;
+            text-align: center;
+            padding: 120px 20px;
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: url('https://via.placeholder.com/1500x500?text=Unleash+Your+Power') no-repeat center/cover;
+            opacity: 0.25;
+            z-index: 0;
+            animation: subtlePan 25s infinite alternate;
+        }
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 56px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.5);
+            animation: fadeInDown 1s ease;
+        }
+        .hero p {
+            font-size: 22px;
+            font-weight: 300;
+            max-width: 850px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+            animation: fadeInUp 1.2s ease;
+        }
+        .cta-btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #fff, #f5f5f5);
+            color: #f97316;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .cta-btn:hover {
+            background: #f97316;
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
+        }
+
+        /* Banner Section */
+        .banner-container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 50px auto;
+            overflow: hidden;
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        }
+        .banner-slider {
+            display: flex;
+            width: 100%;
+            transition: transform 0.7s ease-in-out;
+        }
+        .banner-slide {
+            min-width: 100%;
+            display: none;
+            position: relative;
+        }
+        .banner-slide.active {
+            display: block;
+        }
+        .banner-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            filter: brightness(80%) contrast(110%);
+            transition: all 0.5s ease;
+        }
+        .banner-slide:hover .banner-image {
+            filter: brightness(100%) contrast(115%);
+            transform: scale(1.03);
+        }
+        .banner-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 40px;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            animation: fadeInUp 1.4s ease;
+        }
+        .banner-nav {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+        .banner-nav span {
+            width: 14px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .banner-nav span.active {
+            background: #f97316;
+            transform: scale(1.4);
+        }
+
+        /* About Sections Container */
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .section {
+            background: #fff;
+            padding: 60px;
+            margin: 40px 0;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #f97316, #ea580c);
+            opacity: 0.8;
+        }
+        .section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+        .section h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: linear-gradient(to right, #f97316, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section p {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #374151;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin: 60px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            padding: 35px;
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        .stat-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .stat-box:hover::after {
+            opacity: 1;
+        }
+        .stat-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .stat-box h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .stat-box p {
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(to top, #1a1a1a, #2d2d2d);
+            color: #e5e7eb;
+            margin-top: 50px;
+            font-size: 15px;
+            position: relative;
+        }
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, #f97316, #ea580c);
+        }
+        .footer a {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #fff;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes subtlePan {
+            0% { transform: translateX(-10%) scale(1.1); }
+            100% { transform: translateX(10%) scale(1.1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 80px 15px;
+                min-height: 450px;
+            }
+            .hero h1 {
+                font-size: 42px;
+            }
+            .hero p {
+                font-size: 18px;
+            }
+            .banner-image {
+                height: 450px;
+            }
+            .section {
+                padding: 40px 15px;
+            }
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .stat-box {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('../../views/partials/user/header') %>
+
+    <!-- Breadcrumbs (Unchanged as per your request) -->
+    <div class="breadcrumbs">
+        <a href="/" >Home</a> / <a href="/about">About</a>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>MuscleBlaze® Unleashed</h1>
+        <p>Transforming India’s fitness landscape with world-class nutrition and relentless innovation.</p>
+        <a href="/shop" class="cta-btn">Ignite Your Journey</a>
+    </div>
+
+    <!-- Banner Section -->
+    <div class="banner-container">
+        <div class="banner-slider">
+            <% if (banner && banner.length > 0) { %>
+                <% banner.forEach((bannerItem, index) => { %>
+                    <div class="banner-slide <% if (index === 0) { %> active <% } %>">
+                        <img src="/uploads/product-images/<%= bannerItem.image %>" alt="MuscleBlaze Banner" class="banner-image">
+                        <div class="banner-overlay">Power Up Your Potential</div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="banner-slide active">
+                    <img src="https://via.placeholder.com/1300x500?text=Strength+Unleashed" alt="Default Banner" class="banner-image">
+                    <div class="banner-overlay">Power Up Your Potential</div>
+                </div>
+            <% } %>
+        </div>
+        <div class="banner-nav"></div>
+    </div>
+
+    <!-- About Sections -->
+    <div class="about-container">
+        <div class="section">
+            <h2>Our Vision</h2>
+            <p>At MuscleBlaze®, we’re on a mission to empower every fitness enthusiast in India with premium nutrition that fuels dreams and breaks barriers.</p>
+        </div>
+
+        <div class="section">
+            <h2>Trailblazing Innovation</h2>
+            <p>We redefine the game with SMS authenticity checks and our patented Scoop-on-Top design—delivering convenience and trust like never before.</p>
+        </div>
+
+        <div class="section">
+            <h2>Excellence in Every Scoop</h2>
+            <p>Sourcing global-grade whey and meeting FSSAI and HACCP standards, our cutting-edge processes ensure purity, safety, and peak performance.</p>
+        </div>
+
+        <div class="section">
+            <h2>Science Meets Strength</h2>
+            <p>Our Biozyme Whey—India’s first clinically tested whey protein—boasts 50% better absorption, merging science with extraordinary results.</p>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats">
+            <div class="stat-box">
+                <h3>1.7 Cr+</h3>
+                <p>Boxes Fueling Fitness</p>
+            </div>
+            <div class="stat-box">
+                <h3>10+ Years</h3>
+                <p>Shaping Champions</p>
+            </div>
+            <div class="stat-box">
+                <h3>100% Authentic</h3>
+                <p>Uncompromised Trust</p>
+            </div>
+            <div class="stat-box">
+                <h3>Millions Strong</h3>
+                <p>Community Driven</p>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../views/partials/user/footer') %>
+
+    <!-- JavaScript for Banner Slider and Stats Animation -->
+    <script>
+        // Banner Slider
+        const slides = document.querySelectorAll('.banner-slide');
+        const navDots = document.querySelector('.banner-nav');
+
+        slides.forEach((_, i) => {
+            const dot = document.createElement('span');
+            dot.addEventListener('click', () => goToSlide(i));
+            navDots.appendChild(dot);
+        });
+
+        let currentSlide = 0;
+        function goToSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            navDots.children[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            navDots.children[currentSlide].classList.add('active');
+        }
+
+        setInterval(() => goToSlide(currentSlide + 1), 5000); // Auto-slide every 5s
+        goToSlide(0); // Initialize
+
+        // Stats Animation with Intersection Observer
+        const stats = document.querySelectorAll('.stat-box h3');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const stat = entry.target;
+                    const text = stat.textContent;
+                    const target = parseInt(text.replace(/[^0-9]/g, '')) || 0;
+                    if (target === 0) return;
+                    let count = 0;
+                    const increment = target / 60;
+                    const updateCount = () => {
+                        count += increment;
+                        if (count < target) {
+                            stat.textContent = Math.ceil(count) + (text.includes('+') ? '+' : '');
+                            requestAnimationFrame(updateCount);
+                        } else {
+                            stat.textContent = text;
+                        }
+                    };
+                    updateCount();
+                    observer.unobserve(stat);
+                }
+            });
+        }, { threshold: 0.6 });
+
+        stats.forEach(stat => observer.observe(stat));
+    </script>
+</body>
+</html>

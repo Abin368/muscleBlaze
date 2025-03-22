@@ -67,7 +67,7 @@
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      // Remove the item from the wishlist
+    
       return fetch('/wishlist/remove', {
         method: 'POST',
         headers: {
@@ -82,6 +82,7 @@
   .then(response => response.json())
   .then(data => {
     if (data.success) {
+      fetchCartWishlistCount(); 
       Swal.fire({
         icon: "success",
         title: "Added to Cart!",
@@ -124,7 +125,7 @@ function removeFromWishlist(productId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-           
+          fetchCartWishlistCount(); 
             location.reload(); 
         } else {
             alert('Failed to remove product from wishlist');

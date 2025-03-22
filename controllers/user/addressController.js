@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema");
 const Address = require('../../models/addressSchema')
 const session = require("express-session");
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 
 const getAddresses = async (req, res) => {
@@ -18,7 +19,7 @@ const getAddresses = async (req, res) => {
         res.render('user/addresses', { addresses: addresses });
     } catch (error) {
         console.error('Error fetching addresses:', error);
-        res.status(500).send('Internal server error');
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send('Internal server error');
     }
 };
 //---------------------------------------------------------------
@@ -28,18 +29,18 @@ const addAddress = async (req, res) => {
         const userId = req.session.user._id;
 
         if (!addressType || !name || !city || !state || !district || !pincode || !phone) {
-            return res.status(400).json({ success: false, message: 'All fields are required.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'All fields are required.' });
         }
 
         const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone)) {
-            return res.status(400).json({ success: false, message: 'Invalid phone number. It should be 10 digits long.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'Invalid phone number. It should be 10 digits long.' });
         }
 
       
         const pincodeRegex = /^[0-9]{6}$/;
         if (!pincodeRegex.test(pincode)) {
-            return res.status(400).json({ success: false, message: 'Invalid pincode. It should be 6 digits long.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'Invalid pincode. It should be 6 digits long.' });
         }
 
         const user = await Address.findOne({ userId: userId });
@@ -75,10 +76,10 @@ const addAddress = async (req, res) => {
             await user.save();
         }
 
-        res.status(200).json({ success: true, message: 'Address added successfully.' });
+        res.status(HTTP_STATUS.OK).json({ success: true, message: 'Address added successfully.' });
     } catch (error) {
         console.error('Error adding address:', error);
-        res.status(500).json({ success: false, message: 'Internal server error.' });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Internal server error.' });
     }
 };
 //----------------------------------------------------------
@@ -92,7 +93,7 @@ const deleteAddress= async (req, res) => {
         const user = await Address.findOne({ userId: userId });
 
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: 'User not found' });
         }
 
        
@@ -100,9 +101,9 @@ const deleteAddress= async (req, res) => {
         if (addressIndex !== -1) {
             user.address.splice(addressIndex, 1);
             await user.save();
-            return res.status(200).json({ success: true, message: 'Address deleted successfully.' });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: 'Address deleted successfully.' });
         } else {
-            return res.status(404).json({ success: false, message: 'Address not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: 'Address not found' });
         }
     } catch (error) {
         console.error('Error deleting address:', error);
@@ -117,27 +118,27 @@ const getAddress = async (req, res) => {
 
         const userId = req.session.user?._id;
         if (!userId) {
-            return res.status(401).json({ error: "User not authenticated" });
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: "User not authenticated" });
         }
 
         
         const userAddresses = await Address.findOne({ userId });
 
         if (!userAddresses) {
-            return res.status(404).json({ error: "User's address not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ error: "User's address not found" });
         }
 
        
         const address = userAddresses.address.find(addr => addr._id.toString() === addressId);
 
         if (!address) {
-            return res.status(404).json({ error: "Address not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Address not found" });
         }
 
-        res.status(200).json(address);
+        res.status(HTTP_STATUS.OK).json(address);
     } catch (error) {
         console.error("Error fetching address:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
     }
 };
 
@@ -153,16 +154,16 @@ const updateAddress = async (req, res) => {
 
       
         if (!addressType || !name || !city || !state || !district || !pincode || !phone) {
-            return res.status(400).json({ success: false, message: 'All fields are required.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'All fields are required.' });
         }
 
         if (!/^\d{6}$/.test(pincode)) {
-            return res.status(400).json({ success: false, message: 'Invalid pincode format. It should be a 6-digit number.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'Invalid pincode format. It should be a 6-digit number.' });
         }
 
      
         if (!/^\d{10}$/.test(phone)) {
-            return res.status(400).json({ success: false, message: 'Invalid phone number format. It should be a 10-digit number.' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: 'Invalid phone number format. It should be a 10-digit number.' });
         }
 
      
@@ -170,12 +171,12 @@ const updateAddress = async (req, res) => {
         const user = await Address.findOne({ userId });
 
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: 'User not found' });
         }
 
         const addressToUpdate = user.address.find(addr => addr._id.toString() === addressId);
         if (!addressToUpdate) {
-            return res.status(404).json({ success: false, message: 'Address not found' });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: 'Address not found' });
         }
 
    
@@ -191,10 +192,10 @@ const updateAddress = async (req, res) => {
      
         await user.save();
 
-        res.status(200).json({ success: true, message: 'Address updated successfully', data: addressToUpdate });
+        res.status(HTTP_STATUS.OK).json({ success: true, message: 'Address updated successfully', data: addressToUpdate });
     } catch (error) {
         console.error('Error updating address:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Internal server error' });
     }
 };
 

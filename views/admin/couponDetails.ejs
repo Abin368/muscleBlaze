@@ -380,13 +380,15 @@ function confirmDelete(couponId) {
 
 //--------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    const editButtons = document.querySelectorAll(".edit-btn");
     const modal = document.getElementById("editCouponModal");
     const closeModal = document.querySelector(".close");
     const editForm = document.getElementById("editCouponForm");
 
-    editButtons.forEach(button => {
-        button.addEventListener("click", () => {
+  
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("edit-btn")) {
+            const button = event.target;
+
             document.getElementById("couponId").value = button.getAttribute("data-id");
             document.getElementById("editName").value = button.getAttribute("data-name");
             document.getElementById("editDiscountType").value = button.getAttribute("data-discounttype");
@@ -395,25 +397,27 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("editExpireOn").value = button.getAttribute("data-expireon");
 
             modal.classList.add("active");
-        });
+        }
     });
 
+   
     closeModal.addEventListener("click", () => {
         modal.classList.remove("active");
     });
 
+   
     window.addEventListener("click", (event) => {
         if (event.target === modal) {
             modal.classList.remove("active");
         }
     });
 
+ 
     editForm.addEventListener("submit", (event) => {
         event.preventDefault();
 
         const couponId = document.getElementById("couponId").value;
 
-    
         const formData = {
             name: document.getElementById("editName").value,
             discountType: document.getElementById("editDiscountType").value,
@@ -444,6 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error("Error:", error));
     });
 });
+
 //--------------------------------------
 
 

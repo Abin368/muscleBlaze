@@ -36,7 +36,7 @@ const userSchema = new Schema({
     },
     cart:[{
         type:Schema.Types.ObjectId,
-        ref:"cart",
+        ref:"Cart",
     }],
     wallet:[{
         type:Number,
@@ -44,7 +44,7 @@ const userSchema = new Schema({
     }],
     wishlist:[{
         type:Schema.Types.ObjectId,
-        res:"wishlist"
+        ref:"Wishlist"
     }],
     orderHistory:[{
         type:Schema.Types.ObjectId,

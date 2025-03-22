@@ -36,6 +36,7 @@ router.get('/auth/google/callback',preventCache,isLoggedIn,passport.authenticate
       console.log(req.session.user); 
     res.redirect('/')
 })
+router.get('/about',preventCache,userController.loadAbout)
 router.get('/logout',userController.logout)
 
 //profile management
@@ -75,6 +76,8 @@ router.get('/search', preventCache,userController.searchProducts);
 //product management
 
 router.get('/productDetails',preventCache,productController.productDetails)
+router.post("/add-review", preventCache,productController.addReview);
+router.post("/edit-review", preventCache,productController.editReview);
 
 
 //cart management
@@ -83,6 +86,7 @@ router.get('/cart', preventCache,cartController.getCart)
 router.post('/cart/add',preventCache,cartController.addToCart);
 router.post('/cart/update-quantity', preventCache,cartController.updateQuantity);
 router.post('/cart/delete', preventCache, cartController.deleteFromCart);
+router.get('/cart-wishlist-count',preventCache, cartController.cartWishlistCounter)
 
 //wishlist management 
 router.get('/wishlist',preventCache,wishlistController.getWishlist)
@@ -114,6 +118,7 @@ router.post('/payment/wallet', preventCache, walletController.processWalletPayme
 //coupon management
 router.get('/coupons',preventCache, couponController.getCoupon);
 router.post('/apply-coupon',preventCache, checkoutController.applyCoupon);
+router.post('/remove-coupon',preventCache, checkoutController.removeCoupon)
 
 
 

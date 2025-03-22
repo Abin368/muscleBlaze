@@ -7,19 +7,14 @@
       <li><a href="/">Home</a></li>
       <li><a href="/shop">Shop</a></li>
       <li><a href="/about">About</a></li>
-      <% if (!user) { %> <!-- Show login/signup if user is NOT logged in -->
+      <% if (!user) { %> 
         <li><a href="/login">Login</a></li>
         <li><a href="/signup">Signup</a></li>
       <% } %>
     </ul>
   </nav>
 
-  <!-- <form action="/search" method="GET" class="search-form">
-  <div class="search-bar">
-    <input type="text" name="query" placeholder="Search here">
-    <button><i class="fas fa-search"></i></button>
-  </div>
-</form> -->
+
 
 <form action="/filter" method="GET" class="search-form">
   <div class="search-bar">
@@ -31,8 +26,16 @@
 
 
   <div class="icons">
-    <a href="/wishlist"><i class="fas fa-heart"></i></a> <!-- Wishlist -->
-    <a href="/cart"><i class="fas fa-shopping-cart"></i></a> <!-- Cart -->
+    <div class="header-icons">
+      <a href="/wishlist">
+          <i class="fas fa-heart"></i>
+          <span id="wishlist-count">0</span>
+      </a>
+      <a href="/cart">
+          <i class="fas fa-shopping-cart"></i>
+          <span id="cart-count">0</span>
+      </a>
+  </div>
     <% if (user) { %> <!-- Show user details if logged in -->
       <div class="profile-dropdown">
         <a href="#" class="profile-icon"><i class="fas fa-user"></i></a> <!-- Profile Icon -->
@@ -45,3 +48,22 @@
     <% } %>
   </div>
 </header>
+
+
+<script>
+  async function fetchCartWishlistCount() {
+    try {
+      const response = await fetch("/cart-wishlist-count");
+      const data = await response.json();
+  
+      document.getElementById("cart-count").innerText = data.cartCount;
+      document.getElementById("wishlist-count").innerText = data.wishlistCount;
+    } catch (error) {
+      console.error("Error fetching cart/wishlist count:", error);
+    }
+  }
+  
+  // Fetch the count when the page loads
+  document.addEventListener("DOMContentLoaded", fetchCartWishlistCount);
+  </script>
+  

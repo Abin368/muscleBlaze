@@ -10,7 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/sidebar.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/customerDetails.css">
+
     <link rel="stylesheet" href="/dashboard.css">
+   
 </head>
 <body>
     <div class="container">
@@ -18,42 +22,526 @@
         <%- include('../../views/partials/admin/sidebar') %>
 
         <!-- Main Content -->
-        <div class="main-content">
-            <!-- Profile Section -->
-            <div class="profile">
-               
-                <div class="profile-details">
-                    <p>Admin</p>
-                    <small>admin@example.com</small>
+        <div class="content">
+            <h1>Dashboard</h1>
+            <p>Welcome to the Admin Dashboard!</p>
+        
+            <!-- Cards Section -->
+            <div class="cards">
+                <div class="card">
+                    <i class="fas fa-users"></i>
+                    <h3>Users</h3>
+                    <p class="count-value"><%= typeof totalUsers !== "undefined" ? totalUsers : "N/A" %></p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Orders</h3>
+                    <p class="count-value"><%= typeof totalOrders !== "undefined" ? totalOrders : "N/A" %></p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Total Revenue</h3>
+                    <p class="count-value">₹<%= typeof totalSales !== "undefined" ? totalSales : "N/A" %></p>
                 </div>
             </div>
+            
+            <div class="cards">
+                <div class="card">
+                    <i class="fas fa-redo-alt"></i>
+                    <h3>Refunds</h3>
+                    <p class="count-value">₹<%= typeof totalRefund !== "undefined" ? totalRefund.toFixed(2) : "0.00" %></p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-ban"></i>
+                    <h3>Cancellations</h3>
+                    <p class="count-value">₹<%= typeof totalCancellations !== "undefined" ? totalCancellations : "N/A" %></p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-undo"></i>
+                    <h3>Returns</h3>
+                    <p class="count-value">₹<%= typeof totalReturns !== "undefined" ? totalReturns : "N/A" %></p>
+                </div>
+            </div>
+            
+            <div class="charts-container">
+                <!-- Row 1: Bar Chart -->
+                <div class="chart-box full-width">
+                    <h2>Sales Overview</h2>
+                    <canvas id="monthlySalesChart"></canvas>
+                </div>
+            
+                <!-- Row 2: Two Pie Charts -->
+                <div class="chart-box half-width">
+                    <h2>Top Selling Products</h2>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            
+                <div class="chart-box half-width">
+                    <h2>Most Sold Categories</h2>
+                    <canvas id="topCategoryChart"></canvas>
+                </div>
+            </div>
+            
+            
 
-            <!-- Dashboard Content -->
-            <div class="content">
-                <h1>Dashboard</h1>
-                <p>Welcome to the Admin Dashboard!</p>
+            <!-- <canvas id="monthlySalesChart"></canvas> -->
+        
+            <!-- <h2>Top Selling Products</h2>
+            <div style="width: 100%; display: flex; justify-content: center;">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
 
-                <!-- Cards Section -->
-                <div class="cards">
-                    <div class="card">
-                        <i class="fas fa-users"></i>
-                        <h3>Users</h3>
-                        <p>Total Users: 1,234</p>
-                    </div>
-                    <div class="card">
-                        <i class="fas fa-box"></i>
-                        <h3>Products</h3>
-                        <p>Total Products: 567</p>
-                    </div>
-                    <div class="card">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h3>Orders</h3>
-                        <p>Total Orders: 89</p>
-                    </div>
+            <h2>Top 5 Best-Selling Products</h2>
+<div style="width: 100%; display: flex; justify-content: center;">
+    <canvas id="topProductsChart"></canvas>
+</div> -->
+
+<div class="sales-report-container">
+    <h2>Sales Report</h2>
+
+    <!-- Filters Section -->
+    <div class="filters">
+        <label>Start Date:</label>
+        <input type="date" id="startDate">
+        
+        <label>End Date:</label>
+        <input type="date" id="endDate">
+        
+        <label>Filter By:</label>
+        <select id="filterType">
+            <option value="all">All</option>
+            <option value="day">Day</option>
+            <option value="week">Weekly</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+        </select>
+        
+        <button onclick="fetchSalesReport()">Search</button>
+        <button onclick="clearFilter()">Clear Filter</button>
+          <button onclick="exportToPDF()">Export to PDF</button>
+        <button onclick="exportToExcel()">Export to Excel</button>
+
+    </div>
+
+    <!-- Table Section -->
+    <table id="salesReportTable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be loaded dynamically -->
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <button onclick="prevPage()">Previous</button>
+        <span id="pageInfo">Page 1</span>
+        <button onclick="nextPage()">Next</button>
+    </div>
+
+   
+</div>
+          
+        </div>
+        
                 </div>
             </div>
         </div>
     </div>
+    <pre id="monthlySalesData" style="display: none;">
+        <%= typeof monthlySales !== "undefined" ? JSON.stringify(monthlySales) : "[]" %>
+    </pre>
+    
+    <pre id="topProductSalesData" style="display: none;">
+        <%= typeof topProductSales !== "undefined" ? JSON.stringify(topProductSales) : "[]" %>
+    </pre>
+
+    <pre id="topCategorySalesData" style="display: none;">
+        <%= typeof topCategorySales !== "undefined" ? JSON.stringify(topCategorySales) : "[]" %>
+    </pre>
+   
+    
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>    
+     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+           
+            const monthlySalesData = JSON.parse(document.getElementById("monthlySalesData").textContent || "[]");
+    
+           
+            const monthsTillNow = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const salesData = new Array(new Date().getMonth() + 1).fill(0); 
+    
+            monthlySalesData.forEach(sale => {
+                salesData[sale._id - 1] = sale.total; 
+            });
+    
+           
+            const ctx = document.getElementById("monthlySalesChart").getContext("2d");
+    
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, "rgba(75, 192, 192, 1)"); 
+            gradient.addColorStop(1, "rgba(75, 192, 192, 0.2)"); 
+    
+          
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: monthsTillNow.slice(0, salesData.length), 
+                    datasets: [{
+                        label: "Total Sales (₹)",
+                        data: salesData,
+                        backgroundColor: gradient, 
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 2,
+                        borderRadius: 10, 
+                        barPercentage: 0.5,
+                        categoryPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500, 
+                        easing: "easeInOutQuart"
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: "white",
+                                font: {
+                                    size: 14,
+                                    weight: "bold"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: "white", font: { size: 12, weight: "bold" } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: "rgba(255, 255, 255, 0.2)" },
+                            ticks: { color: "white", font: { size: 12, weight: "bold" } }
+                        }
+                    }
+                }
+            });
+        });
+
+
+
+        //--------------------------------------------
+        document.addEventListener("DOMContentLoaded", function () {
+ 
+    const productSalesData = JSON.parse(document.getElementById("topProductSalesData").innerText || "[]");
+
+   
+    const productNames = productSalesData.map(p => `${p.productName || "N/A"}`);
+    const productQuantities = productSalesData.map(p => p.totalSold);
+
+  
+    const pieColors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+
+   
+    new Chart(document.getElementById("topProductsChart"), {
+        type: "pie",
+        data: {
+            labels: productNames,
+            datasets: [{
+                data: productQuantities,
+                backgroundColor: pieColors,
+                hoverBackgroundColor: pieColors.map(color => color + "AA") 
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        color: "white",
+                        font: { size: 14 }
+                    }
+                }
+            }
+        }
+    });
+});
+//------------------------------------
+document.addEventListener("DOMContentLoaded",function(){
+    const categorySalesData=JSON.parse(document.getElementById('topCategorySalesData').innerText || '[]')
+    const categoryNames=categorySalesData.map(c=>`${c._id || 'N/A'}`)
+    const categoryQuantities=categorySalesData.map(c=>c.totalSold);
+
+    const pieColors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+    new Chart(document.getElementById("topCategoryChart"), {
+        type: "pie",
+        data: {
+            labels: categoryNames,
+            datasets: [{
+                data: categoryQuantities,
+                backgroundColor: pieColors,
+                hoverBackgroundColor: pieColors.map(color => color + "AA") 
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: {
+                        color: "white",
+                        font: { size: 14 }
+                    }
+                }
+            }
+        }
+    });
+});
+
+
+//----------------------------------------
+let salesData = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchSalesReport(); 
+});
+
+function fetchSalesReport() {
+    let startDate = document.getElementById("startDate").value;
+    let endDate = document.getElementById("endDate").value;
+    const filterType = document.getElementById("filterType").value;
+
+    let start, end;
+
+  
+    if (filterType !== "all") {
+        ({ start, end } = getDateRange(filterType));
+    }
+
+  
+    if (startDate && endDate) {
+        start = startDate;
+        end = endDate;
+    }
+
+   
+    let url = "/admin/sales-report";
+    if (start && end) {
+        url += `?start=${start}&end=${end}`;
+    }
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            salesData = data;
+            currentPage = 1;
+            renderTable();
+        })
+        .catch(error => console.error("Error fetching sales data:", error));
+}
+//---------------------------------------
+function getDateRange(filter) {
+    const today = new Date();
+    let start, end;
+
+   
+    let tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    end = tomorrow.toISOString().split("T")[0]; 
+
+    switch (filter) {
+        case "day":
+            start = today.toISOString().split("T")[0]; 
+            break;
+        case "week":
+            let lastWeek = new Date(today);
+            lastWeek.setDate(today.getDate() - 6); 
+            start = lastWeek.toISOString().split("T")[0];
+            break;
+        case "month":
+            let lastMonth = new Date(today);
+            lastMonth.setMonth(today.getMonth() - 1);
+            start = lastMonth.toISOString().split("T")[0];
+            break;
+        case "year":
+            let lastYear = new Date(today);
+            lastYear.setFullYear(today.getFullYear() - 1);
+            start = lastYear.toISOString().split("T")[0];
+            break;
+    }
+
+    return { start, end };
+}
+
+
+//---------------------------------
+function renderTable() {
+    const tableBody = document.querySelector("#salesReportTable tbody");
+    tableBody.innerHTML = "";
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedData = salesData.slice(start, end);
+
+    paginatedData.forEach(order => {
+        const row = `<tr>
+            <td>${order.orderId}</td>
+            <td>${new Date(order.date).toLocaleDateString()}</td>
+            <td>${order.customer}</td>
+            <td>${order.status}</td>
+            <td>${order.totalAmount}</td>
+            <td>${order.paymentMethod}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+    });
+
+    document.getElementById("pageInfo").innerText = `Page ${currentPage}`;
+}
+//---------------------------------
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+    }
+}
+//----------------------------------
+function nextPage() {
+    if (currentPage * rowsPerPage < salesData.length) {
+        currentPage++;
+        renderTable();
+    }
+}
+//----------------------------
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    pdf.text("Sales Report", 10, 10);
+    pdf.autoTable({
+        head: [["Order ID", "Date", "Customer", "Status", "Total Amount", "Payment Method"]],
+        body: salesData.map(order => [
+            order.orderId,
+            new Date(order.date).toLocaleDateString(),
+            order.customer,
+            order.status,
+            order.totalAmount,
+            order.paymentMethod
+        ]),
+    });
+
+   
+    let startDate = document.getElementById("startDate").value || "";
+    let endDate = document.getElementById("endDate").value || "";
+    let filterType = document.getElementById("filterType").value;
+    
+    let today = new Date();
+    let tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    let filename;
+
+    switch (filterType) {
+        case "day":
+            filename = `Sales_Report_Today_${today.toISOString().split("T")[0]}.pdf`;
+            break;
+        case "week":
+            let lastWeek = new Date();
+            lastWeek.setDate(today.getDate() - 7);
+            filename = `Sales_Report_Week_${lastWeek.toISOString().split("T")[0]}_to_${today.toISOString().split("T")[0]}.pdf`;
+            break;
+        case "month":
+            let firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            filename = `Sales_Report_Month_${firstDayOfMonth.toISOString().split("T")[0]}_to_${today.toISOString().split("T")[0]}.pdf`;
+            break;
+        case "year":
+            let firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+            filename = `Sales_Report_Year_${firstDayOfYear.toISOString().split("T")[0]}_to_${today.toISOString().split("T")[0]}.pdf`;
+            break;
+        default:
+            if (startDate && endDate) {
+                filename = `Sales_Report_${startDate}_to_${endDate}.pdf`;
+            } else {
+                filename = `Sales_Report_All_Orders.pdf`;
+            }
+            break;
+    }
+
+    pdf.save(filename);
+}
+
+
+//-----------------------------------
+
+function exportToExcel() {
+    let startDate = document.getElementById("startDate").value;
+    let endDate = document.getElementById("endDate").value;
+    let filterType = document.getElementById("filterType").value;
+
+    let today = new Date();
+    let fileName;
+
+    if (filterType === "day") {
+        fileName = `Sales_Report_Today_${today.toISOString().split("T")[0]}.xlsx`;
+    } else if (filterType === "month") {
+        let monthName = today.toLocaleString('default', { month: 'long' });
+        fileName = `Sales_Report_${monthName}-${today.getFullYear()}.xlsx`;
+    } else if (filterType === "year") {
+        fileName = `Sales_Report_${today.getFullYear()}.xlsx`;
+    } else if (startDate && endDate) {
+        fileName = `Sales_Report_${startDate}_to_${endDate}.xlsx`;
+    } else {
+        fileName = `Sales_Report.xlsx`;
+    }
+
+    let table = document.getElementById("salesReportTable");
+    let wb = XLSX.utils.table_to_book(table);
+
+   
+    let ws = wb.Sheets[wb.SheetNames[0]]; 
+    let wsCols = [{ wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }]; 
+    ws["!cols"] = wsCols;
+
+    XLSX.writeFile(wb, fileName);
+}
+
+//---------------------------------
+function clearFilter() {
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("filterType").value = "all";
+
+    fetchSalesReport(); 
+}
+
+
+
+    </script>
+    
+    
+
 </body>
 
 </html>

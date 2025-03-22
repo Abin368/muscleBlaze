@@ -1,8 +1,10 @@
 const User = require('../../models/userSchema');
 const Product = require("../../models/productSchema");
 const Cart=require("../../models/cartSchema")
-const mongodb = require("mongodb");
 
+const Wishlist=require('../../models/wishlistSchema')
+const mongodb = require("mongodb");
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 const getCart = async (req, res) => {
   try {
@@ -20,10 +22,10 @@ const getCart = async (req, res) => {
       let grandTotal = 0;
       let outOfStockMessages = [];
 
+      // **Filter out items where productId is null (deleted products)**
+      cart.items = cart.items.filter(item => item.productId !== null);
+
       cart.items.forEach(item => {
-          if (!item.productId) {
-              return;
-          }
           if (item.quantity > item.productId.quantity) {
               outOfStockMessages.push(`${item.productId.productName} is out of stock. Please remove it from the cart.`);
           }
@@ -45,31 +47,41 @@ const getCart = async (req, res) => {
 };
 
 
+
 //----------------------------------------
 
 
 const addToCart = async (req, res) => {
   try {
-    const userId = req.session.user;  
-    const { productId } = req.body;   
-    const product = await Product.findById(productId);
+    const userId = req.session.user;
+    const { productId } = req.body;
 
-    if (!product) {
-      return res.json({ success: false, message: 'Product not found' });
+   
+    const product = await Product.findById(productId).populate("category");
+
+    if (
+      !product || 
+      product.isBlocked || 
+      product.isDeleted || 
+      !product.category || 
+      product.category.isDeleted || 
+      !product.category.isListed 
+    ) {  
+      return res.json({ success: false, message: "Product not available" });
     }
+
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
+
     const existingItem = cart.items.find(item => item.productId.toString() === productId);
 
     if (existingItem) {
-    
       existingItem.quantity += 1;
       existingItem.totalPrice = existingItem.quantity * existingItem.price;
     } else {
-    
       cart.items.push({
         productId: product._id,
         quantity: 1,
@@ -78,16 +90,16 @@ const addToCart = async (req, res) => {
       });
     }
 
-  
     await cart.save();
-
-  
     res.json({ success: true });
+
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.json({ success: false, message: 'Error adding product to cart' });
+    console.error("Error adding to cart:", error);
+    res.json({ success: false, message: "Error adding product to cart" });
   }
 };
+
+
 //-----------------------------------------------
 
 const updateQuantity = async (req, res) => {
@@ -99,19 +111,19 @@ const updateQuantity = async (req, res) => {
     const cart = await Cart.findOne({ userId });
 
     if (!cart) {
-      return res.status(404).send("Cart not found");
+      return res.status(HTTP_STATUS.NOT_FOUND).send("Cart not found");
     }
 
     const item = cart.items.find(item => item.productId.toString() === productId);
 
     if (!item) {
-      return res.status(404).send("Item not found in cart");
+      return res.status(HTTP_STATUS.NOT_FOUND).send("Item not found in cart");
     }
 
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).send("Product not found");
+      return res.status(HTTP_STATUS.NOT_FOUND).send("Product not found");
     }
 
     let newQuantity = item.quantity;
@@ -135,7 +147,7 @@ const updateQuantity = async (req, res) => {
       totalPrice: item.totalPrice
     });
   } catch (error) {
-    res.status(500).send("Something went wrong while updating cart.");
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Something went wrong while updating cart.");
   }
 };
 //-----------------------------------
@@ -147,14 +159,14 @@ const deleteFromCart = async (req, res) => {
       const cart = await Cart.findOne({ userId });
   
       if (!cart) {
-        return res.status(404).json({ success: false, message: "Cart not found" });
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Cart not found" });
       }
   
      
       const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
   
       if (itemIndex === -1) {
-        return res.status(404).json({ success: false, message: "Item not found in cart" });
+        return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Item not found in cart" });
       }
   
       cart.items.splice(itemIndex, 1);
@@ -166,9 +178,36 @@ const deleteFromCart = async (req, res) => {
       res.json({ success: true, message: "Item deleted successfully from cart" });
     } catch (error) {
       console.error("Error deleting product from cart:", error);
-      res.status(500).json({ success: false, message: "Something went wrong while deleting the product from cart" });
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Something went wrong while deleting the product from cart" });
     }
   };
+  //-------------------------
+  const cartWishlistCounter = async (req, res) => {
+    try {
+      if (!req.session.user) {
+        return res.json({ cartCount: 0, wishlistCount: 0 });
+      }
+  
+      const user = await User.findById(req.session.user._id);
+      if (!user) {
+        return res.json({ cartCount: 0, wishlistCount: 0 });
+      }
+  
+      let cart = await Cart.findOne({ userId: user._id });
+      let wishlist = await Wishlist.findOne({ userId: user._id });
+  
+      res.json({
+        cartCount: cart ? cart.items.length : 0,
+        wishlistCount: wishlist ? wishlist.products.length : 0,
+      });
+  
+    } catch (error) {
+      console.error("Error fetching cart/wishlist count:", error);
+      res.status(500).json({ cartCount: 0, wishlistCount: 0 });
+    }
+  };
+  
+
   
 
 
@@ -177,5 +216,6 @@ module.exports={
     getCart,
     addToCart,
     updateQuantity,
-    deleteFromCart
+    deleteFromCart,
+    cartWishlistCounter
 }

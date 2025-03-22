@@ -145,24 +145,36 @@ $(document).ready(function() {
     $("#editProfileForm").submit(function(event) {
         event.preventDefault();
 
-        var name = $("#editName").val();
+        var name = $("#editName").val().trim();
         var phone = $("#editPhone").val();
+        var nameInput = $("#editName");
         var phoneInput = $("#editPhone");
         var messageBox = $("#editMessage");
 
-  
+       
+        var nameRegex = /^[A-Za-z\s]{4,}$/; 
+
+if (!nameRegex.test(name)) {
+    messageBox.text("Name must contain at least 4 letters (no numbers).").css("color", "red").fadeIn();
+    nameInput.css("border", "2px solid red");
+    return;
+} else {
+    nameInput.css("border", "");
+}
+
+        
         var phoneRegex = /^[6-9]\d{9}$/;
         if (!phoneRegex.test(phone)) {
             messageBox.text("Invalid phone number. Enter a valid 10-digit number.")
-                .css("color", "red") 
+                .css("color", "red")
                 .fadeIn();
-            phoneInput.css("border", "2px solid red"); 
+            phoneInput.css("border", "2px solid red");
             return;
+        } else {
+            phoneInput.css("border", "");
         }
 
-       
         messageBox.fadeOut();
-        phoneInput.css("border", ""); 
 
         var updatedData = {
             id: "<%= user._id %>",
@@ -180,7 +192,7 @@ $(document).ready(function() {
                 setTimeout(() => { location.reload(); }, 2000);
             },
             error: function(xhr) {
-                showMessage(" Error updating profile. Try again!", "red");
+                showMessage("Error updating profile. Try again!", "red");
             }
         });
     });

@@ -10,16 +10,17 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const ejs = require("ejs");
 const stream = require('stream')
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 const requestReturn = async (req, res) => {
     try {
         const { orderId, returnItems, returnReason } = req.body;
 
         const order = await Order.findById(orderId);
-        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (!order) return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Order not found" });
 
         if (!order.orderItems || order.orderItems.length === 0) {
-            return res.status(400).json({ success: false, message: "No items found in order." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "No items found in order." });
         }
 
         const itemsToReturn = Array.isArray(returnItems) ? returnItems : [returnItems];
@@ -47,7 +48,7 @@ const requestReturn = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Error processing return request." });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error processing return request." });
     }
 }
 //------------------------------------------------
@@ -60,7 +61,7 @@ const generateInvoice = async (req, res) => {
     
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(HTTP_STATUS.NOT_FOUND).send("Order not found");
         }
         const addressId = order.address; 
         console.log("Address ID from Order:", addressId);
@@ -77,7 +78,7 @@ const generateInvoice = async (req, res) => {
         res.render('user/invoiceTemplate', { order,  address: selectedAddress || null});
     } catch (error) {
         console.error("Error fetching invoice:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 

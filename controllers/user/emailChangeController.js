@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const env = require("dotenv").config();
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 
 function generateOtp() {
@@ -63,7 +64,7 @@ const getemailChange = async (req, res) => {
         return res.render("user/email-change", { messages: "" });
     } catch (error) {
         console.error("Error rendering forgot-password:", error);
-        res.status(500).send("Server error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Server error");
     }
 };
 //----------------------------------------
@@ -87,12 +88,12 @@ const changeEmailValid = async (req, res) => {
 
        
         if (findUser && findUser.email !== req.session.email) {
-            return res.status(400).json({ success: false, message: "This email is already registered. Please enter a unique email." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "This email is already registered. Please enter a unique email." });
         }
 
        
         if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "An OTP has already been sent. Please wait before requesting a new one." });
         }
 
      
@@ -107,13 +108,13 @@ const changeEmailValid = async (req, res) => {
             req.session.otpExpiry = Date.now() + 60000; 
             console.log(email)
 
-            return res.status(200).json({ success: true, message: "OTP sent successfully.", redirectUrl: "/emailChange-otp-verification" });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "OTP sent successfully.", redirectUrl: "/emailChange-otp-verification" });
         } else {
-            return res.status(500).json({ success: false, message: "Failed to send OTP, please try again." });
+            return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to send OTP, please try again." });
         }
     } catch (error) {
         console.error("Error in changeEmailValid:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 //-------------------------------------------------------
@@ -122,22 +123,22 @@ const verifyOtp = async (req, res) => {
         const { otp } = req.body;
 
         if (!req.session.user) {
-            return res.status(401).json({ success: false, message: "User session expired. Please log in again." });
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "User session expired. Please log in again." });
         }
 
         const userId = req.session.user._id; 
         console.log("User ID from session:", userId);
 
         if (!userId) {
-            return res.status(401).json({ success: false, message: "User not logged in." });
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "User not logged in." });
         }
 
         if (!req.session.userOtp || !req.session.email || !req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "Session expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Session expired. Please request a new OTP." });
         }
 
         if (Date.now() > req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "OTP expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "OTP expired. Please request a new OTP." });
         }
 
         if (otp.toString() === req.session.userOtp.toString()) {
@@ -153,7 +154,7 @@ const verifyOtp = async (req, res) => {
             );
 
             if (!updatedUser) {
-                return res.status(404).json({ success: false, message: "User not found." });
+                return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "User not found." });
             }
 
             req.session.user.email = updatedUser.email;
@@ -166,13 +167,13 @@ const verifyOtp = async (req, res) => {
             console.log("Updated email in session:", req.session.user.email);
             console.log("Updated email in database:", updatedUser.email);
 
-            return res.status(200).json({ success: true, message: "OTP verified successfully. Email updated." });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "OTP verified successfully. Email updated." });
         } else {
-            return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Invalid OTP. Please try again." });
         }
     } catch (error) {
         console.error("Error verifying OTP:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 
@@ -183,11 +184,11 @@ const resendEmailOtp = async (req, res) => {
     try {
         const email = req.session.email;  // Get email from session
         if (!email) {
-            return res.status(400).json({ success: false, message: "Session expired. Please request a new OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Session expired. Please request a new OTP." });
         }
 
         if (req.session.otpExpiry && Date.now() < req.session.otpExpiry) {
-            return res.status(400).json({ success: false, message: "Please wait until the timer ends before resending OTP." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Please wait until the timer ends before resending OTP." });
         }
 
         const otp = generateOtp();
@@ -197,13 +198,13 @@ const resendEmailOtp = async (req, res) => {
             req.session.userOtp = otp;
             req.session.otpExpiry = Date.now() + 60000;  // 1 minute expiry
 
-            return res.status(200).json({ success: true, message: "New OTP has been sent!" });
+            return res.status(HTTP_STATUS.OK).json({ success: true, message: "New OTP has been sent!" });
         } else {
-            return res.status(500).json({ success: false, message: "Failed to resend OTP. Please try again." });
+            return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to resend OTP. Please try again." });
         }
     } catch (error) {
         console.error("Error in Resend OTP:", error);
-        return res.status(500).json({ success: false, message: "Internal Server Error" });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 

@@ -1,6 +1,7 @@
 const Category = require("../../models/categorySchema");
 const { getPaginatedCategories } = require("../../helpers/categoryHelpers");
 const Product = require("../../models/productSchema");
+const HTTP_STATUS = require("../../config/httpStatusCode");
 
 const categoryInfo = async (req, res) => {
     const search = req.query.search || "";
@@ -48,22 +49,25 @@ const addCategory = async (req, res) => {
     const limit = 4;
 
     try {
-  
-        const existingCategory = await Category.findOne({ name });
+        
+        const formattedName = name.trim().toLowerCase();
+        
+        
+        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i' } });
+
         if (existingCategory) {
-            req.session.errorMessage = 'Category already exists';
+            req.session.errorMessage = 'Category already exists!';
             return res.redirect(`/admin/categories?search=${search}&page=${page}`);
         }
 
-        const newCategory = new Category({ name, description });
+        
+        const newCategory = new Category({ name: formattedName, description });
         await newCategory.save();
 
-        
         req.session.successMessage = 'Category added successfully!';
-
     } catch (error) {
-        console.error(error);
-        req.session.errorMessage = 'An error occurred while adding the category';
+        console.error("Error adding category:", error);
+        req.session.errorMessage = 'An error occurred while adding the category!';
     }
 
     return res.redirect(`/admin/categories?search=${search}&page=${page}`);
@@ -110,6 +114,7 @@ const getEditCategory = async (req, res) => {
             return res.redirect(`/admin/categories?error=true&message=Category not found`);
         }
 
+    
       
         res.render('admin/editCategory', { category, error: false, message: req.query.message || '' });
     } catch (error) {
@@ -119,18 +124,20 @@ const getEditCategory = async (req, res) => {
 };
 //--------------------------------------------------------
 
-// POST Update Category
+
 const updateCategory = async (req, res) => {
     try {
         const { id, name, description } = req.body;
 
-      
+    
         const existingCategory = await Category.findOne({ name, _id: { $ne: id } });
 
         if (existingCategory) {
 
             return res.redirect(`/admin/editCategory/${id}?error=true&message=Category name already exists`);
         }
+
+
 
        
         await Category.updateOne({ _id: id }, { $set: { name, description } });
@@ -148,10 +155,10 @@ const deleteCategory = async (req, res) => {
     try {
         const { id, search, page } = req.query;
 
-        // Mark the category as deleted (soft delete)
+      
         await Category.updateOne({ _id: id }, { $set: { isDeleted: true } });
 
-        // Redirect back to the category list page with a success message
+     
         req.session.successMessage = 'Category deleted successfully';
         return res.redirect(`/admin/categories?search=${search}&page=${page}`);
     } catch (error) {
@@ -168,7 +175,7 @@ const addCategoryOffer = async (req, res) => {
         
         const findCategory = await Category.findOne({ _id: categoryId });
         if (!findCategory) {
-            return res.status(404).json({ status: false, message: "Category not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ status: false, message: "Category not found" });
         }
 
        
@@ -199,7 +206,7 @@ const addCategoryOffer = async (req, res) => {
         res.json({ status: true, message: "Category offer applied successfully" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ status: false, message: "Internal server error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ status: false, message: "Internal server error" });
     }
 };
 
@@ -212,7 +219,7 @@ const removeCategoryOffer = async (req, res) => {
         const findCategory = await Category.findOne({ _id: categoryId });
         
         if (!findCategory) {
-            return res.status(404).json({ status: false, message: "Category not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ status: false, message: "Category not found" });
         }
 
         
@@ -235,7 +242,7 @@ const removeCategoryOffer = async (req, res) => {
         res.json({ status: true, message: "Category offer removed successfully" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ status: false, message: "Internal server error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ status: false, message: "Internal server error" });
     }
 };
 

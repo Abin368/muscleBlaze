@@ -3,6 +3,7 @@ const User = require("../../models/userSchema");
 const Order = require("../../models/orderSchema")
 const Address = require("../../models/addressSchema")
 const Wallet = require('../../models/walletSchema')
+const HTTP_STATUS=require('../../config/httpStatusCode')
 
 const getOrder = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ const getOrder = async (req, res) => {
             }, (err, html) => {
                 if (err) {
                     console.error(err);
-                    return res.status(500).json({ success: false, message: "Error rendering partial content" });
+                    return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error rendering partial content" });
                 }
                 res.send(html);
             });
@@ -61,7 +62,7 @@ const getOrder = async (req, res) => {
         }
     } catch (error) {
         console.error("Error fetching orders:", error);
-        res.status(500).json({ success: false, message: "Failed to fetch orders" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to fetch orders" });
     }
 };
 
@@ -75,10 +76,10 @@ const getOrderDetails = async (req, res) => {
 
         const order = await Order.findById(orderId)
             .populate("userId", "name email")  
-            .populate("orderItems.product", "productName price productImage");
+            .populate("orderItems.product", "productName price productImage salePrice");
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(HTTP_STATUS.NOT_FOUND).send("Order not found");
         }
 
         const addressId = order.address; 
@@ -110,7 +111,7 @@ const getOrderDetails = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching order details:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send("Internal Server Error");
     }
 };
 
@@ -130,7 +131,7 @@ const updateOrderStatus = async (req, res) => {
             if (productId) {
                 const order = await Order.findById(orderId);
                 if (!order) {
-                    return res.status(404).json({ success: false, message: "Order not found" });
+                    return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Order not found" });
                 }
 
           
@@ -151,13 +152,13 @@ const updateOrderStatus = async (req, res) => {
         const order = await Order.findByIdAndUpdate(orderId, updateData, { new: true });
 
         if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Order not found" });
         }
 
         res.json({ success: true, message: "Order status updated successfully", order });
     } catch (error) {
         console.error("Error updating order status:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Internal Server Error" });
     }
 };
 //---------------------------------------------------------
@@ -169,22 +170,34 @@ const approveReturn = async (req, res) => {
             .populate("orderItems.product")
             .populate("userId");
 
+            
+
         if (!order) {
-            return res.status(404).json({ success: false, message: "Order not found" });
+            return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Order not found" });
         }
 
         if (!order.userId) {
-            return res.status(400).json({ success: false, message: "User not found for this order." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "User not found for this order." });
         }
 
         const userId = order.userId._id.toString();
         let refundAmount = 0;
         let hasReturnedItems = false;
 
+        let totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+           
+            let itemPerPrice = order.discount / totalQuantity;
+           
+
         for (const item of order.orderItems) {
             if (returnItems.includes(item.product._id.toString()) && item.returnStatus === "Requested") {
                 item.returnStatus = "Approved";
-                refundAmount += item.product.salePrice * item.quantity;
+
+                let refundPerItem = item.price - itemPerPrice;
+
+                
+                refundAmount += refundPerItem * item.quantity;
                 hasReturnedItems = true;
                 item.status='Returned'
 
@@ -196,12 +209,12 @@ const approveReturn = async (req, res) => {
         }
 
         if (!hasReturnedItems) {
-            return res.status(400).json({ success: false, message: "No valid products selected for return." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "No valid products selected for return." });
         }
 
         console.log("Total Refund Amount:", refundAmount);
 
-     
+        refundAmount = parseFloat(refundAmount.toFixed(2));
         await Wallet.findOneAndUpdate(
             { userId },
             {
@@ -241,7 +254,7 @@ const approveReturn = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Error approving return." });
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error approving return." });
     }
 };
 
