@@ -15,6 +15,10 @@ body {
   font-family: 'Arial', sans-serif;
 }
 
+  /* ==========================================================================
+    
+     ========================================================================== */
+
 header {
   display: flex;
   align-items: center;
@@ -40,6 +44,10 @@ header {
 .logo .b {
   color: #FBBC04;
 }
+
+  /* ==========================================================================
+    
+     ========================================================================== */
 
 nav {
   display: flex;
@@ -84,7 +92,9 @@ nav {
 .nav-links li a:hover::after {
   width: 100%;
 }
-
+  /* ==========================================================================
+    
+     ========================================================================== */
 .search-bar {
   display: flex;
   align-items: center;
@@ -120,7 +130,9 @@ nav {
 .search-bar button i {
   color: white;
 }
-
+  /* ==========================================================================
+    
+     ========================================================================== */
 .icons {
   display: flex;
   align-items: center;
@@ -138,76 +150,491 @@ nav {
 .icons a:hover {
   color: #FBBC04;
 }
-
-/* Hamburger Menu */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-}
-
-.hamburger .line {
-  width: 25px;
-  height: 3px;
-  background-color: black;
-  margin: 4px 0;
-  transition: all 0.3s ease;
-}
-
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  header {
-    padding: 0 20px;
-    height: 80px;
+.header-icons {
+    display: flex;
+    gap: 15px;
   }
-
-  .nav-links {
+  
+  .header-icons a {
+    position: relative;
+  }
+  
+  .header-icons span {
     position: absolute;
-    top: 80px;
-    right: 0;
-    background-color: #D4D4D4;
-    width: 100%;
-    flex-direction: column;
+    top: -5px;
+    right: -5px;
+    background: #FBBC04;
+    color: white;
+    font-size: 12px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    height: 0;
-    overflow: hidden;
-    transition: height 0.3s ease;
   }
-
-  .nav-links.active {
-    height: 250px; /* Adjust based on content */
+  
+/* ==========================================================================
+    
+     ========================================================================== */
+     .profile-dropdown {
+    position: absolute;
+    display: inline-block;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    margin-left: -30px;
   }
-
-  .nav-links li {
-    margin: 15px 0;
+  
+  .profile-dropdown:hover {
+    transform: scale(1.05);
   }
-
-  .hamburger {
-    display: flex;
-  }
-
-  .search-bar {
-    display: none; /* Hide search bar on smaller screens */
-  }
-
-  .icons {
-    margin-left: auto; /* Push icons to the right */
-  }
-}
-
-@media (max-width: 480px) {
-  .logo {
+  
+  .profile-icon {
+    color: black;
     font-size: 24px;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
   }
-
-  .icons a {
-    margin: 0 10px;
+  
+  .profile-icon:hover {
+    color: #FBBC04;
+    transform: rotate(360deg);
+  }
+  
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 200px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    z-index: 100;
+    padding: 15px 0;
+    margin-top: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+  }
+  
+  .profile-dropdown:hover .dropdown-content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear;
+  }
+  
+  .dropdown-content p {
+    padding: 12px 24px;
+    margin: 0;
     font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    text-align: center;
+    transition: background-color 0.3s ease;
   }
-}
+  
+  .dropdown-content p:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .dropdown-content a {
+    display: block;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    transition: background-color 0.3s ease, padding-left 0.3s ease;
+    border-radius: 6px;
+    margin: 4px 0;
+  }
+  
+  .dropdown-content a:hover {
+    background-color: #FBBC04;
+    color: white;
+    padding-left: 30px;
+  }
 
+  /* ==========================================================================
+    
+     ========================================================================== */
+     /* Base styles */
+     .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      margin-left: 15px;
+      gap: 5px;
+      padding: 8px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f6f6f6, #e9e9e9);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hamburger .line {
+      width: 24px;
+      height: 3px;
+      background: linear-gradient(to right, #555, #333);
+      border-radius: 4px;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .hamburger:hover {
+      transform: scale(1.05) rotate(5deg);
+      background: linear-gradient(135deg, #ffffff, #f0f0f0);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  nav {
+      display: block;
+  }
+  
+  /* Mobile screens (below 768px) */
+  @media (max-width: 768px) {
+      header {
+          padding: 0 15px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+  
+      .hamburger {
+          display: flex;
+          order: 1;
+      }
+  
+      .logo {
+          order: 0;
+          font-weight: 700;
+          color: #222;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+  
+      nav {
+          position: fixed;
+          top: 80px;
+          left: -280px;
+          width: 280px;
+          height: calc(100vh - 80px);
+          z-index: 2000;
+          transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+  
+      nav.active {
+          left: 0;
+      }
+  
+      .nav-links {
+          display: flex;
+          flex-direction: column;
+          background: linear-gradient(145deg, #ffffff, #e8ecef);
+          width: 100%;
+          height: 100%;
+          padding: 20px 0;
+          margin: 0;
+          list-style: none;
+          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+          border-radius: 0 15px 15px 0;
+          backdrop-filter: blur(5px);
+          overflow-y: auto;
+      }
+  
+      .nav-links li {
+          width: 100%;
+          margin: 10px 0;
+          padding: 0 20px;
+          text-align: left;
+          transition: transform 0.2s ease;
+      }
+  
+      .nav-links li:hover {
+          transform: translateX(10px);
+      }
+  
+      .nav-links li a {
+          display: block;
+          padding: 12px 15px;
+          font-size: 18px;
+          color: #333;
+          text-decoration: none;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.8);
+          transition: all 0.3s ease;
+      }
+  
+      .nav-links li a:hover {
+          background: linear-gradient(to right, #FBBC04, #f7d794);
+          color: #fff;
+          box-shadow: 0 2px 8px rgba(251, 188, 4, 0.3);
+      }
+  
+      .search-form {
+          display: flex;
+          order: 2;
+          margin-left: 10px;
+          width: auto;
+      }
+  
+      .search-bar {
+          display: flex;
+          align-items: center;
+      }
+  
+      .search-bar input {
+          width: 120px;
+          padding: 6px 10px;
+          border: none;
+          border-radius: 15px;
+          background: #fff;
+          box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          font-size: 14px;
+      }
+  
+      .search-bar input:focus {
+          outline: none;
+          box-shadow: 0 0 8px rgba(251, 188, 4, 0.5);
+          width: 150px;
+      }
+  
+      .search-bar button {
+          background: none;
+          border: none;
+          padding: 5px;
+          cursor: pointer;
+          color: #555;
+          transition: color 0.3s ease;
+      }
+  
+      .search-bar button:hover {
+          color: #FBBC04;
+      }
+  
+      .icons {
+          margin-left: auto;
+          order: 3;
+          gap: 10px;
+          display: flex;
+          align-items: center;
+      }
+  
+      .profile-dropdown {
+          position: relative;
+          margin-left: 0;
+      }
+  
+      .dropdown-content {
+          right: -60px;
+          min-width: 200px;
+          background: #fff;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+  
+      .profile-icon {
+          font-size: 24px;
+          color: #333;
+          transition: color 0.3s ease;
+      }
+  
+      .profile-icon:hover {
+          color: #FBBC04;
+      }
+  }
+  
+  /* Small mobile screens (below 480px) */
+  @media (max-width: 480px) {
+      .logo {
+          font-size: 22px;
+      }
+  
+      .hamburger .line {
+          width: 20px;
+      }
+  
+      nav {
+          left: -220px;
+          width: 220px;
+      }
+  
+      nav.active {
+          left: 0;
+      }
+  
+      .search-bar input {
+          width: 100px;
+      }
+  
+      .search-bar input:focus {
+          width: 120px;
+      }
+  
+      .icons a {
+          margin: 0 8px;
+          font-size: 16px;
+      }
+  }
+  
+  /* Very small mobile screens (below 420px) */
+  @media (max-width: 420px) {
+      header {
+          padding: 0 10px;
+          height: 70px;
+      }
+  
+      .logo {
+          font-size: 20px;
+      }
+  
+      .hamburger {
+          margin-left: 10px;
+          padding: 6px;
+      }
+  
+      .hamburger .line {
+          width: 18px;
+          height: 2px;
+      }
+  
+      nav {
+          left: -200px;
+          width: 200px;
+      }
+  
+      nav.active {
+          left: 0;
+      }
+  
+      .nav-links li {
+          margin: 8px 0;
+          padding: 0 15px;
+      }
+  
+      .nav-links li a {
+          padding: 10px 12px;
+          font-size: 16px;
+      }
+  
+      .search-bar input {
+          width: 90px;
+          padding: 5px 8px;
+          font-size: 12px;
+      }
+  
+      .search-bar input:focus {
+          width: 110px;
+      }
+  
+      .search-bar button {
+          padding: 4px;
+      }
+  
+      .icons {
+          gap: 8px;
+      }
+  
+      .icons a {
+          margin: 0 6px;
+          font-size: 14px;
+      }
+  
+      .profile-icon {
+          font-size: 20px;
+      }
+  
+      .dropdown-content {
+          right: -50px;
+          min-width: 180px;
+      }
+  }
+  
+  /* Extremely small mobile screens (below 360px) */
+  @media (max-width: 360px) {
+      header {
+          padding: 0 8px; /* Even tighter padding */
+          height: 60px; /* Shorter header */
+      }
+  
+      .logo {
+          font-size: 18px; /* Smaller logo */
+      }
+  
+      .hamburger {
+          margin-left: 8px;
+          padding: 5px;
+      }
+  
+      .hamburger .line {
+          width: 16px; /* Tiny hamburger lines */
+          height: 2px;
+      }
+  
+      nav {
+          left: -180px; /* Narrower menu */
+          width: 180px;
+      }
+  
+      nav.active {
+          left: 0;
+      }
+  
+      .nav-links li {
+          margin: 6px 0; /* Tighter spacing */
+          padding: 0 12px;
+      }
+  
+      .nav-links li a {
+          padding: 8px 10px; /* Smaller padding */
+          font-size: 14px; /* Smaller text */
+      }
+  
+      .search-form {
+          margin-left: 8px;
+      }
+  
+      .search-bar input {
+          width: 80px; /* Tiny search bar */
+          padding: 4px 6px;
+          font-size: 11px;
+      }
+  
+      .search-bar input:focus {
+          width: 100px;
+      }
+  
+      .search-bar button {
+          padding: 3px;
+      }
+  
+      .icons {
+          gap: 6px;
+      }
+  
+      .icons a {
+          margin: 0 5px;
+          font-size: 12px;
+      }
+  
+      .profile-icon {
+          font-size: 18px;
+      }
+  
+      .dropdown-content {
+          right: -40px;
+          min-width: 160px;
+      }
+  }
+
+  /* ==========================================================================
+    
+     ========================================================================== */
 /* Footer Styles */
 footer {
   background-color: black;
@@ -324,6 +751,10 @@ footer {
     font-size: 18px;
   }
 }
+
+/* ==========================================================================
+    
+     ========================================================================== */
 /* Dropdown Container */
 .profile-dropdown {
   position: absolute;
@@ -679,6 +1110,122 @@ h1::after {
     color: #777;
     font-style: italic;
 }
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .orders-container {
+        max-width: 90%;
+        padding: 25px;
+    }
+
+    .orders-container h1 {
+        font-size: 26px;
+    }
+
+    .orders-container h3 {
+        font-size: 20px;
+    }
+
+    .orders-container p {
+        font-size: 16px;
+    }
+
+    .product-item img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .back-button {
+        width: 180px;
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .orders-container {
+        max-width: 95%;
+        padding: 20px;
+    }
+
+    .orders-container h1 {
+        font-size: 24px;
+    }
+
+    .orders-container h3 {
+        font-size: 18px;
+    }
+
+    .orders-container p {
+        font-size: 15px;
+    }
+
+    .product-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product-item img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 10px;
+    }
+
+    .address-box {
+        font-size: 16px;
+    }
+
+    .back-button {
+        width: 160px;
+        font-size: 15px;
+    }
+
+    .invoice-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .orders-container {
+        padding: 15px;
+    }
+
+    .orders-container h1 {
+        font-size: 22px;
+    }
+
+    .orders-container h3 {
+        font-size: 16px;
+    }
+
+    .orders-container p {
+        font-size: 14px;
+    }
+
+    .product-item img {
+        width: 70px;
+        height: 70px;
+    }
+
+    .address-box {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .cancel-message {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .back-button {
+        width: 140px;
+        font-size: 14px;
+    }
+
+    .invoice-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
 
 
 
@@ -701,21 +1248,26 @@ h1::after {
                 <p><strong>Estimated Delivery:</strong> <%= deliveryDate %></p>
             <% } %>
             <p><strong>Total Price:</strong> <%= order.totalPrice %></p>
+            <% if (order.couponApplied) { %>
+              <p><strong>Coupon Name:</strong> <%= order.couponName %></p>
+              <p><strong>Discount:</strong> ₹<%= order.discount %></p>
+          <% } %>
             <p><strong>Payment Method:</strong> <%= order.paymentMethod%></p>
         
             <h3>Products Ordered:</h3>
             <div class="product-list">
                 <% order.orderItems.forEach(item => { %>
                     <div class="product-item">
-                        <img src="/uploads/product-images/<%= item.product ? item.product.productImage[0] : 'default-image.jpg' %>" 
-                             alt="<%= item.product ? item.product.productName : 'Product' %>">
+                      <img src="<%= item.product && item.product.productImage.length > 0 ? item.product.productImage[0] : 'default-image.jpg' %>" 
+                      alt="<%= item.product ? item.product.productName : 'Product' %>">
+                 
                         <div>
                             <p><strong>Product:</strong> <%= item.product ? item.product.productName : "Unknown" %></p>
                             <p><strong>Quantity:</strong> <%= item.quantity %></p>
                             <p><strong>Price:</strong> ₹<%= item.product.salePrice || item.product.price %></p>
                             <p><strong>Status:</strong> <%= item.status %></p>
                         
-
+                            
                         </div>
                     </div>
                 <% }); %>

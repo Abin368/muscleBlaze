@@ -2,6 +2,11 @@
   <div class="logo">
     <span class="m">M</span><span class="b">B</span>
   </div>
+  <div class="hamburger">
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+  </div>
   <nav>
     <ul class="nav-links">
       <li><a href="/">Home</a></li>
@@ -13,57 +18,75 @@
       <% } %>
     </ul>
   </nav>
-
-
-
-<form action="/filter" method="GET" class="search-form">
-  <div class="search-bar">
-    <input type="text" name="query" placeholder="Search here" value="<%= searchQuery || '' %>">
-    <button><i class="fas fa-search"></i></button>
-  </div>
-</form>
-
-
-
+  <form action="/filter" method="GET" class="search-form">
+    <div class="search-bar">
+      <input type="text" name="query" placeholder="Search here" value="<%= searchQuery || '' %>">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+  </form>
   <div class="icons">
     <div class="header-icons">
       <a href="/wishlist">
-          <i class="fas fa-heart"></i>
-          <span id="wishlist-count">0</span>
+        <i class="fas fa-heart"></i>
+        <span id="wishlist-count">0</span>
       </a>
       <a href="/cart">
-          <i class="fas fa-shopping-cart"></i>
-          <span id="cart-count">0</span>
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cart-count">0</span>
       </a>
-  </div>
-    <% if (user) { %> <!-- Show user details if logged in -->
+    </div>
+    <% if (user) { %>
       <div class="profile-dropdown">
-        <a href="#" class="profile-icon"><i class="fas fa-user"></i></a> <!-- Profile Icon -->
+        <a href="#" class="profile-icon"><i class="fas fa-user"></i></a>
         <div class="dropdown-content">
-          <p><%= user.username %></p> <!-- Display user's name -->
-          <a href="/profile">Profile</a> <!-- Link to profile page -->
-          <a href="/logout">Logout</a> <!-- Logout button -->
+          <p><%= user.username %></p>
+          <a href="/profile">Profile</a>
+          <a href="/logout">Logout</a>
         </div>
       </div>
     <% } %>
   </div>
 </header>
 
-
 <script>
-  async function fetchCartWishlistCount() {
-    try {
-      const response = await fetch("/cart-wishlist-count");
-      const data = await response.json();
-  
-      document.getElementById("cart-count").innerText = data.cartCount;
-      document.getElementById("wishlist-count").innerText = data.wishlistCount;
-    } catch (error) {
-      console.error("Error fetching cart/wishlist count:", error);
-    }
+ // public/script.js
+async function fetchCartWishlistCount() {
+  try {
+    const response = await fetch("/cart-wishlist-count");
+    const data = await response.json();
+    document.getElementById("cart-count").innerText = data.cartCount;
+    document.getElementById("wishlist-count").innerText = data.wishlistCount;
+  } catch (error) {
+    console.error("Error fetching cart/wishlist count:", error);
   }
-  
-  // Fetch the count when the page loads
-  document.addEventListener("DOMContentLoaded", fetchCartWishlistCount);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    fetchCartWishlistCount();
+
+    const hamburger = document.querySelector(".hamburger");
+    const nav = document.querySelector("nav"); // Target <nav>
+
+    if (hamburger && nav) {
+        hamburger.addEventListener("click", () => {
+            nav.classList.toggle("active"); // Toggle .active on <nav>
+
+            const lines = hamburger.querySelectorAll(".line");
+            if (nav.classList.contains("active")) {
+                lines[0].style.transform = "rotate(45deg) translate(6px, 6px)";
+                lines[1].style.transform = "scaleX(0) translateX(-10px)";
+                lines[1].style.opacity = "0";
+                lines[2].style.transform = "rotate(-45deg) translate(6px, -6px)";
+                hamburger.style.background = "linear-gradient(135deg, #FBBC04, #f7d794)";
+            } else {
+                lines[0].style.transform = "rotate(0) translate(0, 0)";
+                lines[1].style.transform = "scaleX(1) translateX(0)";
+                lines[1].style.opacity = "1";
+                lines[2].style.transform = "rotate(0) translate(0, 0)";
+                hamburger.style.background = "linear-gradient(135deg, #f6f6f6, #e9e9e9)";
+            }
+        });
+    }
+});
   </script>
   

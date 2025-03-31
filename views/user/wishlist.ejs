@@ -23,7 +23,11 @@
               <% wishlist.forEach(item => { %>
                   <div class="wishlist-item-box" data-product-id="<%= item.productId._id %>">
                       <div class="wishlist-item-image">
-                          <img src="/uploads/product-images/<%= item.productId.productImage[0] || 'default-image.jpg' %>" alt="<%= item.productId.name %>">
+                        <img 
+                        src="<%= item.productId.productImage && item.productId.productImage.length > 0 ? item.productId.productImage[0] : '/images/default-image.jpg' %>" 
+                        alt="<%= item.productId.name %>"
+                    >
+                    
                       </div>
   
                       <div class="wishlist-item-details">

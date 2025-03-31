@@ -62,11 +62,21 @@
             <td>
                 <% if (category.isListed) { %>
                     <button class="btn btn-danger" style="width: 70px;">
-                        <a href="/admin/listCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" class="text-white" style="text-decoration: none;">Unlist</a>
+                        <a href="javascript:void(0);" 
+                           class="text-white" 
+                           style="text-decoration: none;" 
+                           onclick="confirmUnlist('<%= category._id %>')">
+                           Unlist
+                        </a>
                     </button>
                 <% } else { %>
                     <button class="btn btn-success" style="width: 70px;">
-                        <a href="/admin/unlistCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" class="text-white" style="text-decoration: none;">List</a>
+                        <a href="javascript:void(0);" 
+                           class="text-white" 
+                           style="text-decoration: none;" 
+                           onclick="confirmList('<%= category._id %>')">
+                           List
+                        </a>
                     </button>
                 <% } %>
             </td>
@@ -78,8 +88,12 @@
                         </a>
                 </button>
                 <button class="btn btn-danger" style="width: 70px;">
-                    <a href="/admin/deleteCategory?id=<%= category._id %>&search=<%= search %>&page=<%= currentPage %>" 
-                       class="text-white" style="text-decoration: none;">Delete</a>
+                    <a href="javascript:void(0);" 
+                       class="text-white" 
+                       style="text-decoration: none;"
+                       onclick="confirmDelete('<%= category._id %>')">
+                       Delete
+                    </a>
                 </button>
             </td>
             
@@ -112,17 +126,7 @@
             
               <!-- ----------------------------------->
             
-            <!-- <% if (typeof error !== 'undefined' && error) { %>
-                <div class="error-message" style="color: red;">
-                    <%= message %>
-                </div>
-            <% } else if (typeof error !== 'undefined' && !error) { %>
-                <div class="success-message" style="color: green;">
-                    <%= message %>
-                </div>
-            <% } %>
-             -->
-
+          
 
              <% if (successMessage) { %>
                 <div class="success-message" style="color: green;">
@@ -254,6 +258,54 @@ async function removeCategoryOffer(categoryId) {
         Swal.fire("Error", "An error occurred during the process.", "error");
     }
 }
+//-------------------------------
+function confirmDelete(categoryId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Once deleted, you won't be able to recover this category!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/deleteCategory?id=${categoryId}&search=<%= search %>&page=<%= currentPage %>`;
+            }
+        });
+    }
+    //---------------------------------
+    function confirmUnlist(categoryId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This category will be unlisted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, unlist it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/listCategory?id=${categoryId}&search=<%= search %>&page=<%= currentPage %>`;
+            }
+        });
+    }
+
+    function confirmList(categoryId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This category will be listed!",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, list it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/unlistCategory?id=${categoryId}&search=<%= search %>&page=<%= currentPage %>`;
+            }
+        });
+    }
 
 
    </script>

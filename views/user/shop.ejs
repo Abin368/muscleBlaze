@@ -13,104 +13,82 @@
 
 <body>
     <%- include('../../views/partials/user/header') %>
-    <!-- <%- include('./breadcrump') %> -->
 
     <div class="breadcrumbs">
-        <a href="/">Home</a>  <a href="/shop">Shop</a>
+        <a href="/">Home</a> <a href="/shop">Shop</a>
     </div>
-    
 
     <div class="shop-container">
-        
         <aside class="sidebar">
-            <button onclick="resetFilters()" class="reset-btn">Reset Filters</button>
-            
-         
-            <h3>Sort By</h3>
-            <ul class="categories">
-                <li><a href="#" class="category-link sort-link" data-sort="low-to-high">Price Lower to Higher</a></li>
-                <li><a href="#" class="category-link sort-link" data-sort="high-to-low">Price Higher to Lower</a></li>
-            </ul>
-            
-            <ul class="categories">
-                <li><a href="#" class="category-link sort-link" data-sort="aA-zZ">aA-zZ</a></li>
-                <li><a href="#" class="category-link sort-link" data-sort="zZ-aZ">zZ-aA</a></li>
-            </ul>
-            
+            <button class="filter-toggle-btn">Show Filters</button>
+            <div class="filter-content" id="filterContent">
+                <button onclick="resetFilters()" class="reset-btn">Reset Filters</button>
+                
+                <h3>Sort By</h3>
+                <ul class="categories">
+                    <li><a href="#" class="category-link sort-link" data-sort="low-to-high">Price Lower to Higher</a></li>
+                    <li><a href="#" class="category-link sort-link" data-sort="high-to-low">Price Higher to Lower</a></li>
+                </ul>
+                <ul class="categories">
+                    <li><a href="#" class="category-link sort-link" data-sort="aA-zZ">aA-zZ</a></li>
+                    <li><a href="#" class="category-link sort-link" data-sort="zZ-aZ">zZ-aA</a></li>
+                </ul>
 
+                <h3>Categories</h3>
+                <ul class="categories">
+                    <% categories.forEach(category => { %> 
+                        <li><a href="/filter?category=<%= category._id %>" class="category-link"><%= category.name %></a></li>
+                    <% }) %>
+                </ul>
 
-            <h3>Categories</h3>
-            <ul class="categories">
-                <% categories.forEach(category => { %> 
-                    <li>
-                        <a href="/filter?category=<%= category._id %>" class="category-link"><%= category.name %></a>
-                    </li>
-                <% }) %>
-            </ul>
-    
-            <h3>Flavors</h3>
-<ul class="categories">
-    <% if (flavors.length > 0) { %>
-        <% flavors.forEach(flavor => { %>
-          
+                <h3>Flavors</h3>
+                <ul class="categories">
+                    <% if (flavors.length > 0) { %>
+                        <% flavors.forEach(flavor => { %>
+                            <li>
+                                <a href="/filter?flavor=<%= flavor %>" 
+                                   class="category-link <%= (selectedFlavor && selectedFlavor === flavor) ? 'active' : '' %>">
+                                   <%= flavor %>
+                                </a>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li>No flavors available</li>
+                    <% } %>
+                </ul>
 
-            <li>
-                <a href="/filter?flavor=<%= flavor %>" 
-                   class="category-link <%= (selectedFlavor && selectedFlavor === flavor) ? 'active' : '' %>">
-                   <%= flavor %>
-                </a>
-            </li>
-            
-        <% }) %>
-    <% } else { %>
-        <li>No flavors available</li>
-    <% } %>
-</ul>
-
-    
-            <h3>Price Range</h3>
-            <ul class="categories">
-                <li><a href="/filter?price=1500" class="category-link">Below ₹1500</a></li>
-                <li><a href="/filter?price=2500" class="category-link">Below ₹2500</a></li>
-                <li><a href="/filter?price=4000" class="category-link">Below ₹4000</a></li>
-                <li><a href="/filter?price=above4000" class="category-link">Above ₹4000</a></li>
-            </ul>
+                <h3>Price Range</h3>
+                <ul class="categories">
+                    <li><a href="/filter?price=1500" class="category-link">Below ₹1500</a></li>
+                    <li><a href="/filter?price=2500" class="category-link">Below ₹2500</a></li>
+                    <li><a href="/filter?price=4000" class="category-link">Below ₹4000</a></li>
+                    <li><a href="/filter?price=above4000" class="category-link">Above ₹4000</a></li>
+                </ul>
+            </div>
         </aside>
-    
-        <!-- Main Content Area for Products -->
+
         <div class="container">
             <h1>All Products</h1>
             <div class="products-grid">
                 <% for (let i = 0; i < product.length; i++) { %>
                     <div class="product-card">
                         <a href="/productDetails?id=<%=product[i]._id%>">
-            
-                        <img 
-                            src="/uploads/product-images/<%= product[i].productImage && product[i].productImage.length > 0 ? product[i].productImage[0] : 'default-image.jpg' %>" 
+                            <img 
+                            src="<%= product[i].productImage && product[i].productImage.length > 0 ? product[i].productImage[0] : '/images/default-image.jpg' %>" 
                             alt="<%= product[i].name %>" 
                             class="product-image"
-                            
-                        > 
+                        >
+                        
                         </a>
                         <div class="product-name"><%= product[i].productName %></div>
                         <div class="product-details">Size: <%= product[i].size ? product[i].size + ' kg' : 'N/A' %></div>
                         <div class="product-details">Flavor: <%= product[i].flavor || 'N/A' %></div>
-                        <!-- <div class="product-details">
-                            Price: ₹<%= product[i].salePrice ? product[i].salePrice.toFixed(2) : '0.00' %> 
-                            <% if (product[i].productOffer && product[i].productOffer > 0) { %>
-                                <span class="offer-text">(<%= product[i].productOffer %>% off)</span>
-                            <% } %>
-                        </div> -->
-                        
                         <div class="product-details">
                             Price: ₹<%= product[i].salePrice ? product[i].salePrice.toFixed(2) : '0.00' %> 
                             <% if (product[i].highestOffer > 0) { %>
                                 <span class="offer-text">(<%= product[i].highestOffer %>% off)</span>
                             <% } %>
                         </div>
-                        
-
-
                         <div class="product-details">
                             <% if (product[i].quantity === 0) { %>
                                 <span style="color: red; font-weight: bold;">Out of stock</span>
@@ -120,46 +98,56 @@
                                 <span style="color: green; font-weight: bold;">Available</span>
                             <% } %>
                         </div>
-    
                         <div class="wishlist-icon">
                             <i id="wishlist-icon-<%= product[i]._id %>" 
-                                class="fas fa-heart" 
-                                onclick="addToWishlist('<%= product[i]._id %>')">
-                             </i>
-                             
+                               class="fas fa-heart" 
+                               onclick="addToWishlist('<%= product[i]._id %>')">
+                            </i>
                         </div>
                         <button class="add-to-cart-btn" onclick="addToCart('<%= product[i]._id %>')">Add to Cart</button>
                     </div>
                 <% } %>
-              
-                
             </div>
             <div class="pagination">
                 <% if (currentPage > 1) { %>
                     <a href="?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" class="page-link">Previous</a>
                 <% } %>
-            
                 <% for (let i = 1; i <= totalPages; i++) { %>
                     <a href="?page=<%= i %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" 
                        class="page-link <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
                 <% } %>
-            
                 <% if (currentPage < totalPages) { %>
                     <a href="?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&flavor=<%= selectedFlavor || '' %>&price=<%= selectedPrice || '' %>" class="page-link">Next</a>
                 <% } %>
             </div>
-            
         </div>
-        
     </div>
-    
-     <!-- Closing .shop-container -->
+
+   
     
 
     <%- include('../../views/partials/user/footer') %>
     <script src="/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.querySelector(".filter-toggle-btn");
+    const filterContent = document.querySelector("#filterContent");
+
+    if (toggleBtn && filterContent) {
+        toggleBtn.addEventListener("click", () => {
+            filterContent.classList.toggle("active");
+            toggleBtn.textContent = filterContent.classList.contains("active") ? "Hide Filters" : "Show Filters";
+        });
+    }
+
+    // Existing cart/wishlist functions can go here if needed
+});
+
+
+
+//--------------------------------------
 
         function resetFilters() {
     window.location.href = "/filter";
@@ -179,6 +167,19 @@ document.querySelectorAll(".sort-link").forEach(link => {
   });
 
 //---------------------------------------------
+async function fetchCartWishlistCount() {
+      try {
+        const response = await fetch("/cart-wishlist-count");
+        const data = await response.json();
+        document.getElementById("cart-count").innerText = data.cartCount;
+        document.getElementById("wishlist-count").innerText = data.wishlistCount;
+      } catch (error) {
+        console.error("Error fetching cart/wishlist count:", error);
+      }
+    }
+
+
+//------------------------------------
 function addToCart(productId) {
   fetch('/cart/add', {
     method: 'POST',
@@ -265,6 +266,28 @@ function addToWishlist(productId) {
     });
 }
 
+//--------------------------
+document.addEventListener("DOMContentLoaded", () => {
+      fetchCartWishlistCount();
+
+      const hamburger = document.querySelector(".hamburger");
+      const navLinks = document.querySelector(".nav-links");
+      if (hamburger && navLinks) {
+        hamburger.addEventListener("click", () => {
+          navLinks.classList.toggle("active");
+          const lines = hamburger.querySelectorAll(".line");
+          if (navLinks.classList.contains("active")) {
+            lines[0].style.transform = "rotate(45deg) translate(0.35rem, 0.35rem)";
+            lines[1].style.opacity = "0";
+            lines[2].style.transform = "rotate(-45deg) translate(0.35rem, -0.35rem)";
+          } else {
+            lines[0].style.transform = "rotate(0) translate(0, 0)";
+            lines[1].style.opacity = "1";
+            lines[2].style.transform = "rotate(0) translate(0, 0)";
+          }
+        });
+      }
+    });
     </script>
 </body>
 

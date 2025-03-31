@@ -134,3 +134,56 @@ margin-bottom: 10px;
   border-radius: 5px;
   font-weight: bold;
 }
+@media (max-width: 480px) {
+  /* Adjust header font size */
+  header h1 {
+    font-size: 1.2rem;
+  }
+
+  /* Adjust form width and centering for smaller screens */
+  form {
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  /* Adjust input fields for smaller screens */
+  input {
+    width: 80%; /* Make inputs wider for smaller screens */
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust button size for smaller screens */
+  button {
+    width: 80%; /* Match input width */
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust h1 font size for smaller screens */
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  /* Adjust footer padding for smaller screens */
+  footer {
+    padding: 0.8rem;
+  }
+
+  /* Adjust footer text size for smaller screens */
+  footer p {
+    font-size: 0.8rem;
+  }
+
+  /* Adjust message font size */
+  .message {
+    font-size: 0.8rem;
+  }
+
+  /* Adjust error and success message padding */
+  .error-message, .error, .success {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+}

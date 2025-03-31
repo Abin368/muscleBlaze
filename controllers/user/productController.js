@@ -136,7 +136,7 @@ const addReview = async (req, res) => {
             review.user.toString() === userObjectId.toString()
         );
 
-        console.log("Existing Review:", existingReview); 
+      
 
         if (existingReview) {
             return res.json({ success: false, message: "You have already reviewed this product." });

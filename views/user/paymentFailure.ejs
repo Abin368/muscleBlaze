@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .payment-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+            padding: 20px;
+            margin: 20px 0; 
+        }
+        
+        .payment-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 420px;
+            padding: 30px 25px; /* Slightly reduced padding */
+            text-align: center;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .error-icon {
+            font-size: 60px; /* Reduced from 72px */
+            color: #ff3e4e;
+            margin-bottom: 20px; /* Reduced from 24px */
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .error-title {
+            color: #2d3748;
+            font-size: 24px; /* Reduced from 28px */
+            font-weight: 700;
+            margin-bottom: 12px; /* Reduced from 16px */
+        }
+        
+        .error-message {
+            color: #718096;
+            font-size: 15px; /* Reduced from 16px */
+            line-height: 1.5;
+            margin-bottom: 24px; /* Reduced from 32px */
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Reduced from 12px */
+        }
+        
+        .btn {
+            display: block;
+            padding: 12px 20px; /* Reduced from 14px 24px */
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px; /* Reduced from 16px */
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #FBBC04;
+            color: #000;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #F9A825;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249, 168, 37, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: #4A5568;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #F7FAFC;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <%- include('../../views/partials/user/header') %>
+    
+    <div class="payment-container">
+        <div class="payment-card">
+            <i class="fa-solid fa-circle-exclamation error-icon"></i>
+            <h1 class="error-title">Payment Failed</h1>
+            <p class="error-message">We couldn't process your payment. Please check your payment details and try again.</p>
+            <div class="button-container">
+                <a href="/orders" class="btn btn-primary">Try Again</a>
+                <a href="/" class="btn btn-secondary">Return to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <%- include('../../views/partials/user/footer') %>
+</body>
+</html>

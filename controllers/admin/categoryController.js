@@ -171,7 +171,7 @@ const deleteCategory = async (req, res) => {
 const addCategoryOffer = async (req, res) => {
     try {
         const { categoryId, percentage } = req.body;  
-        console.log('Category ID:', categoryId, 'Percentage:', percentage); 
+      
         
         const findCategory = await Category.findOne({ _id: categoryId });
         if (!findCategory) {

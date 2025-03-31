@@ -83,7 +83,7 @@ const removeFromWishlist = async (req, res) => {
             return res.json({ success: false, message: 'Wishlist not found' });
         }
 
-        // Remove product from wishlist
+        
         wishlist.products = wishlist.products.filter(
             item => item.productId.toString() !== productId
         );

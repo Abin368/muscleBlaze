@@ -83,8 +83,7 @@ const getOrderDetails = async (req, res) => {
         }
 
         const addressId = order.address; 
-        console.log("Address ID from Order:", addressId);
-
+      
       
         const addressDoc = await Address.findOne({ "address._id": addressId }, { "address.$": 1 });
 
@@ -120,7 +119,7 @@ const getOrderDetails = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
     try {
-        console.log("Received Data:", req.body); 
+      
 
         const { orderId } = req.params;
         const { status, cancelMessage, productId } = req.body;
@@ -167,85 +166,124 @@ const approveReturn = async (req, res) => {
         const { orderId, returnItems } = req.body;
 
         const order = await Order.findById(orderId)
-            .populate("orderItems.product")
-            .populate("userId");
-
-            
+            .populate('orderItems.product', 'productName')
+            .populate('userId', 'name');
 
         if (!order) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Order not found" });
         }
 
         if (!order.userId) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "User not found for this order." });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "User not found for this order" });
         }
 
         const userId = order.userId._id.toString();
-        let refundAmount = 0;
-        let hasReturnedItems = false;
-
-        let totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
-        
-           
-            let itemPerPrice = order.discount / totalQuantity;
-           
-
-        for (const item of order.orderItems) {
-            if (returnItems.includes(item.product._id.toString()) && item.returnStatus === "Requested") {
-                item.returnStatus = "Approved";
-
-                let refundPerItem = item.price - itemPerPrice;
-
-                
-                refundAmount += refundPerItem * item.quantity;
-                hasReturnedItems = true;
-                item.status='Returned'
-
-             
-                await Product.findByIdAndUpdate(item.product._id, {
-                    $inc: { quantity: item.quantity }
-                });
-            }
-        }
-
-        if (!hasReturnedItems) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "No valid products selected for return." });
-        }
-
-        console.log("Total Refund Amount:", refundAmount);
-
-        refundAmount = parseFloat(refundAmount.toFixed(2));
-        await Wallet.findOneAndUpdate(
-            { userId },
-            {
-                $inc: { balance: refundAmount },
-                $push: {
-                    transactions: {
-                        type: "credit",
-                        amount: refundAmount,
-                        reason: "Product Return Refund",
-                        orderId: order._id
-                    }
-                }
-            },
-            { new: true, upsert: true }
-        );
 
        
-        const allReturned = order.orderItems.every(item => item.returnStatus === "Approved");
-        const someReturned = order.orderItems.some(item => item.returnStatus === "Approved");
+        const totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+        const totalPreDiscount = order.orderItems.reduce((sum, item) => {
+            const itemTotal = item.totalPrice || (order.paymentMethod === 'Razorpay' ? item.price : item.price * item.quantity);
+            return sum + itemTotal;
+        }, 0);
+        const totalDiscount = order.discount || 0;
+        const effectiveGrandTotal = order.finalAmount || (totalPreDiscount - totalDiscount);
 
-        if (allReturned) {
-            order.status = "Returned";
-        } else if (someReturned) {
-            order.status = "Partially Returned";
-        } else {
-            order.status = "Return Requested";
+      
+        const wallet = await Wallet.findOne({ userId });
+        const previousRefunds = wallet?.transactions
+            .filter(t => t.orderId === orderId && t.type === 'credit')
+            .reduce((sum, t) => sum + t.amount, 0) || 0;
+
+     
+        let refundAmount = 0;
+        let returnedQuantity = 0;
+        let returnedPreDiscountTotal = 0;
+        const bulkUpdateOps = [];
+
+        order.orderItems.forEach(item => {
+            const itemId = item.product._id.toString();
+            if (returnItems.includes(itemId) && item.returnStatus === "Requested") {
+                const itemTotal = item.totalPrice || (order.paymentMethod === 'Razorpay' ? item.price : item.price * item.quantity);
+               
+
+                item.returnStatus = "Approved";
+                item.status = "Returned";
+
+                returnedPreDiscountTotal += itemTotal;
+                returnedQuantity += item.quantity;
+
+                bulkUpdateOps.push({
+                    updateOne: {
+                        filter: { _id: item.product._id },
+                        update: { $inc: { quantity: item.quantity } }
+                    }
+                });
+            }
+        });
+
+        if (returnedQuantity === 0) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "No valid products selected for return" });
         }
 
-        await order.save();
+       
+        const refundDiscount = totalDiscount * (returnedQuantity / totalQuantity);
+        refundAmount = returnedPreDiscountTotal - refundDiscount;
+        const maxRefundable = effectiveGrandTotal - previousRefunds;
+        refundAmount = Math.min(refundAmount, maxRefundable);
+        refundAmount = Math.max(refundAmount, 0);
+        refundAmount = parseFloat(refundAmount.toFixed(2));
 
-        res.json({
+       
+
+      
+        const allReturned = order.orderItems.every(item => item.status === "Returned");
+        const someReturned = order.orderItems.some(item => item.status === "Returned");
+        order.status = allReturned ? "Returned" : someReturned ? "Partially Returned" : "Return Requested";
+        await order.save();
+      
+
+     
+        if (bulkUpdateOps.length > 0) {
+            await Product.bulkWrite(bulkUpdateOps);
+            console.log("Stock restored for returned products.");
+        }
+
+       
+        if (refundAmount > 0 && ["Razorpay", "wallet"].includes(order.paymentMethod)) {
+            console.log(`Processing refund of ${refundAmount} to wallet for ${order.paymentMethod} payment.`);
+
+            let wallet = await Wallet.findOne({ userId }) || new Wallet({
+                userId,
+                balance: 0,
+                transactions: []
+            });
+
+            const previousBalance = Number(wallet.balance || 0);
+            wallet.balance = previousBalance + refundAmount;
+            wallet.transactions.push({
+                type: "credit",
+                amount: refundAmount,
+                reason: `Refund for returned items - ${order.paymentMethod}`,
+                orderId: order._id,
+                date: new Date()
+            });
+
+            await wallet.save();
+           
+
+            const user = await User.findById(userId);
+            if (user) {
+                user.wallet = Number(user.wallet || 0) + refundAmount;
+                await user.save();
+                
+            } else {
+                console.log('User not found for ID:', userId);
+            }
+        } else {
+            console.log('No refund processed:', { refundAmount, paymentMethod: order.paymentMethod });
+        }
+
+        res.status(HTTP_STATUS.OK).json({
             success: true,
             message: "Return approved, stock updated & wallet credited.",
             refundAmount,
@@ -253,12 +291,10 @@ const approveReturn = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error approving return." });
+        console.error("Error approving return:", error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Error approving return" });
     }
 };
-
-
 
 
 module.exports={

@@ -99,7 +99,7 @@ const changeEmailValid = async (req, res) => {
      
         const otp = generateOtp();
         const emailSent = await sendVerificationEmail(email, otp);
-        console.log(otp);
+      
       
 
         if (emailSent) {
@@ -127,7 +127,7 @@ const verifyOtp = async (req, res) => {
         }
 
         const userId = req.session.user._id; 
-        console.log("User ID from session:", userId);
+      
 
         if (!userId) {
             return res.status(HTTP_STATUS.UNAUTHORIZED).json({ success: false, message: "User not logged in." });
@@ -144,7 +144,7 @@ const verifyOtp = async (req, res) => {
         if (otp.toString() === req.session.userOtp.toString()) {
          
             const newEmail = req.session.email;  
-            console.log("New email to update:", newEmail);
+           
 
          
             const updatedUser = await User.findByIdAndUpdate(
@@ -164,8 +164,7 @@ const verifyOtp = async (req, res) => {
             req.session.otpExpiry = null;
             req.session.isVerified = true;
 
-            console.log("Updated email in session:", req.session.user.email);
-            console.log("Updated email in database:", updatedUser.email);
+         
 
             return res.status(HTTP_STATUS.OK).json({ success: true, message: "OTP verified successfully. Email updated." });
         } else {

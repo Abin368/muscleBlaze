@@ -19,7 +19,6 @@ const pageNotfound=async(req,res)=>{
     }
 }
 
-//---------------------------------------------------
 
   
 
@@ -84,7 +83,7 @@ const signup = async (req, res) => {
     try {
       await sendOTPEmail(email, otp);
     } catch (error) {
-      console.error("Error sending OTP:", error);
+     
       return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to send OTP, please try again." });
     }
 
@@ -92,7 +91,7 @@ const signup = async (req, res) => {
     req.session.otpData = { name, email, phone, password, otp, timestamp: Date.now() };
     req.session.otpExpiry = Date.now() + 60000; 
 
-    console.log("Generated OTP:", otp);
+   
 
     return res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -123,7 +122,7 @@ const signup = async (req, res) => {
   
     
       await sendOTPEmail(otpData.email, newOtp);
-      console.log(newOtp)
+     
   
       res.json({ success: true, message: "New OTP sent to your email!" });
     } catch (error) {
@@ -270,8 +269,7 @@ const loadHomepage = async (req, res) => {
             });
         }
 
-        console.log('User session cleared successfully');
-
+     
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
@@ -379,7 +377,7 @@ const loadShoppingPage = async (req, res) => {
       .limit(limit)
       .lean();
 
-    console.log("Product Categories:", products.map(p => p.category));
+    
 
     if (!products || products.length === 0) {
       return res.render('user/shop', {
@@ -444,7 +442,7 @@ const filterProduct = async (req, res) => {
     const categories = await Category.find({ isListed: true, isDeleted: false }).lean();
     const validCategoryIds = categories.map(cat => cat._id.toString());
 
-    console.log("Valid Categories:", validCategoryIds);
+  
 
     const query = {
       isBlocked: false,
@@ -503,7 +501,7 @@ const filterProduct = async (req, res) => {
    
     let findProducts = await Product.find(query).sort(sortCondition).lean();
 
-    console.log("Filtered Product Categories:", findProducts.map(p => p.category));
+  
 
    
     const uniqueFlavors = await Product.distinct("flavor", {
@@ -567,13 +565,13 @@ const searchProducts = async (req, res) => {
     const selectedPrice = req.query.price || "";
     const sortBy = req.query.sort || ""; 
 
-    console.log("Selected Flavor in Search Controller:", selectedFlavor);
+    
 
    
     const categories = await Category.find({ isListed: true, isDeleted: false }).lean();
     const validCategoryIds = categories.map(cat => cat._id.toString());
 
-    console.log("Valid Categories:", validCategoryIds);
+    
 
     let searchCondition = {
       isBlocked: false,
@@ -634,7 +632,7 @@ const searchProducts = async (req, res) => {
       .limit(limit)
       .lean();
 
-    console.log("Filtered Product Categories:", product.map(p => p.category));
+    
 
     const totalProducts = await Product.countDocuments(searchCondition);
     const totalPages = Math.ceil(totalProducts / limit);

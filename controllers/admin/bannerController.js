@@ -2,7 +2,7 @@ const Banner=require('../../models/bannerSchema');
 const path=require('path')
 const fs= require('fs')
 const HTTP_STATUS=require('../../config/httpStatusCode')
-
+const {cloudinary,uploadToCloudinary} =require('../../config/cloudinaryConfig')
 
 
 
@@ -23,8 +23,12 @@ const getAddBannerPage = async(req,res)=>{
     }
 }
 //---------------------------------
+
+
 const addBanner = async (req, res) => {
     try {
+       
+
         const data = req.body;
         const image = req.files["images1"] ? req.files["images1"][0] : null;
 
@@ -32,8 +36,26 @@ const addBanner = async (req, res) => {
             return res.render("addBanner", { error: "Please upload an image!" });
         }
 
+      
+        const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                { folder: "products" },
+                (error, result) => {
+                    if (error) {
+                        console.error("Cloudinary Upload Error:", error);
+                        reject(error);
+                    } else {
+                        resolve(result.secure_url);
+                    }
+                }
+            ).end(image.buffer);
+        });
+
+       
+
+       
         const newBanner = new Banner({
-            image: image.filename, 
+            image: result, 
             title: data.bannerName,
             description: data.description,
             startDate: new Date(data.startDate + "T00:00:00"),
@@ -41,19 +63,26 @@ const addBanner = async (req, res) => {
         });
 
         await newBanner.save();
-        res.redirect("/admin/banners");
+      
+
+        
+        return res.redirect("/admin/banners");
     } catch (error) {
         console.error("Error adding banner:", error);
-        res.render("addBanner", { error: "Something went wrong! Please try again." });
+        return res.render("addBanner", { error: "Something went wrong! Please try again." });
     }
 };
+
+module.exports = { addBanner };
+
+
 
 //---------------------------------
 const deleteBanner = async (req, res) => {
     try {
         const id = req.query.id; 
         if (!id) {
-            console.log("Error: No ID provided for deletion.");
+           
             return res.redirect('/admin/banners');
         }
 

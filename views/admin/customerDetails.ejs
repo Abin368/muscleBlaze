@@ -42,22 +42,25 @@
                 <tbody>
                     <% for (let i = 0; i < data.length; i++) { %>
                         <tr>
-                            <td><%= (page - 1) * limit + i + 1 %></td> <!-- Adjusted numbering for pagination -->
+                            <td><%= (page - 1) * limit + i + 1 %></td> 
                             <td><%= data[i].name %></td>
                             <td><%= data[i].email %></td>
                             <td><%= data[i].phone %></td>
                             <td><%= data[i].address %></td>
                             <td>
                                 <% if (!data[i].isBlocked) { %>
-                                    <button class="btn btn-danger" style="width: 80px;">
-                                        <a href="/admin/blockCustomer?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Block</a>
+                                    <button class="btn btn-danger" style="width: 80px;"
+                                        onclick="confirmBlock('<%= data[i]._id %>')">
+                                        Block
                                     </button>
                                 <% } else { %>
-                                    <button class="btn btn-success" style="width: 80px;">
-                                        <a href="/admin/unblockCustomer?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Unblock</a>
+                                    <button class="btn btn-success" style="width: 80px;"
+                                        onclick="confirmUnblock('<%= data[i]._id %>')">
+                                        Unblock
                                     </button>
                                 <% } %>
                             </td>
+                            
                         </tr>
                     <% } %>
                 </tbody>
@@ -86,7 +89,7 @@
             
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -122,21 +125,42 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-
-
 //------------------------
-//         document.addEventListener("DOMContentLoaded", function () {
-//     const searchForm = document.getElementById("searchForm");
-//     const searchInput = document.getElementById("searchInput");
 
-//     searchForm.addEventListener("submit", function (event) {
-//       if (!searchInput.value.trim()) {
-//         event.preventDefault(); 
-//         window.location.href = "/admin/users"; 
-//       }
-//     });
-//   });
-//     </script>
+
+function confirmBlock(customerId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to block this customer?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, block it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/blockCustomer?id=${customerId}`;
+            }
+        });
+    }
+
+    function confirmUnblock(customerId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to unblock this customer?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, unblock it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/unblockCustomer?id=${customerId}`;
+            }
+        });
+    }
+
+     </script>
     
 </body>
 </html>

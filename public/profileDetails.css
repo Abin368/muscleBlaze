@@ -25,22 +25,21 @@
     margin-top: 20px;
     display: flex;
     justify-content: center;
-    gap: 10px; /* Adds space between buttons */
+    gap: 10px;
 }
 
 .profile-actions button {
-    padding: 8px 15px; /* Reduced padding for smaller size */
+    padding: 8px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px; /* Smaller font */
+    font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 5px; /* Space between icon and text */
+    gap: 5px;
 }
 
-/* Button colors */
 .email-btn { 
     background: #f39c12; 
     color: #fff;
@@ -51,42 +50,38 @@
     color: #fff;
 }
 
-/* Button hover effect */
 .email-btn:hover, .password-btn:hover { 
     opacity: 0.8; 
 }
 
-/* Icons inside buttons */
 .profile-actions button i {
-    font-size: 16px; /* Slightly larger icon */
+    font-size: 16px;
 }
 
 /* Modal Styling */
 .modal {
-    display: none; /* Hide modals initially */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4); /* Dark background */
+    background-color: rgba(0, 0, 0, 0.4);
     justify-content: center;
     align-items: center;
 }
 
-/* Fix Close Button Position */
 .modal-content {
-    position: relative;  /* This ensures close button stays inside modal */
+    position: relative;
     background: white;
     padding: 20px;
     border-radius: 10px;
     width: 400px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.3s ease-out; /* Smooth fade-in animation */
+    animation: fadeIn 0.3s ease-out;
 }
 
-/* Close Button */
 .close-btn {
     position: absolute;
     top: 10px;
@@ -105,30 +100,6 @@
     color: red;
 }
 
-/* Edit Profile Button (Inside Modal) */
-.edit-profile-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-.edit-profile-btn:hover {
-    background: #2980b9;
-}
-
-/* Input Fields */
 .input-group {
     margin-bottom: 15px;
 }
@@ -147,7 +118,6 @@
     border-radius: 5px;
 }
 
-/* Save Button */
 .save-btn {
     width: 100%;
     padding: 10px;
@@ -161,92 +131,60 @@
 }
 
 .save-btn:hover {
-    background: #f39c12;
-}
-
-/* Change Email & Password Buttons */
-.modal-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-.modal-actions button {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* Email Button */
-.email-btn {
-    background: #f39c12;
-    color: #fff;
-}
-
-.email-btn:hover {
     background: #e67e22;
 }
 
-/* Password Button */
-.password-btn {
-    background: #e74c3c;
-    color: #fff;
-}
-
-.password-btn:hover {
-    background: #c0392b;
-}
-/* OTP & Verify Buttons */
-.otp-btn, .verify-btn {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s ease;
-}
-
-.otp-btn {
-    background: #f39c12;
-    color: white;
-}
-
-.otp-btn:hover {
-    background: #e67e22;
-}
-
-.verify-btn {
-    background: #2ecc71;
-    color: white;
-}
-
-.verify-btn:hover {
-    background: #27ae60;
-}
-
-/* OTP Section */
-#emailOtpSection {
-    margin-top: 15px;
-}
-.message-box{
+.message-box {
     display: none;
     color: #27ae60;
 }
-/* Animation */
+
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Animation for Modal */
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .profile-details-container {
+        padding: 15px; /* Reduce padding on smaller screens */
+    }
+
+    .profile-card {
+        width: 100%; /* Full width on mobile */
+        margin: 0 auto;
+    }
+
+    .profile-actions {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 15px;
+    }
+
+    .profile-actions button {
+        width: 100%; /* Full-width buttons */
+    }
+
+    .modal-content {
+        width: 85%; /* Adjust modal width for smaller screens */
+        max-width: 400px;
+    }
+
+    h2 {
+        font-size: 20px; /* Slightly smaller heading */
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-card {
+        padding: 15px; /* Reduce padding further */
+    }
+
+    .edit-icon-btn {
+        font-size: 18px; /* Smaller edit icon */
+    }
+
+    .profile-actions button {
+        font-size: 12px; /* Smaller text */
+        padding: 6px 10px;
+    }
 }

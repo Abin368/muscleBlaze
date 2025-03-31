@@ -27,7 +27,11 @@
           <% items.forEach(item => { %>
             <div class="cart-item-box" data-product-id="<%= item.productId._id %>">
               <div class="cart-item-image">
-                <img src="/uploads/product-images/<%= item.productId.productImage[0] || 'default-image.jpg' %>" alt="<%= item.productId.name %>">
+                <img 
+                src="<%= item.productId.productImage && item.productId.productImage.length > 0 ? item.productId.productImage[0] : '/images/default-image.jpg' %>" 
+                alt="<%= item.productId.name %>"
+            >
+            
               </div>
               <div class="cart-item-details">
                 <h3><%= item.productId.productName %></h3>

@@ -77,7 +77,8 @@ td img {
                     <% for (let i = 0; i < data.length; i++) { %>
                         <tr>
                             <td>
-                                <img src="/uploads/product-images/<%= data[i].image %>" alt="Banner Image">
+                                <img src="<%= data[i].image %>" alt="Banner Image">
+
                             </td>
 
                             <td><%= data[i].title %></td>

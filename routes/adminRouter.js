@@ -10,7 +10,7 @@ const bannerController=require('../controllers/admin/bannerController')
 const orderController=require('../controllers/admin/orderController')
 const couponController=require('../controllers/admin/couponController')
 const WalletController=require('../controllers/admin/walletController')
-const salesController=require('../controllers/admin/salesController')
+
 const multer = require('multer');  
 const { storage, fileFilter } = require('../helpers/multer');  
 const upload = multer({ storage, fileFilter });  

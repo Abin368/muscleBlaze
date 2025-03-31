@@ -50,7 +50,7 @@ app.use(session({
 app.use(bannerMiddleware.loadBanners)
 
 
-// app.use(cartWishlistCounter);
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -87,12 +87,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use((req, res, next) => {
-    res.locals.currentPath = req.path; // Store current URL path
+    res.locals.currentPath = req.path;
     next();
 });
 
 app.use('/', userRouter);
-app.use('/', adminRouter); // Admin routes
+app.use('/', adminRouter); 
 
 app.get('*', (req, res) => {
     if (req.session.admin) {
@@ -103,10 +103,34 @@ app.get('*', (req, res) => {
         return res.redirect('/pageNotfound');
     }
 });
+//------------------------------
+app.use((err, req, res, next) => {
+    const statusCode = err.status || 500;
+  
+   
+    if (req.xhr || req.headers.accept?.includes("application/json")) {
+      return res.status(statusCode).json({ 
+        success: false, 
+        error: err.message || "Internal Server Error" 
+      });
+    }
+  
+   
+    const isAdminRoute = req.originalUrl.startsWith("/admin");
+  
+  
+    const errorPage = isAdminRoute ? "pageerror" : "pageNotfound";
+  
+    res.status(statusCode).render(errorPage, { 
+      message: err.message || (isAdminRoute ? "Admin Page Not Found" : "Page Not Found") 
+    });
+  });
 
+
+//-----------------------------
 
 const PORT = process.env.PORT || 3000; 
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0',() => {
     console.log(`Server running on port ${PORT}`);
 });

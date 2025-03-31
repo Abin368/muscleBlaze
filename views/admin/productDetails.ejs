@@ -61,11 +61,7 @@
                             <% } %>
                         </td>
                         
-                        <!-- <td class="action-icons">
-                            <a href="/admin/addOffer/<%= data[i].category._id %>" 
-                               class="btn btn-warning btn-sm text-dark" style="width: 80px;">
-                                <i class="fas fa-edit"></i> AddOffer
-                            </a> -->
+                       
                             <td>
                                 <% if (!data[i].productOffer || data[i].productOffer === 0) { %>
                                     <button class="custom-btn green" onclick="addOffer('<%= data[i]._id %>')">
@@ -78,23 +74,22 @@
                                 <% } %>
                             </td>
                             
-                            <!-- <a href="/admin/removeOffer?id=<%= data[i].category._id %>&search=<%= search %>&page=<%= currentPage %>" 
-                               class="btn btn-danger btn-sm text-white" style="width: 80px;">
-                                <i class="fas fa-trash"></i> Remove
-                            </a> -->
-                     
+                          
                        
                         <td><%= data[i].quantity %></td>
                         
                         <td>
                             <% if (data[i].isBlocked == false) { %>
-                                <a href="/admin/blockProduct?id=<%= data[i]._id %>&search=<%= search %>&page=<%= currentPage %>" 
+                                <a href="javascript:void(0);" 
+                                   onclick="confirmBlock('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
                                    class="custom-btn red">Block</a>
                             <% } else { %>
-                                <a href="/admin/unblockProduct?id=<%= data[i]._id %>&search=<%= search %>&page=<%= currentPage %>" 
+                                <a href="javascript:void(0);" 
+                                   onclick="confirmUnblock('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
                                    class="custom-btn green">Unblock</a>
                             <% } %>
                         </td>
+                        
                         
                         
                         
@@ -108,10 +103,12 @@
                              </a>
                              
                         
-                            <a href="/admin/deleteProduct?id=<%= data[i]._id %>&search=<%= search %>&page=<%= currentPage %>" 
-                               class="action-btn red">
-                                Delete
-                            </a>
+                             <a href="javascript:void(0);" 
+                             onclick="confirmDelete('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
+                             class="action-btn red">
+                             Delete
+                          </a>
+                          
                         </td>
                         
                     </tr>
@@ -262,7 +259,55 @@ async function removeOffer(productId) {
         Swal.fire("Error", "An error occurred during the process.", "error");
     }
 }
+//---------------------------------
+function confirmBlock(productId, search, page) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you really want to block this product?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, block it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/blockProduct?id=${productId}&search=${search}&page=${page}`;
+            }
+        });
+    }
 
+    function confirmUnblock(productId, search, page) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to unblock this product?",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, unblock it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/unblockProduct?id=${productId}&search=${search}&page=${page}`;
+            }
+        });
+    }
+    //--------------------------------
+
+    function confirmDelete(productId, search, page) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone. Do you want to delete this product?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/deleteProduct?id=${productId}&search=${search}&page=${page}`;
+            }
+        });
+    }
 
    </script>
 </body>

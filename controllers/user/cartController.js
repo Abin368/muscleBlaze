@@ -1,7 +1,6 @@
 const User = require('../../models/userSchema');
 const Product = require("../../models/productSchema");
 const Cart=require("../../models/cartSchema")
-
 const Wishlist=require('../../models/wishlistSchema')
 const mongodb = require("mongodb");
 const HTTP_STATUS=require('../../config/httpStatusCode')
@@ -22,7 +21,7 @@ const getCart = async (req, res) => {
       let grandTotal = 0;
       let outOfStockMessages = [];
 
-      // **Filter out items where productId is null (deleted products)**
+     
       cart.items = cart.items.filter(item => item.productId !== null);
 
       cart.items.forEach(item => {

@@ -1,85 +1,201 @@
-<style>
-h2{
-    color: black;
-    font-weight: bold;
-    
-}
-.profile-container {
-    display: flex;
-    min-height: 80vh; /* Ensure it fills the page */
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Sidebar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-/* Sidebar Styles */
-.sidebar {
-    width: auto;
-    height: auto;
-    /* background: linear-gradient(135deg, #ffffff, #ffffff); */
-    background-color: white;
-    padding: 20px;
-    color: rgb(0, 0, 0);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        body {
+            background-color: #f8f9fa;
+        }
 
-.sidebar h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
-    font-weight: bold;
-}
+        h2 {
+            color: black;
+            font-weight: bold;
+        }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-}
+        .profile-container {
+            display: flex;
+            min-height: 80vh;
+            position: relative;
+        }
 
-.sidebar ul li {
-    width: 100%;
-    margin-bottom: 15px;
-}
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            padding: 20px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+        }
 
-.sidebar ul li a {
-    text-decoration: none;
-    font-size: 18px;
-    color: rgb(0, 0, 0);
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
-}
+        .sidebar h2 {
+            font-size: 22px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
 
-.sidebar ul li a i {
-    margin-right: 10px;
-    font-size: 20px;
-}
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
 
-.sidebar ul li a:hover {
-    background: #f39c12;
-    padding-left: 20px;
-}
+        .sidebar ul li {
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-/* Profile Content */
-.profile-content {
-    flex: 1; /* Takes remaining space */
-    padding: 30px;
-}
+        .sidebar ul li a {
+            text-decoration: none;
+            font-size: 16px;
+            color: black;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+        }
 
-</style>
-<div class="profile-container">
-    <div class="sidebar">
-        <h2>Dashboard</h2>
-        <ul>
-            <li><a href="/profile" class="active"><i class="fas fa-user"></i> Profile</a></li>
-            <li><a href="/orders"><i class="fas fa-box"></i> Orders</a></li>
-            <li><a href="/addresses"><i class="fas fa-map-marker-alt"></i> Addresses</a></li>
-            <li><a href="/wallet"><i class="fas fa-money-bill-wave"></i> Wallet</a></li>
-            <li><a href="/coupons"><i class="fas fa-ticket-alt"></i> Coupons</a></li>
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
 
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background: #FBBC04;
+            color: #000;
+            padding-left: 20px;
+        }
 
-        </ul>
+        .sidebar-toggle {
+            position: absolute;
+            top: 0%;
+            right: -15px;
+            transform: translateY(-50%);
+            background: #FBBC04;
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -250px;
+                height: auto;
+                min-height: 100%;
+                z-index: 100;
+
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .sidebar-toggle {
+                right: -35px;
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+                display: flex;
+            }
+
+            .sidebar.active .sidebar-toggle {
+                transform: translateY(-50%) rotate(180deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left" id="toggleIcon"></i>
+            </button>
+            <h2>Dashboard</h2>
+            <ul>
+                <li><a href="/profile" class="nav-link" data-link="profile"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="/orders" class="nav-link" data-link="orders"><i class="fas fa-box"></i> Orders</a></li>
+                <li><a href="/addresses" class="nav-link" data-link="addresses"><i class="fas fa-map-marker-alt"></i> Addresses</a></li>
+                <li><a href="/wallet" class="nav-link" data-link="wallet"><i class="fas fa-money-bill-wave"></i> Wallet</a></li>
+                <li><a href="/coupons" class="nav-link" data-link="coupons"><i class="fas fa-ticket-alt"></i> Coupons</a></li>
+            </ul>
+        </div>
+       
     </div>
-   
-</div>
 
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            toggleIcon.classList.toggle('fa-chevron-left');
+            toggleIcon.classList.toggle('fa-chevron-right');
+        });
+
+        function checkScreenSize() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                toggleIcon.classList.add('fa-chevron-right');
+                toggleIcon.classList.remove('fa-chevron-left');
+            } else {
+                sidebar.classList.add('active');
+                toggleIcon.classList.add('fa-chevron-left');
+                toggleIcon.classList.remove('fa-chevron-right');
+            }
+        }
+
+        window.addEventListener('resize', checkScreenSize);
+        checkScreenSize();
+
+        function setActiveLink() {
+            const currentPath = window.location.pathname.split('/')[1];
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-link') === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        setActiveLink();
+    </script>
+</body>
+</html>

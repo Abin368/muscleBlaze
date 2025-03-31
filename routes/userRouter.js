@@ -105,6 +105,9 @@ router.get('/order-summary/:orderId', preventCache, checkoutController.getSummar
 router.get('/orders',preventCache, checkoutController.getOrders)
 router.post("/order/cancel", preventCache, checkoutController.cancelOrder);
 router.get("/order/details/:orderId", preventCache, checkoutController.getUserOrderDetails);
+router.get("/payment-failure",preventCache, checkoutController.paymentFailurePage); // Show failure page
+router.post("/payment-failure", preventCache,checkoutController.paymentFailure); // Update order status to Failed
+router.post("/payment/retry", preventCache,checkoutController.retryRazorpayPayment);
 
 //return product
 router.post('/order/return',preventCache, returnController.requestReturn);

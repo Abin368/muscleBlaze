@@ -4,7 +4,7 @@ const session = require("express-session");
 const HTTP_STATUS=require('../../config/httpStatusCode')
 
 
-const getAddresses = async (req, res) => {
+const getAddresses = async (req, res,next) => {
     try {
         const userId = req.session.user ? req.session.user._id : null;
         if (!userId) {
@@ -13,17 +13,15 @@ const getAddresses = async (req, res) => {
 
         const addresses = await Address.find({ userId: userId });
 
-     
-        console.log(addresses);
 
         res.render('user/addresses', { addresses: addresses });
     } catch (error) {
         console.error('Error fetching addresses:', error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send('Internal server error');
+      next(error)
     }
 };
 //---------------------------------------------------------------
-const addAddress = async (req, res) => {
+const addAddress = async (req, res,next) => {
     try {
         const { addressType, name, city, landmark, state, district, pincode, phone } = req.body;
         const userId = req.session.user._id;
@@ -79,12 +77,12 @@ const addAddress = async (req, res) => {
         res.status(HTTP_STATUS.OK).json({ success: true, message: 'Address added successfully.' });
     } catch (error) {
         console.error('Error adding address:', error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Internal server error.' });
+       next(error)
     }
 };
 //----------------------------------------------------------
 
-const deleteAddress= async (req, res) => {
+const deleteAddress= async (req, res,next) => {
     try {
         const { addressId } = req.params;
         const userId = req.session.user._id;
@@ -107,50 +105,56 @@ const deleteAddress= async (req, res) => {
         }
     } catch (error) {
         console.error('Error deleting address:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+       next(error)
     }
 }
 //----------------------------------------
-const getAddress = async (req, res) => {
+const getAddress = async (req, res,next) => {
     try {
         const { addressId } = req.params;
-        console.log("Fetching Address ID:", addressId);
+       
 
         const userId = req.session.user?._id;
         if (!userId) {
-            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: "User not authenticated" });
+            const error = new Error("User not authenticated");
+            error.status = 401;
+            return next(error); 
         }
 
         
         const userAddresses = await Address.findOne({ userId });
 
         if (!userAddresses) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ error: "User's address not found" });
+            const error = new Error("User's address not found");
+            error.status = 404;
+            return next(error);
         }
 
        
         const address = userAddresses.address.find(addr => addr._id.toString() === addressId);
 
         if (!address) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ error: "Address not found" });
+            const error = new Error("Address not found");
+            error.status = 404;
+            return next(error);
         }
 
         res.status(HTTP_STATUS.OK).json(address);
     } catch (error) {
         console.error("Error fetching address:", error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: "Internal Server Error" });
+      next(error)
     }
 };
 
 
 
 //-----------------------------------------
-const updateAddress = async (req, res) => {
+const updateAddress = async (req, res,next) => {
     try {
         const { addressType, name, city, landmark, state, district, pincode, phone } = req.body;
         const { addressId } = req.params;
 
-        console.log("Updating Address ID:", addressId);
+      
 
       
         if (!addressType || !name || !city || !state || !district || !pincode || !phone) {
@@ -195,7 +199,7 @@ const updateAddress = async (req, res) => {
         res.status(HTTP_STATUS.OK).json({ success: true, message: 'Address updated successfully', data: addressToUpdate });
     } catch (error) {
         console.error('Error updating address:', error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Internal server error' });
+       next(error)
     }
 };
 

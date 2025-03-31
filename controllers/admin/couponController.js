@@ -39,12 +39,12 @@ const addCoupon = async (req, res) => {
     try {
         const { name, discountType, discountValue, minimumPrice, expireOn } = req.body;
 
-    
-        const existingCoupon = await Coupon.findOne({ name });
+        const existingCoupon = await Coupon.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
+
         if (existingCoupon) {
             return res.json({ success: false, message: "Coupon already exists" });
         }
-
+        
         const expirationDate = new Date(expireOn);
         const currentDate = new Date();
 
@@ -115,8 +115,7 @@ const deleteCoupon = async (req, res) => {
 const editCoupon = async (req, res) => {
     try {
         const { name, discountType, discountValue, minimumPrice, expireOn } = req.body;
-        console.log("Received data for update:", req.body); 
-
+       
     
         const { couponId } = req.params;
         const existingCoupon = await Coupon.findOne({ name, _id: { $ne: couponId } });

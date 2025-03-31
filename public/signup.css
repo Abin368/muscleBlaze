@@ -114,3 +114,33 @@ body {
   color: red;
   font-weight: bold;
 }
+@media (max-width: 480px) {
+  /* Adjust form container width for smaller screens */
+  .form-container {
+    padding: 20px;
+    width: 90%;
+    max-width: 90%;
+  }
+
+  /* Adjust form title font size */
+  .form-container h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Adjust input and button sizes for smaller screens */
+  .form-container input,
+  .form-container button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust the margin for the login link */
+  .login-link {
+    margin-top: 15px;
+  }
+
+  /* Adjust the error message container */
+  .error-messages {
+    padding: 8px;
+  }
+}

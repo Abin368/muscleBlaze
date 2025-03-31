@@ -216,3 +216,323 @@
         width: 100%;
     }
 }
+
+
+
+#returnOrderModal {
+    display: none; /* Hidden on load */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+}
+
+.return-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.return-modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 400px;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Close Button */
+.return-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.return-close:hover {
+    color: red;
+}
+
+/* Title & Description */
+.return-title {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.return-description {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Form Elements */
+.return-label {
+    font-weight: 600;
+    display: block;
+    margin: 10px 0 5px;
+    color: #444;
+}
+
+.return-textarea {
+    width: 100%;
+    height: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: none;
+    font-size: 14px;
+}
+
+/* Submit Button */
+.return-submit-btn {
+    background: #ffcc00;
+    color: black;
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+}
+
+.return-submit-btn:hover {
+    background: #ffcc00;
+}
+
+/* Return Items Container */
+.return-items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Individual Return Item */
+.return-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+/* Checkbox Styling */
+.return-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #ffcc00;
+}
+
+/* Return Item Text */
+.return-item-text {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+
+/* Modal Wrapper */
+.cancel-modal-wrapper {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position to cover the entire screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+    z-index: 9999; /* Ensure modal is on top of other content */
+    justify-content: center; /* Center the modal content horizontally */
+    align-items: center; /* Center the modal content vertically */
+    overflow: auto;
+    animation: cancelSlideIn 0.5s ease-out;
+}
+
+/* Modal Box (Main Modal Container) */
+.cancel-modal-box {
+    background-color: #fff; /* White background */
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 550px;
+    width: 90%; /* Ensure it doesn't overflow on small screens */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Close Button */
+.cancel-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+}
+
+.cancel-modal-close:hover {
+    color: #333;
+}
+
+/* Modal Title */
+.cancel-modal-title {
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Order Item List */
+.cancel-order-items-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.cancel-order-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.cancel-order-item input {
+    margin-right: 10px;
+}
+
+/* Cancel Reason Textarea */
+
+
+
+.swal2-container {
+    z-index: 99999 !important; /* Make sure it has a higher z-index */
+} 
+.cancel-button:hover {
+    background-color: #e25a4e;
+}
+
+.cancel-confirm-cancel-button {
+    background-color: #1d87e8; /* Soft blue */
+    color: #fff;
+    border: none;
+}
+
+.cancel-confirm-cancel-button:hover {
+    background-color: #1c76c2;
+}
+
+/* Animation for Modal Appearance */
+@keyframes cancelSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+    }
+
+.pagination a {
+    text-decoration: none;
+    background-color: #ffcc00;
+    color: black;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+    font-size: 14px;
+}
+
+.pagination a:hover {
+    background-color: #e67e22;
+}
+
+.pagination span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.pagination .prev,
+.pagination .next {
+    font-weight: bold;
+}
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .pagination {
+        gap: 5px;
+    }
+
+    .pagination a {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .pagination span {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination {
+        gap: 3px;
+    }
+
+    .pagination a {
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
+    .pagination span {
+        font-size: 12px;
+    }
+}

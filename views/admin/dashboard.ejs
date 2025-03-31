@@ -84,17 +84,7 @@
             
             
 
-            <!-- <canvas id="monthlySalesChart"></canvas> -->
-        
-            <!-- <h2>Top Selling Products</h2>
-            <div style="width: 100%; display: flex; justify-content: center;">
-                <canvas id="monthlySalesChart"></canvas>
-            </div>
-
-            <h2>Top 5 Best-Selling Products</h2>
-<div style="width: 100%; display: flex; justify-content: center;">
-    <canvas id="topProductsChart"></canvas>
-</div> -->
+          
 
 <div class="sales-report-container">
     <h2>Sales Report</h2>
@@ -133,6 +123,7 @@
                 <th>Status</th>
                 <th>Total Amount</th>
                 <th>Payment Method</th>
+                <th>Product(QNTY)</th>
             </tr>
         </thead>
         <tbody>
@@ -407,6 +398,10 @@ function renderTable() {
     const paginatedData = salesData.slice(start, end);
 
     paginatedData.forEach(order => {
+        const productsWithQty = order.items
+            ? order.items.map(item => `${item.productName} (${item.quantity})`).join(", ")
+            : "No items";
+        
         const row = `<tr>
             <td>${order.orderId}</td>
             <td>${new Date(order.date).toLocaleDateString()}</td>
@@ -414,6 +409,7 @@ function renderTable() {
             <td>${order.status}</td>
             <td>${order.totalAmount}</td>
             <td>${order.paymentMethod}</td>
+            <td>${productsWithQty}</td>
         </tr>`;
         tableBody.innerHTML += row;
     });
@@ -439,20 +435,37 @@ function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
 
+    pdf.setFontSize(18);
     pdf.text("Sales Report", 10, 10);
-    pdf.autoTable({
-        head: [["Order ID", "Date", "Customer", "Status", "Total Amount", "Payment Method"]],
-        body: salesData.map(order => [
+
+    const headers = [["Order ID", "Date", "Customer", "Status", "Total Amount", "Payment Method", "Products (Qty)"]];
+
+    const body = salesData.map(order => {
+        const productsWithQty = order.items
+            ? order.items.map(item => `${item.productName} (${item.quantity})`).join(", ")
+            : "No items";
+        
+        return [
             order.orderId,
             new Date(order.date).toLocaleDateString(),
             order.customer,
             order.status,
             order.totalAmount,
-            order.paymentMethod
-        ]),
+            order.paymentMethod,
+            productsWithQty
+        ];
     });
 
-   
+    pdf.autoTable({
+        head: headers,
+        body: body,
+        startY: 20,
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        columnStyles: { 6: { cellWidth: 50 } } 
+    });
+
     let startDate = document.getElementById("startDate").value || "";
     let endDate = document.getElementById("endDate").value || "";
     let filterType = document.getElementById("filterType").value;
@@ -462,7 +475,6 @@ function exportToPDF() {
     tomorrow.setDate(today.getDate() + 1);
 
     let filename;
-
     switch (filterType) {
         case "day":
             filename = `Sales_Report_Today_${today.toISOString().split("T")[0]}.pdf`;
@@ -492,7 +504,6 @@ function exportToPDF() {
     pdf.save(filename);
 }
 
-
 //-----------------------------------
 
 function exportToExcel() {
@@ -516,14 +527,81 @@ function exportToExcel() {
         fileName = `Sales_Report.xlsx`;
     }
 
-    let table = document.getElementById("salesReportTable");
-    let wb = XLSX.utils.table_to_book(table);
+  
+    const headers = [
+        "Order ID",
+        "Date",
+        "Customer",
+        "Status",
+        "Total Price",      
+        "Discount",        
+        "Final Amount",    
+        "Payment Method",
+        "Products (Qty)"
+    ];
 
    
-    let ws = wb.Sheets[wb.SheetNames[0]]; 
-    let wsCols = [{ wch: 20 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }]; 
-    ws["!cols"] = wsCols;
+    const dataRows = salesData.map(order => {
+        const productsWithQty = order.items
+            ? order.items.map(item => `${item.productName} (${item.quantity})`).join(", ")
+            : "No items";
+        
+        return [
+            order.orderId,
+            new Date(order.date).toLocaleDateString(),
+            order.customer,
+            order.status,
+            order.totalPrice || 0,    
+            order.discount || 0,   
+            order.totalAmount,        
+            order.paymentMethod,
+            productsWithQty
+        ];
+    });
 
+   
+    const totalPriceSum = salesData.reduce((sum, order) => sum + (order.totalPrice || 0) + (order.discount || 0), 0);
+
+    const discountSum = salesData.reduce((sum, order) => sum + (order.discount || 0), 0);
+    const finalAmountSum = salesData.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
+   
+    console.log("Verification:", { totalPriceSum, discountSum, finalAmountSum, expected: finalAmountSum + discountSum });
+
+   
+    const summaryRows = [
+        [], 
+        ["Summary", "", "", "", totalPriceSum, discountSum, finalAmountSum, "", ""]
+    ];
+
+   
+    const wsData = [
+        headers,
+        ...dataRows,
+        ...summaryRows
+    ];
+
+  
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+   
+    ws["!cols"] = [
+        { wch: 20 }, 
+        { wch: 15 }, 
+        { wch: 25 }, 
+        { wch: 15 }, 
+        { wch: 15 }, 
+        { wch: 15 }, 
+        { wch: 15 }, 
+        { wch: 15 }, 
+        { wch: 30 }  
+    ];
+
+   
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+
+   
     XLSX.writeFile(wb, fileName);
 }
 

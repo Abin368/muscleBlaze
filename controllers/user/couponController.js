@@ -6,7 +6,7 @@ const getCoupon =async(req,res)=>{
     let userId=req.session.user ? req.session.user._id : null;
     let date= new Date()
     if(!userId){
-        console.log('no user')
+       
        return res.redirect('/login')
     }
 

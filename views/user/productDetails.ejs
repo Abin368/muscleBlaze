@@ -30,24 +30,26 @@
 
      <div class="main-image">
         <img 
-            src="/uploads/product-images/<%= product.productImage[0] %>" 
-            alt="<%= product.productName %>" 
-            id="mainImage"
-            class="drift-trigger"
-            data-zoom="/uploads/product-images/<%= product.productImage[0] %>"
-        >
+        src="<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/default-image.jpg' %>" 
+        alt="<%= product.productName %>" 
+        id="mainImage"
+        class="drift-trigger"
+        data-zoom="<%= product.productImage && product.productImage.length > 0 ? product.productImage[0] : '/images/default-image.jpg' %>"
+    >
+    
     </div>
  
           <div class="thumbnail-gallery">
             <% product.productImage.forEach((image, index) => { %>
-              <div class="thumbnail">
-                <img id="zoom-image"
-                  src="/uploads/product-images/<%= image %>" 
-                  alt="Thumbnail <%= index + 1 %>"
-                  onclick="changeMainImage('<%= image %>')"
-                >
-              </div>
+                <div class="thumbnail">
+                    <img id="zoom-image"
+                        src="<%= image %>" 
+                        alt="Thumbnail <%= index + 1 %>"
+                        onclick="changeMainImage('<%= image %>')"
+                    >
+                </div>
             <% }) %>
+            
           </div>
         </div>
 
@@ -151,10 +153,11 @@
                 <div class="product-card">
                     <a href="/productDetails?id=<%= relatedProducts[i]._id %>">
                         <img 
-                            src="/uploads/product-images/<%= relatedProducts[i].productImage && relatedProducts[i].productImage.length > 0 ? relatedProducts[i].productImage[0] : 'default-image.jpg' %>" 
-                            alt="<%= relatedProducts[i].productName %>" 
-                            class="product-image"
-                        > 
+                        src="<%= relatedProducts[i].productImage && relatedProducts[i].productImage.length > 0 ? relatedProducts[i].productImage[0] : 'default-image.jpg' %>" 
+                        alt="<%= relatedProducts[i].productName %>" 
+                        class="product-image"
+                    />
+                     
                     </a>
                     <div class="product-name"><%= relatedProducts[i].productName %></div>
                     <div class="product-details">Size: <%= relatedProducts[i].size ? relatedProducts[i].size + ' kg' : 'N/A' %></div>
@@ -355,9 +358,10 @@
 
     
     function changeMainImage(imageSrc) {
-        mainImage.src = "/uploads/product-images/" + imageSrc;
-        mainImage.setAttribute('data-zoom', "/uploads/product-images/" + imageSrc);
-    }
+    mainImage.src = imageSrc; 
+    mainImage.setAttribute('data-zoom', imageSrc);
+}
+
 
     window.changeMainImage = changeMainImage;
 });

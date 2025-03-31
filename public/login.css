@@ -139,3 +139,48 @@ body {
   font-weight: bold;
   text-align: center;
 }
+@media (max-width: 480px) {
+  /* Adjust form container width for smaller screens */
+  .form-container {
+    padding: 20px;
+    width: 90%;
+    max-width: 90%;
+  }
+
+  /* Adjust form title font size */
+  .form-container h2 {
+    font-size: 1.5rem;
+  }
+
+  /* Adjust input and button sizes for smaller screens */
+  .form-container input,
+  .form-container button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust the margin for the forgot password and signup link */
+  .forgot-password,
+  .signup-link {
+    margin-top: 10px;
+  }
+
+  /* Adjust the error and success message for smaller screens */
+  .error-message,
+  .success-message {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust the Google signup button */
+  .google-signup button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Adjust Google signup button icon size */
+  .google-signup button img {
+    width: 18px;
+    margin-right: 8px;
+  }
+}

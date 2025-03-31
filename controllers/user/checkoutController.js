@@ -27,7 +27,7 @@ const getCheckout = async (req, res) => {
         const userId = req.session.user;
         let { productId, quantity, couponCode } = req.query;
 
-        console.log("Session Data in Checkout Page", req.session.checkoutData);
+      
 
         let cartItems = [];
         let grandTotal = 0;
@@ -40,7 +40,7 @@ const getCheckout = async (req, res) => {
           
             product = await Product.findById(productId).populate('category');
             if (!product || product.isBlocked || product.isDeleted || !product.category || product.category.isDeleted || !product.category.isListed) {
-                console.error(`Product with ID ${productId} not found or is unavailable.`);
+               
                 return res.redirect('/pageNotFound');
             }
 
@@ -73,7 +73,7 @@ const getCheckout = async (req, res) => {
          
             const cart = await Cart.findOne({ userId }).populate('items.productId');
             if (!cart || cart.items.length === 0) {
-                console.warn("Cart is empty. Redirecting to cart page.");
+               
                 return res.redirect('/cart');
             }
 
@@ -108,7 +108,7 @@ const getCheckout = async (req, res) => {
             
         };
 
-        console.log("Session Data in Checkout Page After Processing:", req.session.checkoutData);
+       
 
         res.render('user/checkout', {
             cartItems,
@@ -309,7 +309,7 @@ const getPayment = async (req, res) => {
 
         const address = userAddress.address[0];
         const userId = req.session.user._id;  
-        console.log('Checkout Data Passed to Payment Page:', req.session.checkoutData);
+      
 
         res.render("user/payment", { 
             checkoutData: { 
@@ -336,64 +336,82 @@ const getPayment = async (req, res) => {
 const proceedToPayment = async (req, res) => {
     try {
         const { addressId, cartItems, quantity } = req.body;
-           
+
         if (!addressId || !cartItems || !quantity) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Missing required fields." });
+            return res.status(400).json({ success: false, message: "Missing required fields." });
         }
 
       
-        let updatedGrandTotal = req.session.checkoutData?.grandTotal || cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-        
+        const productIds = cartItems.map(item => item.product);
+
+     
+        const products = await Product.find({ _id: { $in: productIds } }, 'productName price');
+
+     
+        const updatedCartItems = cartItems.map(item => {
+            const product = products.find(p => p._id.toString() === item.product.toString());
+            return {
+                product: item.product,
+                name: product ? product.productName : "Unknown Product",  
+                quantity: item.quantity,
+                price: item.price,
+                totalPrice: item.totalPrice
+            };
+        });
+
+        let updatedGrandTotal = req.session.checkoutData?.grandTotal || updatedCartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+     
         req.session.checkoutData = {
             ...req.session.checkoutData,
             addressId,
-            cartItems,
-            grandTotal: updatedGrandTotal, 
+            cartItems: updatedCartItems,
+            grandTotal: updatedGrandTotal,
             quantity,
             couponCode: req.session.checkoutData?.couponCode || null,
             discount: req.session.checkoutData?.discount || 0,
             originalTotal: req.session.checkoutData?.originalTotal || updatedGrandTotal
         };
-        console.log(req.session.checkoutData)
 
+      
         req.session.save((err) => {
             if (err) {
                 console.error("Error saving session:", err);
-                return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to save session." });
+                return res.status(500).json({ success: false, message: "Failed to save session." });
             }
-            console.log("Proceeded to Payment,  Checkout Data:", req.session.checkoutData);
             return res.json({ success: true });
         });
 
     } catch (error) {
         console.error("Error proceeding to payment:", error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Failed to proceed to payment." });
+        res.status(500).json({ success: false, message: "Failed to proceed to payment." });
     }
 };
+
 
 
 
 //-------------------------------------
 const confirmPayment = async (req, res) => {
     try {
+        
+        
         const userId = req.session.user?._id || req.body.userId;
-        console.log("Extracted userId:", userId);
-        console.log("Received Checkout Data:", req.body);
-       
+      
+
         if (!userId) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "User not logged in." });
         }
 
         const { addressId, cartItems, productId, quantity, grandTotal, paymentMethod, couponCode } = req.body;
-        console.log('coupon code',couponCode)
 
         if (!addressId || !grandTotal || !paymentMethod) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: 'Missing required fields' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Missing required fields" });
         }
 
         let discountAmount = 0;
+        let couponName = null;
 
-        
         if (couponCode) {
             const coupon = await Coupon.findOne({ name: couponCode });
 
@@ -401,51 +419,65 @@ const confirmPayment = async (req, res) => {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Invalid coupon code." });
             }
 
-          
             if (coupon.usedBy.includes(userId)) {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Coupon already used by this user." });
             }
 
-        
-            discountAmount = coupon.discountAmount || 0;
+            const originalTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-          
-           
+            if (coupon.discountType === "fixed") {
+                discountAmount = coupon.discountValue;
+            } else if (coupon.discountType === "percentage") {
+                discountAmount = (coupon.discountValue * originalTotal) / 100;
+            }
+
+            couponName = couponCode;
         }
 
-      
-        const finalAmount = grandTotal - discountAmount;
+        const finalAmount = grandTotal ;
+
+        if (paymentMethod.toLowerCase() === "cod" && finalAmount > 1000) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "COD not allowed for orders above 1000. Choose another payment method." });
+        }
 
         let orderItems = [];
 
         if (cartItems && cartItems.length > 0) {
-            orderItems = cartItems.map(item => ({
-                product: item.product?._id || item.product,
-                quantity: item.quantity,
-                price: item.price
-            })).filter(item => item.product);
+            orderItems = await Promise.all(cartItems.map(async (item) => {
+                const product = await Product.findById(item.product);
+                if (!product) throw new Error(`Product not found: ${item.product}`);
+                if (product.quantity < item.quantity) throw new Error(`Insufficient stock for: ${product.name}`);
+
+                return {
+                    product: product._id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    status: "Ordered",
+                    cancelMessage: "",
+                    returnStatus: "Not Requested",
+                    returnReason: ""
+                };
+            }));
         } else if (productId && quantity) {
             const product = await Product.findById(productId);
-            if (!product) {
-                return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, error: 'Product not found' });
-            }
-            if (product.stock < quantity) {
-                return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: 'Insufficient stock' });
-            }
+            if (!product) return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, error: "Product not found" });
+            if (product.quantity < quantity) return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Insufficient stock" });
+
             orderItems.push({
                 product: product._id,
                 quantity: quantity,
-                price: product.price * quantity
+                price: product.price * quantity,
+                status: "Ordered",
+                cancelMessage: "",
+                returnStatus: "Not Requested",
+                returnReason: ""
             });
         } else {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: 'Invalid order data' });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Invalid order data" });
         }
 
         if (orderItems.length === 0) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "No valid products in order" });
-        }
-        if(finalAmount>1000){
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({success:false,error:'Cant make COD above 1000 Choose another option'})
         }
 
         const newOrder = new Order({
@@ -456,17 +488,15 @@ const confirmPayment = async (req, res) => {
             paymentMethod: paymentMethod,
             finalAmount: finalAmount,
             address: addressId,
-            status: 'Pending',
+            status: "Pending",
+            paymentStatus: paymentMethod.toLowerCase() === "cod" ? "Pending" : "Paid",
             createdAt: new Date(),
-            invoiceDate: new Date()
+            invoiceDate: new Date(),
+            couponApplied: !!couponCode,
+            couponName: couponName || null
         });
 
         const savedOrder = await newOrder.save();
-        //---------------------
-        // const invoiceUrl = await generateInvoice(newOrder._id,req.session.checkoutData); 
-        // newOrder.invoiceUrl = invoiceUrl; 
-        // await newOrder.save();
-        //--------------------
 
         if (couponCode) {
             await Coupon.updateOne(
@@ -474,8 +504,6 @@ const confirmPayment = async (req, res) => {
                 { $addToSet: { usedBy: userId } }
             );
         }
-
-
 
         for (const item of orderItems) {
             await Product.findByIdAndUpdate(
@@ -488,12 +516,12 @@ const confirmPayment = async (req, res) => {
             $push: { orderHistory: savedOrder._id }
         });
 
-        console.log('Order saved successfully:', savedOrder);
+      
 
         res.status(HTTP_STATUS.OK).json({ success: true, orderId: savedOrder._id });
     } catch (error) {
-        console.error('Error processing payment:', error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, error: 'Internal server error' });
+        console.error("Error processing payment:", error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, error: "Internal server error" });
     }
 };
 
@@ -518,8 +546,8 @@ const createRazorpayOrder = async (req, res) => {
         }
 
         let discountAmount = 0;
-
-     
+        let couponName = null;
+        
         if (couponCode) {
             const coupon = await Coupon.findOne({ name: couponCode });
 
@@ -539,8 +567,8 @@ const createRazorpayOrder = async (req, res) => {
                 discountAmount = (coupon.discountValue * originalTotal) / 100;
             }
 
-            console.log('Discount Applied:', discountAmount);
-
+          
+            couponName = couponCode;
             
            
         }
@@ -586,7 +614,9 @@ const createRazorpayOrder = async (req, res) => {
             status: "Pending",
             createdAt: new Date(),
             invoiceDate: new Date(),
-            razorpayOrderId: order.id
+            razorpayOrderId: order.id,
+            couponApplied: !!couponCode,  
+            couponName: couponName || null
         });
 
         const savedOrder = await newOrder.save();
@@ -610,7 +640,7 @@ const createRazorpayOrder = async (req, res) => {
             $push: { orderHistory: savedOrder._id }
         });
 
-        console.log("Razorpay Order saved successfully:", savedOrder);
+       
 
         res.status(HTTP_STATUS.OK).json({
             success: true,
@@ -630,80 +660,185 @@ const createRazorpayOrder = async (req, res) => {
 
 const verifyRazorpayPayment = async (req, res) => {
     try {
-        console.log("🔹 Received Data in /payment/verify:", req.body);
-
-        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, userId, couponCode } = req.body;
+       
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
 
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-           
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Missing required payment verification fields." });
+            return res.status(400).json({
+                success: false,
+                message: "Missing required payment verification fields.",
+                orderId: orderId || 'unknown'
+            });
         }
 
-        if (!userId) {
-           
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "User ID is missing or invalid." });
-        }
-
-        console.log(" Verifying Razorpay Signature...");
         const generated_signature = crypto
             .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest("hex");
 
+        
+
         if (generated_signature !== razorpay_signature) {
-            
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Payment verification failed." });
-        }
-
-      
-        const existingOrder = await Order.findOne({ razorpayOrderId: razorpay_order_id });
-
-        if (!existingOrder) {
-         
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "Order not found." });
+            return res.status(400).json({
+                success: false,
+                message: "Payment verification failed: Invalid signature.",
+                orderId
+            });
         }
 
      
+        let existingOrder = orderId ? await Order.findById(orderId) : null;
+
+      
+        if (!existingOrder) {
+            existingOrder = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+        }
+
+        if (!existingOrder) {
+            return res.status(400).json({
+                success: false,
+                message: "Order not found.",
+                orderId
+            });
+        }
 
         existingOrder.paymentStatus = "Paid";
         existingOrder.status = "Paid";
         existingOrder.razorpayPaymentId = razorpay_payment_id;
-
         await existingOrder.save();
-     
+
+       
 
         res.json({
             success: true,
             message: "Payment verified and order placed successfully.",
             orderId: existingOrder._id
         });
+    } catch (error) {
+        console.error(" Payment Verification Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Payment verification failed.",
+            orderId: req.body.orderId || 'unknown'
+        });
+    }
+};
+
+//-------------------------------------------------------
+const paymentFailurePage = (req, res) => {
+    try {
+        const { orderId, error } = req.query;
+        res.render("user/paymentFailure", { orderId, error });
+    } catch (err) {
+        console.error("Payment Failure Error:", err);
+        res.redirect("/pageerror");
+    }
+};
+//---------------------------------------------
+const paymentFailure = async (req, res) => {
+    try {
+        const { orderId } = req.body; 
+
+        if (!orderId) {
+            return res.status(400).json({ success: false, error: "Order ID is required" });
+        }
+
+     
+        const order = await Order.findOneAndUpdate(
+            { razorpayOrderId: orderId },
+            { $set: { status: "Failed" } },
+            { new: true }
+        );
+
+        if (!order) {
+            return res.status(404).json({ success: false, error: "Order not found" });
+        }
+
+       
+        res.status(200).json({ success: true, message: "Order status updated to Failed" });
 
     } catch (error) {
-    
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Payment verification failed." });
+        console.error("Error handling payment failure:", error);
+        res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+};
+
+// ---------------- GET ORDER SUMMARY PAGE ----------------
+
+const retryRazorpayPayment = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+
+        if (!orderId) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Order ID is required." });
+        }
+
+        const order = await Order.findById(orderId).populate('userId', 'name email phone');
+        if (!order) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Order not found." });
+        }
+
+        if (order.paymentStatus === "Paid" || order.status === "Paid") {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Order already paid." });
+        }
+
+        if (order.paymentMethod.toLowerCase() !== "razorpay") {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Invalid payment method for retry." });
+        }
+
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+
+        const options = {
+            amount: Math.round(order.finalAmount * 100),
+            currency: "INR",
+            receipt: `order_${orderId}`.substring(0, 40),
+
+            payment_capture: 1
+        };
+
+        const razorpayOrder = await razorpay.orders.create(options);
+        order.razorpayOrderId = razorpayOrder.id; 
+        await order.save();
+
+        res.status(HTTP_STATUS.OK).json({
+            success: true,
+            razorpayOrderId: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+            orderId: order._id,
+            userName: order.userId?.name,
+            userEmail: order.userId?.email,
+            userPhone: order.userId?.phone
+        });
+    } catch (error) {
+        console.error("Error retrying Razorpay payment:", error);
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            error: error.message,
+            orderId: req.body.orderId || 'unknown'
+        });
     }
 };
 
 
-
-//-------------------------------------------------------
-
-
-// ---------------- GET ORDER SUMMARY PAGE ----------------
+//------------------------------------------------------------------
 
 const getSummary = async (req, res) => {
     try {
         const orderId = req.params.orderId;
 
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).render("pageNotFound");
+            return res.status(HTTP_STATUS.BAD_REQUEST).render("user/pageNotfound");
         }
 
        
         const order = await Order.findById(orderId).lean();
 
         if (!order) {
-            return res.status(HTTP_STATUS.NOT_FOUND).render("pageNotFound");
+            return res.status(HTTP_STATUS.NOT_FOUND).render("user/pageNotfound");
         }
 
      
@@ -713,7 +848,7 @@ const getSummary = async (req, res) => {
         );
 
         if (!userAddress || !userAddress.address[0]) {
-            return res.status(HTTP_STATUS.NOT_FOUND).render("pageNotFound");
+            return res.status(HTTP_STATUS.NOT_FOUND).render("user/pageNotfound");
         }
 
         order.address = userAddress.address[0]; 
@@ -861,17 +996,16 @@ const cancelOrder = async (req, res) => {
        
         order.status = allCancelled ? "Cancelled" : "Partially Cancelled";
         await order.save();
-        console.log("Order updated:", order.status);
-
+       
       
         if (bulkUpdateOps.length > 0) {
             await Product.bulkWrite(bulkUpdateOps);
-            console.log("Stock restored for cancelled products.");
+           
         }
 
        
         if (refundAmount > 0 && ["Razorpay", "wallet"].includes(order.paymentMethod)) {
-            console.log(`Processing refund of ${refundAmount} to wallet for ${order.paymentMethod} payment.`);
+            
 
             let wallet = await Wallet.findOne({ userId: order.userId }) || new Wallet({
                 userId: order.userId,
@@ -896,7 +1030,7 @@ const cancelOrder = async (req, res) => {
             if (user) {
                 user.wallet = Number(user.wallet || 0) + refundAmount;
                 await user.save();
-                console.log(`User wallet updated: ${user.wallet}`);
+               
             } else {
                 console.log('User not found for ID:', order.userId);
             }
@@ -931,8 +1065,7 @@ const getUserOrderDetails = async (req, res) => {
         }
 
         const addressId = order.address; 
-        console.log("Address ID from Order:", addressId);
-
+      
       
         const addressDoc = await Address.findOne({ "address._id": addressId }, { "address.$": 1 });
         const selectedAddress = addressDoc ? addressDoc.address[0] : null;
@@ -978,7 +1111,11 @@ module.exports={
     createRazorpayOrder,
     verifyRazorpayPayment,
     applyCoupon,
-    removeCoupon
+    removeCoupon,
+    paymentFailurePage,
+    paymentFailure,
+    retryRazorpayPayment
+ 
 
    
 }

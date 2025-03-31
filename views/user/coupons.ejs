@@ -9,96 +9,68 @@
  
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">    
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .coupon-section {
-    max-width: 900px;
-    margin: 20px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+<link rel="stylesheet" href="coupon.css">
 
-.coupon-title {
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 15px;
-}
-
-.coupon-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #f9f9f9;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.coupon-table th, .coupon-table td {
-    padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-}
-
-.coupon-table th {
-    background: #f39c12;
-    color: black;
-    font-weight: bold;
-}
-
-.coupon-table tr:nth-child(even) {
-    background: #f1f1f1;
-}
-
-.no-coupons {
-    text-align: center;
-    font-size: 18px;
-    color: #777;
-    padding: 20px;
-}
-
-</style>
 </head>
 <body>
     <%- include('../../views/partials/user/header') %>
 
-<div class="profile-container">
-    <%- include('../../views/partials/user/profileSidebar') %>  
+    <div class="profile-container">
+        <%- include('../../views/partials/user/profileSidebar') %>  
 
-    <div class="coupon-section">
-        <h2>Available Coupons</h2>
+        <div class="coupon-section">
+            <h2 class="coupon-title">Available Coupons</h2>
 
-        <% if (coupons.length > 0) { %>
-            <table class="coupon-table">
-                <thead>
-                    <tr>
-                        <th>Coupon Name</th>
-                        <th>Discount Type</th>
-                        <th>Discount Value</th>
-                        <th>Minimum Price</th>
-                        <th>Expiry Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% coupons.forEach(coupon => { %>
+            <% if (coupons.length > 0) { %>
+                <!-- Table view for larger screens -->
+                <table class="coupon-table">
+                    <thead>
                         <tr>
-                            <td><%= coupon.name %></td>
-                            <td><%= coupon.discountType === 'percentage' ? 'Percentage (%)' : 'Fixed Amount (₹)' %></td>
-                            <td><%= coupon.discountValue %></td>
-                            <td>₹<%= coupon.minimumPrice %></td>
-                            <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
+                            <th>Coupon Name</th>
+                            <th>Discount Type</th>
+                            <th>Discount Value</th>
+                            <th>Minimum Price</th>
+                            <th>Expiry Date</th>
                         </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        <% } else { %>
-            <p class="no-coupons">No coupons available at the moment.</p>
-        <% } %>
-    </div>
-</div>
+                    </thead>
+                    <tbody>
+                        <% coupons.forEach(coupon => { %>
+                            <tr>
+                                <td><%= coupon.name %></td>
+                                <td><%= coupon.discountType === 'percentage' ? 'Percentage (%)' : 'Fixed Amount (₹)' %></td>
+                                <td><%= coupon.discountValue %></td>
+                                <td>₹<%= coupon.minimumPrice %></td>
+                                <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
 
-<%- include('../../views/partials/user/footer') %>
+                <!-- Card view for smaller screens -->
+                <div class="coupon-list">
+                    <% coupons.forEach(coupon => { %>
+                        <div class="coupon-card">
+                            <div class="coupon-left">
+                                <h3><%= coupon.name %></h3>
+                                <p>Discount: <span><%= coupon.discountType === 'percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue %></span></p>
+                                <p>Min Purchase: <span>₹<%= coupon.minimumPrice %></span></p>
+                                <p>Expires on: <span><%= new Date(coupon.expireOn).toLocaleDateString() %></span></p>
+                            </div>
+                            <div class="coupon-code-section">
+                               
+
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="no-coupons">No coupons available at the moment.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../../views/partials/user/footer') %>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

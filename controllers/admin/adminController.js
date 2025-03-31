@@ -203,7 +203,7 @@ const salesReport = async (req, res) => {
     try {
         const { start, end, filter } = req.query;
         let filterCondition = {
-            status: { $in: ["Delivered", "Returned", "Partially Returned"] } 
+            status: { $in: ["Delivered", "Returned", "Partially Returned"] }
         };
 
         if (start && end) {
@@ -215,6 +215,7 @@ const salesReport = async (req, res) => {
 
         const orders = await Order.find(filterCondition)
             .populate('userId', 'name')
+            .populate('orderItems.product', 'productName')
             .sort({ createdAt: -1 });
 
         const salesData = orders.map(order => ({
@@ -222,8 +223,14 @@ const salesReport = async (req, res) => {
             date: order.createdAt,
             customer: order.userId?.name || "Unknown",
             status: order.status,
-            totalAmount: order.finalAmount,
-            paymentMethod: order.paymentMethod
+            totalPrice: order.totalPrice,      
+            discount: order.discount,          
+            totalAmount: order.finalAmount,    
+            paymentMethod: order.paymentMethod,
+            items: order.orderItems.map(item => ({
+                productName: item.product?.productName || "Unknown Product",
+                quantity: item.quantity
+            }))
         }));
 
         res.json(salesData);

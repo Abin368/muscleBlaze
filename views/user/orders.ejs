@@ -12,296 +12,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="orders.css">
-    <style>
-#returnOrderModal {
-    display: none; /* Hidden on load */
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    justify-content: center;
-    align-items: center;
-}
-
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-}
-
-.return-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Modal Content */
-.return-modal-content {
-    background: #fff;
-    padding: 20px;
-    width: 400px;
-    border-radius: 12px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    animation: fadeIn 0.3s ease-in-out;
-    position: relative;
-}
-
-/* Close Button */
-.return-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    color: #666;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.return-close:hover {
-    color: red;
-}
-
-/* Title & Description */
-.return-title {
-    font-size: 22px;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.return-description {
-    color: #555;
-    margin-bottom: 15px;
-}
-
-/* Form Elements */
-.return-label {
-    font-weight: 600;
-    display: block;
-    margin: 10px 0 5px;
-    color: #444;
-}
-
-.return-textarea {
-    width: 100%;
-    height: 80px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    resize: none;
-    font-size: 14px;
-}
-
-/* Submit Button */
-.return-submit-btn {
-    background: #ffcc00;
-    color: black;
-    font-size: 16px;
-    padding: 10px;
-    width: 100%;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: background 0.3s ease;
-}
-
-.return-submit-btn:hover {
-    background: #ffcc00;
-}
-
-/* Return Items Container */
-.return-items-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-/* Individual Return Item */
-.return-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 6px;
-}
-
-/* Checkbox Styling */
-.return-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    accent-color: #ffcc00;
-}
-
-/* Return Item Text */
-.return-item-text {
-    font-size: 14px;
-    color: #333;
-}
-
-/* Fade-in Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
-
-
-/* Modal Wrapper */
-.cancel-modal-wrapper {
-    display: none; /* Hidden by default */
-    position: fixed; /* Fixed position to cover the entire screen */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Darker background */
-    z-index: 9999; /* Ensure modal is on top of other content */
-    justify-content: center; /* Center the modal content horizontally */
-    align-items: center; /* Center the modal content vertically */
-    overflow: auto;
-    animation: cancelSlideIn 0.5s ease-out;
-}
-
-/* Modal Box (Main Modal Container) */
-.cancel-modal-box {
-    background-color: #fff; /* White background */
-    padding: 25px;
-    border-radius: 8px;
-    max-width: 550px;
-    width: 90%; /* Ensure it doesn't overflow on small screens */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-/* Close Button */
-.cancel-modal-close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #888;
-    cursor: pointer;
-}
-
-.cancel-modal-close:hover {
-    color: #333;
-}
-
-/* Modal Title */
-.cancel-modal-title {
-    font-size: 26px;
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-/* Order Item List */
-.cancel-order-items-list {
-    max-height: 300px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-    padding: 5px;
-    border-bottom: 1px solid #eee;
-}
-
-.cancel-order-item {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-}
-
-.cancel-order-item input {
-    margin-right: 10px;
-}
-
-/* Cancel Reason Textarea */
-
-
-
-.swal2-container {
-    z-index: 99999 !important; /* Make sure it has a higher z-index */
-} 
-.cancel-button:hover {
-    background-color: #e25a4e;
-}
-
-.cancel-confirm-cancel-button {
-    background-color: #1d87e8; /* Soft blue */
-    color: #fff;
-    border: none;
-}
-
-.cancel-confirm-cancel-button:hover {
-    background-color: #1c76c2;
-}
-
-/* Animation for Modal Appearance */
-@keyframes cancelSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-    gap: 10px;
-    }
-
-.pagination a {
-    text-decoration: none;
-    background-color: #ffcc00;
-    color: black;
-    padding: 8px 15px;
-    border-radius: 5px;
-    transition: background 0.3s ease-in-out;
-    font-size: 14px;
-}
-
-.pagination a:hover {
-    background-color: #e67e22;
-}
-
-.pagination span {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-}
-
-.pagination .prev,
-.pagination .next {
-    font-weight: bold;
-}
-
-    </style>
+   
 </head>
 
 <body>
@@ -322,9 +33,10 @@
                                     <div class="order-left">
                                         <% order.orderItems.forEach(item=> { %>
                                             <div class="product-info">
-                                                <img src="/uploads/product-images/<%= item.product.productImage[0] || 'default-image.jpg' %>"
-                                                    alt="<%= item.product.name %>"
-                                                    style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+                                                <img src="<%= item.product.productImage && item.product.productImage.length > 0 ? item.product.productImage[0] : 'default-image.jpg' %>" 
+     alt="<%= item.product.name %>"
+     style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">
+
 
                                                 <div class="details">
                                                     <h4>
@@ -358,16 +70,23 @@
 
                                             <a href="/order/details/<%= order._id %>" class="btn">View Details</a>
 
-                                            <!-- <% if (order.status !='Cancelled' && order.status!='Delivered' && order.status!='Returned'&& order.status!='Return Requested' &&order.status!='Partially Returned'  ) { %>
-                                                <button class="btn cancel"
-                                                    onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
-                                                <% } %> -->
+                            
 
-                                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Return Requested' && order.status !== 'Partially Returned') { %>
+                                                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned' && order.status !== 'Return Requested' && order.status !== 'Partially Returned' && order.status !== 'Failed') { %>
                                                     <button class="btn cancel-button"
                                                         data-order-id="<%= order._id %>"
                                                         data-order-items="<%- encodeURIComponent(JSON.stringify(order.orderItems)) %>"
                                                         onclick="openCancelModal(this)">Cancel Items</button>
+                                                <% } %>
+
+
+                                                <% if (order.status === 'Failed') { %>
+                                                    <button class="btn retry-payment-button"
+                                                        data-order-id="<%= order._id %>"
+                                                        data-payment-method="<%= order.paymentMethod %>"
+                                                        onclick="retryPayment(this)">
+                                                        Retry Payment
+                                                    </button>
                                                 <% } %>
                                                 
                                                 <!-- Cancel Modal -->
@@ -426,14 +145,28 @@
             </div>
         </div>
 
-
         <div class="pagination">
             <% if (currentPage > 1) { %>
                 <a href="#" class="page-link" data-page="<%= currentPage - 1 %>">Previous</a>
             <% } %>
         
-            <% for (let i = 1; i <= totalPages; i++) { %>
+            <% 
+                let pagesToShow = 2; // Number of numbered pages to display
+                let startPage = Math.max(1, currentPage - 1);
+                let endPage = Math.min(totalPages, startPage + pagesToShow - 1);
+        
+                if (startPage > 1) { %>
+                    <a href="#" class="page-link" data-page="1">1</a>
+                    <% if (startPage > 2) { %> <span>...</span> <% } %>
+            <% } %>
+        
+            <% for (let i = startPage; i <= endPage; i++) { %>
                 <a href="#" class="page-link <%= i === currentPage ? 'active' : '' %>" data-page="<%= i %>"><%= i %></a>
+            <% } %>
+        
+            <% if (endPage < totalPages) { %>
+                <% if (endPage < totalPages - 1) { %> <span>...</span> <% } %>
+                <a href="#" class="page-link" data-page="<%= totalPages %>"><%= totalPages %></a>
             <% } %>
         
             <% if (currentPage < totalPages) { %>
@@ -442,32 +175,43 @@
         </div>
         
         
+        
+        
 
 
         <%- include('../../views/partials/user/footer') %>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".page-link").forEach(link => {
-        link.addEventListener("click", function (e) {
-            e.preventDefault(); 
+    function loadOrders(page) {
+        fetch(`/orders?page=${page}`)
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const newDocument = parser.parseFromString(data, "text/html");
+                document.querySelector(".orders-container").innerHTML = newDocument.querySelector(".orders-container").innerHTML;
+                document.querySelector(".pagination").innerHTML = newDocument.querySelector(".pagination").innerHTML;
+                addPaginationListeners(); // Reattach event listeners after content update
+            })
+            .catch(error => console.error("Error fetching orders:", error));
+    }
 
-            let page = this.getAttribute("data-page");
-
-            fetch(`/orders?page=${page}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.querySelector(".orders-container").innerHTML = 
-                        new DOMParser().parseFromString(data, "text/html")
-                        .querySelector(".orders-container").innerHTML;
-                })
-                .catch(error => console.error("Error fetching orders:", error));
+    function addPaginationListeners() {
+        document.querySelectorAll(".page-link").forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                const page = this.getAttribute("data-page");
+                loadOrders(page);
+            });
         });
-    });
+    }
+
+    addPaginationListeners();
 });
 
 
@@ -719,7 +463,115 @@ window.onclick = function (event) {
         closeReturnModal();
     }
 };
+//-----------------------------------------------
+function retryPayment(button) {
+    const orderId = button.getAttribute("data-order-id");
 
+    fetch("/payment/retry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const options = {
+                key: "rzp_test_v6v5TA0H0GYZBO",
+                amount: data.amount,
+                currency: data.currency,
+                order_id: data.razorpayOrderId,
+                name: "Your Store Name",
+                description: "Retry Payment",
+                prefill: {
+                    name: data.userName || "Guest User",
+                    email: data.userEmail || "guest@example.com",
+                    contact: data.userPhone || "0000000000"
+                },
+                handler: function (response) {
+                    fetch("/payment/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderId: data.orderId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Payment Successful!',
+                                text: 'Redirecting to order summary...',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                            setTimeout(() => window.location.href = `/order-summary/${data.orderId}`, 2000);
+                        } else {
+                            window.location.href = `/payment-failure?orderId=${data.orderId}&error=${encodeURIComponent(data.message || 'Verification failed')}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Verification Error:", error);
+                        window.location.href = `/payment-failure?orderId=${data.orderId}&error=${encodeURIComponent('Verification error')}`;
+                    });
+                },
+                modal: {
+                    ondismiss: function () {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Payment Cancelled',
+                            text: 'You closed the payment window.',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                method: {
+                    netbanking: true,
+                    card: true,
+                    upi: true
+                },
+                retry: {
+                    enabled: true,
+                    max_count: 3
+                },
+                timeout: 600,
+                theme: {
+                    color: '#3399cc'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                console.error("Payment Failed:", response.error);
+                const errorMsg = response.error.description || 'Payment failed';
+                window.location.href = `/payment-failure?orderId=${data.orderId}&error=${encodeURIComponent(errorMsg)}`;
+            });
+            rzp.open();
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Retry Failed',
+                text: data.error || "Unable to retry payment",
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Retry Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Failed to initiate retry payment.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+        });
+    });
+}
 
 </script>
 

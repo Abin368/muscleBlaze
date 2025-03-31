@@ -64,7 +64,7 @@ const generateInvoice = async (req, res) => {
             return res.status(HTTP_STATUS.NOT_FOUND).send("Order not found");
         }
         const addressId = order.address; 
-        console.log("Address ID from Order:", addressId);
+      
 
       
         const addressDoc = await Address.findOne({ "address._id": addressId }, { "address.$": 1 });

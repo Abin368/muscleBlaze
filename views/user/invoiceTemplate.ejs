@@ -27,7 +27,63 @@
 .logo .b {
   color: #FBBC04;
 }
+@media screen and (max-width: 768px) {
+    .invoice-container {
+        padding: 15px;
+        max-width: 95%;
+    }
 
+    h2 {
+        font-size: 22px;
+    }
+
+    table, th, td {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .total {
+        font-size: 16px;
+    }
+
+    .print-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .invoice-container {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    table, th, td {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .total {
+        font-size: 14px;
+    }
+
+    .print-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+}
     </style>
 </head>
 <body>
@@ -78,8 +134,16 @@
             </tr>
             <tr>
                 <td><strong>Coupon Applied:</strong></td>
-                <td><%= order.couponApplied ? "Yes" : "No" %></td>
+                <td>
+                    <% if (order.couponApplied && order.couponName) { %>
+                        Yes ( <%= order.couponName %> )
+                    <% } else { %>
+                        No
+                    <% } %>
+                </td>
             </tr>
+            
+           
             <tr>
                 <td><strong>Final Amount:</strong></td>
                 <td><strong>₹<%= order.finalAmount %></strong></td>

@@ -5,6 +5,7 @@ const fs = require('fs')
 const path=require('path')
 const sharp=require('sharp')
 const HTTP_STATUS=require('../../config/httpStatusCode')
+const {cloudinary,uploadToCloudinary} =require('../../config/cloudinaryConfig')
 
 
 //---------------------------------------------
@@ -57,12 +58,27 @@ const addProducts = async (req, res) => {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: "Invalid category selected" });
         }
 
-        const images = req.files ? req.files.map(file => file.filename) : [];
-        console.log("Image filenames:", images); 
+        const uploadedImages = [];
 
-        if (images.length < 3) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: "Please upload at least three image" });
+        for (const file of req.files) {
+            const result = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: "product-images" }, 
+                    (error, result) => {
+                        if (error) {
+                            console.error("Cloudinary Upload Error:", error);
+                            reject(error);
+                        } else {
+                            resolve(result.secure_url);
+                        }
+                    }
+                ).end(file.buffer); 
+            });
+
+            uploadedImages.push(result);
         }
+
+        console.log("Uploaded Image URLs:", uploadedImages);
 
         const newProduct = new Product({
             productName: product.productName,
@@ -74,7 +90,7 @@ const addProducts = async (req, res) => {
             quantity: quantity,
             flavor: product.flavor,
             size: size,
-            productImage: images,
+            productImage: uploadedImages,
             status: "Available"
         });
 
@@ -311,27 +327,17 @@ const editProduct = async (req, res) => {
             return res.status(400).json({ error: "Invalid category selected." });
         }
 
+        // Upload new images to Cloudinary
         const newImages = [];
         if (req.files && req.files.length > 0) {
-            const allowedFormats = ["image/jpeg", "image/png", "image/webp"];
             for (const file of req.files) {
-                if (allowedFormats.includes(file.mimetype)) {
-                    newImages.push(file.filename);
-                } else {
-                   
-                    const filePath = path.join('public', 'uploads', 'product-images', file.filename);
-                    if (fs.existsSync(filePath)) await fs.unlink(filePath);
-                }
-            }
-            if (newImages.length === 0) {
-                return res.status(400).json({ error: "Invalid image format. Please upload JPG, PNG, or WEBP." });
+                const imageUrl = await uploadToCloudinary(file.buffer);
+                newImages.push(imageUrl);
             }
         }
 
-     
-        const existingImages = product.productImage || [];
-        const updatedImages = [...existingImages, ...newImages];
-
+        // Merge existing images with newly uploaded images
+        const updatedImages = [...(product.productImage || []), ...newImages];
         const updateFields = {
             productName: data.productName,
             description: data.description,

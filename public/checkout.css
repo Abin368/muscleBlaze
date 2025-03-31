@@ -8,9 +8,9 @@ body {
 
 .checkout-container {
     max-width: 900px;
-    margin: 40px auto;
+    margin: 20px auto; /* Reduced margin for smaller screens */
     background: white;
-    padding: 25px;
+    padding: 15px; /* Reduced padding */
     border-radius: 12px;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -19,27 +19,27 @@ body {
 .checkout-wrapper {
     display: flex;
     justify-content: space-between;
-    gap: 25px;
+    gap: 15px; /* Reduced gap */
 }
 
 /* Left Section - Order Summary */
 .checkout-left {
     flex: 1;
     background: #ffffff;
-    padding: 20px;
+    padding: 15px; /* Reduced padding */
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .checkout-left h3 {
-    font-size: 22px;
-    margin-bottom: 15px;
+    font-size: 20px; /* Slightly smaller */
+    margin-bottom: 12px;
     color: #333;
 }
 
 .summary-details p {
-    font-size: 16px;
-    margin: 8px 0;
+    font-size: 14px; /* Smaller font */
+    margin: 6px 0;
     color: #555;
 }
 
@@ -51,14 +51,14 @@ body {
 .checkout-right {
     flex: 1.5;
     background: #ffffff;
-    padding: 20px;
+    padding: 15px; /* Reduced padding */
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .checkout-right h3 {
-    font-size: 22px;
-    margin-bottom: 15px;
+    font-size: 20px; /* Slightly smaller */
+    margin-bottom: 12px;
     color: #333;
 }
 
@@ -67,8 +67,8 @@ body {
     display: flex;
     align-items: center;
     background: #f8f9fa;
-    padding: 12px;
-    margin-bottom: 12px;
+    padding: 10px; /* Reduced padding */
+    margin-bottom: 10px;
     border-radius: 8px;
     border: 2px solid #ddd;
     transition: all 0.3s ease-in-out;
@@ -81,19 +81,19 @@ body {
 }
 
 .address-box input {
-    margin-right: 12px;
+    margin-right: 10px;
     cursor: pointer;
 }
 
 .address-box label {
     flex-grow: 1;
-    font-size: 15px;
+    font-size: 14px; /* Smaller font */
     color: #444;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .address-box strong {
-    font-size: 16px;
+    font-size: 15px; /* Slightly smaller */
     color: #000;
 }
 
@@ -101,8 +101,8 @@ body {
 .edit-btn {
     text-decoration: none;
     color: #ffcc00;
-    font-size: 14px;
-    padding: 6px 10px;
+    font-size: 13px; /* Smaller font */
+    padding: 5px 8px;
     border-radius: 5px;
     background: black;
     transition: all 0.3s ease;
@@ -115,20 +115,18 @@ body {
 
 /* Add Address Button */
 .add-address-btn {
-   
     display: block;
     text-align: center;
     background-color: white;
     color: black;
-    padding: 12px;
+    padding: 10px; /* Reduced padding */
     border-radius: 8px;
     text-decoration: none;
-    margin: 15px 0;
-    font-size: 16px;
+    margin: 12px 0;
+    font-size: 15px; /* Smaller font */
     font-weight: 500;
     border: 2px dotted black;
     transition: all 0.3s ease-in-out;
-
 }
 
 .add-address-btn:hover {
@@ -140,62 +138,240 @@ body {
     width: 100%;
     background-color: #ffcc00;
     color: black;
-    padding: 12px;
+    padding: 10px; /* Reduced padding */
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 15px; /* Smaller font */
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
-    margin-top: 15px;
+    margin-top: 12px;
 }
 
 .checkout-btn:hover {
     background-color: #e67e22;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .checkout-wrapper {
-        flex-direction: column;
-    }
-    .checkout-left,
-    .checkout-right {
-        width: 100%;
-    }
-}
-
+/* Breadcrumbs */
 .breadcrumbs {
-    font-size: 21px;
-    margin-bottom: 15px;
-    margin-left: 20px;
+    font-size: 18px; /* Smaller font */
+    margin-bottom: 12px;
+    margin-left: 15px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     color: #666;
     font-weight: 500;
 }
 
 .breadcrumbs a {
     text-decoration: none;
-    color: black; /* Yellow color */
+    color: black;
     font-weight: 600;
     transition: color 0.3s ease-in-out;
 }
 
 .breadcrumbs a:hover {
-    color: #e6b800; /* Darker yellow */
+    color: #e6b800;
     text-decoration: none;
 }
 
-/* Add a separator (like a slash or arrow) between items */
 .breadcrumbs a::after {
-    content: "›"; /* Arrow separator */
-    margin: 0 8px;
+    content: "›";
+    margin: 0 6px;
     color: #999;
     font-weight: bold;
 }
 
 .breadcrumbs a:last-child::after {
-    content: ""; /* Remove separator after last item */
+    content: "";
 }
+
+/* Coupon Section Styles */
+.coupon-section {
+    background: #f8f9fa;
+    padding: 12px; /* Reduced padding */
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.coupon-section h3 {
+    font-size: 16px; /* Smaller font */
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.coupon-section input {
+    width: 60%; /* Adjusted width */
+    padding: 8px; /* Reduced padding */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px; /* Smaller font */
+    outline: none;
+}
+
+.coupon-section button {
+    background: #ffcc00;
+    color: black;
+    border: none;
+    padding: 8px 12px; /* Reduced padding */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px; /* Smaller font */
+    transition: 0.3s ease-in-out;
+    margin-left: 5px;
+}
+
+.coupon-section button:hover {
+    background: #f39c12;
+}
+
+.coupon-section p {
+    font-size: 13px; /* Smaller font */
+    margin-top: 8px;
+}
+
+/* Modal */
+.modal-content {
+    background-color: white;
+    width: 80%; /* Adjusted for smaller screens */
+    margin: 15% auto;
+    padding: 15px; /* Reduced padding */
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.coupon-card {
+    background-color: #f8f9fa;
+    padding: 12px; /* Reduced padding */
+    margin: 8px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: 0.3s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 300px) {
+    .checkout-container {
+        margin: 10px;
+        padding: 10px;
+    }
+    .checkout-left h3, .checkout-right h3 {
+        font-size: 16px;
+    }
+    .summary-details p, .address-box label {
+        font-size: 12px;
+    }
+    .address-box strong {
+        font-size: 13px;
+    }
+    .edit-btn, .add-address-btn, .checkout-btn {
+        font-size: 12px;
+        padding: 8px;
+    }
+    .breadcrumbs {
+        font-size: 14px;
+        margin-left: 10px;
+    }
+    .coupon-section input {
+        width: 50%;
+        font-size: 12px;
+    }
+    .coupon-section button {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    .modal-content {
+        width: 90%;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-wrapper {
+        flex-direction: column;
+    }
+    .checkout-left, .checkout-right {
+        width: 100%;
+    }
+    .checkout-container {
+        padding: 12px;
+    }
+    .checkout-left h3, .checkout-right h3 {
+        font-size: 18px;
+    }
+    .summary-details p, .address-box label {
+        font-size: 13px;
+    }
+    .address-box {
+        padding: 8px;
+    }
+    .edit-btn {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    .add-address-btn, .checkout-btn {
+        font-size: 14px;
+        padding: 8px;
+    }
+    .breadcrumbs {
+        font-size: 16px;
+    }
+    .coupon-section input {
+        width: 55%;
+    }
+    .modal-content {
+        width: 85%;
+    }
+}
+
+@media (max-width: 768px) {
+    .checkout-wrapper {
+        flex-direction: column;
+    }
+    .checkout-left, .checkout-right {
+        width: 100%;
+    }
+    .checkout-container {
+        padding: 15px;
+    }
+    .modal-content {
+        width: 80%;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .checkout-container {
+        max-width: 700px;
+    }
+    .checkout-wrapper {
+        gap: 20px;
+    }
+    .checkout-left, .checkout-right {
+        padding: 18px;
+    }
+    .modal-content {
+        width: 60%;
+    }
+}
+
+@media (min-width: 1025px) {
+    .checkout-container {
+        max-width: 900px;
+    }
+    .checkout-wrapper {
+        gap: 25px;
+    }
+    .checkout-left, .checkout-right {
+        padding: 20px;
+    }
+    .modal-content {
+        width: 50%;
+    }
+}
+
+/* Rest of your original styles (e.g., animations, hover effects) remain unchanged */

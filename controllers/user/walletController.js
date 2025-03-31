@@ -37,10 +37,10 @@ const getWallet = async (req, res) => {
 //----------------------------------
 const processWalletPayment = async (req, res) => {
     try {
-        console.log("Received Wallet Payment Data:", req.body);
+       
 
         const userId = req.session.user?._id || req.body.userId;
-        console.log("Extracted userId:", userId);
+       
 
         if (!userId) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "User not logged in." });
@@ -66,10 +66,10 @@ const processWalletPayment = async (req, res) => {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Wallet not found." });
         }
 
-        console.log("User Wallet Balance:", wallet.balance);
+       
 
-      
         let discountAmount = 0;
+        let couponName = null; 
 
         if (couponCode) {
             const coupon = await Coupon.findOne({ name: couponCode });
@@ -82,7 +82,6 @@ const processWalletPayment = async (req, res) => {
                 return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Coupon already used by this user." });
             }
 
-           
             const originalTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             if (coupon.discountType === "fixed") {
@@ -91,21 +90,16 @@ const processWalletPayment = async (req, res) => {
                 discountAmount = (coupon.discountValue * originalTotal) / 100; 
             }
 
-
-            console.log('Discount Applied:', discountAmount);
-
-            
            
+            couponName = couponCode; 
         }
 
-       
-        const finalAmount = grandTotal
+        const finalAmount = grandTotal;
 
         if (wallet.balance < finalAmount) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, error: "Insufficient wallet balance." });
         }
 
-       
         let orderItems = await Promise.all(
             cartItems.map(async (item) => {
                 const product = await Product.findById(item.product);
@@ -123,7 +117,6 @@ const processWalletPayment = async (req, res) => {
             })
         );
 
-       
         wallet.balance -= finalAmount;
         wallet.transactions.push({
             type: "debit",
@@ -133,7 +126,6 @@ const processWalletPayment = async (req, res) => {
         });
         await wallet.save();
 
-        
         const newOrder = new Order({
             userId: userId,
             orderItems: orderItems,
@@ -146,19 +138,19 @@ const processWalletPayment = async (req, res) => {
             paymentStatus: "Paid",
             createdAt: new Date(),
             invoiceDate: new Date(),
+            couponApplied: !!couponCode,  
+            couponName: couponName || null
         });
 
         const savedOrder = await newOrder.save();
 
+        if (couponCode) {
+            await Coupon.updateOne(
+                { name: couponCode },
+                { $addToSet: { usedBy: userId } }
+            );
+        }
 
-         if (couponCode) {
-                    await Coupon.updateOne(
-                        { name: couponCode },
-                        { $addToSet: { usedBy: userId } }
-                    );
-                }
-
-       
         for (const item of orderItems) {
             await Product.findByIdAndUpdate(
                 item.product,
@@ -166,13 +158,11 @@ const processWalletPayment = async (req, res) => {
             );
         }
 
-        
         await User.findByIdAndUpdate(userId, {
             $push: { orderHistory: savedOrder._id }
         });
 
-        console.log("Wallet Order saved successfully:", savedOrder);
-
+      
         res.status(HTTP_STATUS.OK).json({ success: true, orderId: savedOrder._id });
 
     } catch (error) {

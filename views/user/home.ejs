@@ -128,11 +128,12 @@
       <% if (banner && banner.length > 0) { %>
           <% banner.forEach((bannerItem, index) => { %>
               <div class="banner-slide <% if (index === 0) { %> active <% } %>">
-                  <img 
-                      src="/uploads/product-images/<%= bannerItem.image %>" 
-                      alt="Banner"
-                      class="banner-image"
-                  >
+                <img 
+                src="<%= bannerItem.image %>" 
+                alt="Banner"
+                class="banner-image"
+            />
+            
               </div>
           <% }); %>
       <% } %>
@@ -156,12 +157,13 @@
         <% for (let i = 0; i < product.length; i++) { %>
           <div class="product-card">
             <a href="/productDetails?id=<%=product[i]._id%>">
-            <img 
-              src="/uploads/product-images/<%= product[i].productImage ? product[i].productImage[0] : 'default.jpg' %>" 
+              <img 
+              src="<%= product[i].productImage && product[i].productImage.length > 0 ? product[i].productImage[0] : '/images/default.jpg' %>" 
               alt="<%= product[i].name || 'Unknown Product' %>" 
               class="product-image"
               onclick="window.location.href='/product-detail/<%= product[i]._id %>'"
-            >
+          />
+          
           </a>
             <div class="product-name"><%= product[i].productName || 'No Name' %></div>
             <div class="product-details">Size: <%= product[i].size ? product[i].size + ' kg' : 'N/A' %></div>

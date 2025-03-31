@@ -40,6 +40,10 @@
                 <p><strong>User:</strong> <%= order.userId.name %> (<%= order.userId.email %>)</p>
                 <p><strong>Total Items:</strong> <%= totalItems %></p>
                 <p><strong>Total Amount:</strong> ₹<%= order.finalAmount %></p>
+                <% if (order.couponApplied) { %>
+                    <p><strong>Coupon Name:</strong> <%= order.couponName %></p>
+                    <p><strong>Discount:</strong> ₹<%= order.discount %></p>
+                <% } %>
     
                
                 <h3>Shipping Address</h3>
