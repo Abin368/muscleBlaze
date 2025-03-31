@@ -164,7 +164,9 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>    
+  
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.2.0/dist/exceljs.min.js"></script>
+ 
      <script>
         document.addEventListener("DOMContentLoaded", function () {
            
@@ -505,105 +507,99 @@ function exportToPDF() {
 }
 
 //-----------------------------------
+async function exportToExcel() {
+        let startDate = document.getElementById("startDate").value;
+        let endDate = document.getElementById("endDate").value;
+        let filterType = document.getElementById("filterType").value;
 
-function exportToExcel() {
-    let startDate = document.getElementById("startDate").value;
-    let endDate = document.getElementById("endDate").value;
-    let filterType = document.getElementById("filterType").value;
+        let today = new Date();
+        let fileName;
 
-    let today = new Date();
-    let fileName;
+        if (filterType === "day") {
+            fileName = `Sales_Report_Today_${today.toISOString().split("T")[0]}.xlsx`;
+        } else if (filterType === "month") {
+            let monthName = today.toLocaleString('default', { month: 'long' });
+            fileName = `Sales_Report_${monthName}-${today.getFullYear()}.xlsx`;
+        } else if (filterType === "year") {
+            fileName = `Sales_Report_${today.getFullYear()}.xlsx`;
+        } else if (startDate && endDate) {
+            fileName = `Sales_Report_${startDate}_to_${endDate}.xlsx`;
+        } else {
+            fileName = `Sales_Report.xlsx`;
+        }
 
-    if (filterType === "day") {
-        fileName = `Sales_Report_Today_${today.toISOString().split("T")[0]}.xlsx`;
-    } else if (filterType === "month") {
-        let monthName = today.toLocaleString('default', { month: 'long' });
-        fileName = `Sales_Report_${monthName}-${today.getFullYear()}.xlsx`;
-    } else if (filterType === "year") {
-        fileName = `Sales_Report_${today.getFullYear()}.xlsx`;
-    } else if (startDate && endDate) {
-        fileName = `Sales_Report_${startDate}_to_${endDate}.xlsx`;
-    } else {
-        fileName = `Sales_Report.xlsx`;
-    }
-
-  
-    const headers = [
-        "Order ID",
-        "Date",
-        "Customer",
-        "Status",
-        "Total Price",      
-        "Discount",        
-        "Final Amount",    
-        "Payment Method",
-        "Products (Qty)"
-    ];
-
-   
-    const dataRows = salesData.map(order => {
-        const productsWithQty = order.items
-            ? order.items.map(item => `${item.productName} (${item.quantity})`).join(", ")
-            : "No items";
-        
-        return [
-            order.orderId,
-            new Date(order.date).toLocaleDateString(),
-            order.customer,
-            order.status,
-            order.totalPrice || 0,    
-            order.discount || 0,   
-            order.totalAmount,        
-            order.paymentMethod,
-            productsWithQty
+        const headers = [
+            "Order ID",
+            "Date",
+            "Customer",
+            "Status",
+            "Total Price",
+            "Discount",
+            "Final Amount",
+            "Payment Method",
+            "Products (Qty)"
         ];
-    });
 
-   
-    const totalPriceSum = salesData.reduce((sum, order) => sum + (order.totalPrice || 0) + (order.discount || 0), 0);
+        const dataRows = salesData.map(order => {
+            const productsWithQty = order.items
+                ? order.items.map(item => `${item.productName} (${item.quantity})`).join(", ")
+                : "No items";
 
-    const discountSum = salesData.reduce((sum, order) => sum + (order.discount || 0), 0);
-    const finalAmountSum = salesData.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+            return [
+                order.orderId,
+                new Date(order.date).toLocaleDateString(),
+                order.customer,
+                order.status,
+                order.totalPrice || 0,
+                order.discount || 0,
+                order.totalAmount,
+                order.paymentMethod,
+                productsWithQty
+            ];
+        });
 
-   
-    console.log("Verification:", { totalPriceSum, discountSum, finalAmountSum, expected: finalAmountSum + discountSum });
+        const totalPriceSum = salesData.reduce((sum, order) => sum + (order.totalPrice || 0) + (order.discount || 0), 0);
+        const discountSum = salesData.reduce((sum, order) => sum + (order.discount || 0), 0);
+        const finalAmountSum = salesData.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
 
-   
-    const summaryRows = [
-        [], 
-        ["Summary", "", "", "", totalPriceSum, discountSum, finalAmountSum, "", ""]
-    ];
+        const summaryRows = [
+            [],
+            ["Summary", "", "", "", totalPriceSum, discountSum, finalAmountSum, "", ""]
+        ];
 
-   
-    const wsData = [
-        headers,
-        ...dataRows,
-        ...summaryRows
-    ];
+       
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Sales Report');
 
-  
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+        worksheet.addRow(headers);
 
-   
-    ws["!cols"] = [
-        { wch: 20 }, 
-        { wch: 15 }, 
-        { wch: 25 }, 
-        { wch: 15 }, 
-        { wch: 15 }, 
-        { wch: 15 }, 
-        { wch: 15 }, 
-        { wch: 15 }, 
-        { wch: 30 }  
-    ];
+      
+        dataRows.forEach(row => worksheet.addRow(row));
 
-   
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+      
+        summaryRows.forEach(row => worksheet.addRow(row));
 
-   
-    XLSX.writeFile(wb, fileName);
-}
+      
+        worksheet.columns = [
+            { width: 20 }, // Order ID
+            { width: 15 }, // Date
+            { width: 25 }, // Customer
+            { width: 15 }, // Status
+            { width: 15 }, // Total Price
+            { width: 15 }, // Discount
+            { width: 15 }, // Final Amount
+            { width: 15 }, // Payment Method
+            { width: 30 }  // Products (Qty)
+        ];
+
+        // Write to file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    }
 
 //---------------------------------
 function clearFilter() {
