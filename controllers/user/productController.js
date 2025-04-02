@@ -7,6 +7,11 @@ const HTTP_STATUS=require('../../config/httpStatusCode')
 const productDetails = async (req, res) => {
     try {
         const userId = req.session.user ? req.session.user._id : null;
+
+        if (!userId) {
+            return res.redirect('/login');
+        }
+        
         const userData = userId ? await User.findById(userId).lean() : null;
 
         const productId = req.query.id;

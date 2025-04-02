@@ -106,7 +106,8 @@ const orderSchema = new Schema({
     },
     razorpayOrderId: {
         type: String,
-        unique: true
+        unique: true,
+        sparse: true
     },
     razorpayPaymentId: {
         type: String

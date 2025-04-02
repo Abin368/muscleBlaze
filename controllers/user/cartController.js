@@ -55,6 +55,11 @@ const addToCart = async (req, res) => {
     const userId = req.session.user;
     const { productId } = req.body;
 
+    if (!userId) { 
+      return res.json({ success: false, message: "Please log in to add items to the cart." });
+    }
+    
+
    
     const product = await Product.findById(productId).populate("category");
 

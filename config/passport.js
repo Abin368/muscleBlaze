@@ -1,9 +1,9 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/userSchema');
-const Wallet=require('../../MuscleBlaze/models/walletSchema')
-require('dotenv').config(); 
+const Wallet = require('../../MuscleBlaze/models/walletSchema');
 
+require('dotenv').config();
 
 passport.use(
   new GoogleStrategy(
@@ -14,48 +14,64 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-      
+       
         let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
-       
-          return done(null, user);
-        } else {
         
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            googleId: profile.id,
-          });
-
-         
-          await user.save();
-          const wallet = new Wallet({ userId: user._id });
-          await wallet.save();
-
           return done(null, user);
         }
+
+       
+        user = await User.findOne({ email: profile.emails[0].value });
+
+        if (user) {
+      
+          if (!user.googleId) {
+           
+            user.googleId = profile.id;
+            user.name = user.name || profile.displayName;
+            await user.save();
+            return done(null, user);
+          }
+         
+          return done(null, user);
+        }
+
+     
+        user = new User({
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          googleId: profile.id,
+        });
+        await user.save();
+
+      
+        const wallet = new Wallet({ userId: user._id });
+        await wallet.save();
+
+        return done(null, user);
       } catch (error) {
+        console.error('Google Auth Error:', error); 
         return done(error, null);
       }
     }
   )
 );
 
-// Serialize user
+
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-// Deserialize user
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then((user) => {
-      done(null, user);
-    })
-    .catch((err) => {
-      done(err, null);
-    });
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 module.exports = passport;
