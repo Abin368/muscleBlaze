@@ -95,7 +95,7 @@
         timer: 2000
       });
 
-      // Fix: Correctly select and remove the wishlist item
+      
       const wishlistItem = document.querySelector(`.wishlist-item-box[data-product-id="${productId}"]`);
       if (wishlistItem) {
         wishlistItem.remove();
@@ -119,26 +119,48 @@
 
 //------------------------------------------
 function removeFromWishlist(productId) {
-    fetch('/wishlist/remove', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ productId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-          fetchCartWishlistCount(); 
-            location.reload(); 
-        } else {
-            alert('Failed to remove product from wishlist');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error removing product from wishlist');
-    });
+  fetch('/wishlist/remove', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ productId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+   
+      const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
+      if (itemElement) {
+        itemElement.remove();
+      }
+
+    
+      fetchCartWishlistCount(); 
+
+   
+      const remainingItems = document.querySelectorAll('.wishlist-item-box');
+      if (remainingItems.length === 0) {
+        const wishlistContainer = document.querySelector(".wishlist-left");
+        wishlistContainer.innerHTML = `<p>Your wishlist is empty.</p>`;
+      }
+
+    
+      Swal.fire({
+        icon: 'success',
+        title: 'Removed!',
+        text: 'Product has been removed from your wishlist.',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } else {
+      Swal.fire("Error", data.message || "Failed to remove product", "error");
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    Swal.fire("Error", "Something went wrong", "error");
+  });
 }
 
 

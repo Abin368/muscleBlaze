@@ -156,35 +156,61 @@ const updateQuantity = async (req, res) => {
 };
 //-----------------------------------
 const deleteFromCart = async (req, res) => {
-    try {
-      const { productId } = req.body;  
-      const userId = req.session.user; 
-      
-      const cart = await Cart.findOne({ userId });
-  
-      if (!cart) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Cart not found" });
-      }
-  
-     
-      const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-  
-      if (itemIndex === -1) {
-        return res.status(HTTP_STATUS.NOT_FOUND).json({ success: false, message: "Item not found in cart" });
-      }
-  
-      cart.items.splice(itemIndex, 1);
-  
-      
-      await cart.save();
-  
-      
-      res.json({ success: true, message: "Item deleted successfully from cart" });
-    } catch (error) {
-      console.error("Error deleting product from cart:", error);
-      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ success: false, message: "Something went wrong while deleting the product from cart" });
+  try {
+    const { productId } = req.body;  
+    const userId = req.session.user; 
+
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+    if (!cart) {
+      return res.status(404).json({ success: false, message: "Cart not found" });
     }
-  };
+
+    const itemIndex = cart.items.findIndex(item => item.productId._id.toString() === productId);
+
+    if (itemIndex === -1) {
+      return res.status(404).json({ success: false, message: "Item not found in cart" });
+    }
+
+    cart.items.splice(itemIndex, 1);
+    await cart.save();
+
+ 
+    let updatedItems = [];
+    let subtotal = 0;
+
+    for (let item of cart.items) {
+      const price = item.productId.salePrice || 0;
+      const quantity = item.quantity;
+      const totalPrice = price * quantity;
+
+      updatedItems.push({
+        productId: item.productId._id,
+        totalPrice,
+      });
+
+      subtotal += totalPrice;
+    }
+
+    return res.json({
+      success: true,
+      message: "Item deleted successfully from cart",
+      updatedCart: {
+        items: updatedItems,
+        subtotal,
+        totalItems: cart.items.length,
+      }
+    });
+
+  } catch (error) {
+    console.error("Error deleting product from cart:", error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while deleting the product from cart"
+    });
+  }
+};
+
   //-------------------------
   const cartWishlistCounter = async (req, res) => {
     try {

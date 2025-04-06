@@ -109,11 +109,6 @@
 
 
 
-
-
-
-
-
 <script>
 
 
@@ -209,7 +204,6 @@ function updateGrandTotal() {
 
 //---------------------------------------
 function deleteFromCart(productId) {
-
   fetch('/cart/delete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -218,29 +212,43 @@ function deleteFromCart(productId) {
   .then(response => response.json())  
   .then(data => {
     if (data.success) {
-      
-      const itemElement = document.querySelector(`[data-product-id="${productId}"]`);  
+   
+      const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
       if (itemElement) {
-        itemElement.remove();  
+        itemElement.remove();
+      }
+  
+      updateGrandTotal();
+    
+      Swal.fire({
+        icon: 'success',
+        title: 'Removed!',
+        text: 'Product has been removed from your cart.',
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      
+      const remainingItems = document.querySelectorAll('.cart-item-box');
+      if (remainingItems.length === 0) {
+        const cartLeft = document.querySelector('.cart-left');
+        cartLeft.innerHTML = `
+          <p class="empty-cart-message">Your cart is empty!</p>
+        `;
       }
 
-     
-      updateCartSummary(data.updatedCart);
-      location.reload();
-      
     } else {
-      
-      alert('Failed to delete product');
+      Swal.fire("Error", data.message || "Failed to delete product", "error");
     }
   })
   .catch(error => {
-  
     console.error('Error:', error);
-    alert('Failed to delete product');
+    Swal.fire("Error", "Something went wrong", "error");
   });
 }
 
 
+//----------------------------
 function updateCartSummary(updatedCart) {
   const totalPriceElement = document.getElementById('total-price');
   const totalItemsElement = document.getElementById('total-items');
