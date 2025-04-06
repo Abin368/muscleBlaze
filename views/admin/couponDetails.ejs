@@ -40,8 +40,9 @@
                     </tr>
                 </thead>
                 <tbody id="couponTableBody">
+                    
                     <% coupons.forEach((coupon, index) => { %>
-                        <tr>
+                        <tr id="row-<%= coupon._id %>">
                             <td><%= index + 1 %></td>
                             <td><%= coupon.name %></td>
                             <td><%= coupon.discountType %></td>
@@ -51,19 +52,24 @@
     
                             <td>
                                 <% if (coupon.isList) { %>
-                                    <button class="custom-btn red">
-                                        <a href="/admin/listCoupon?id=<%= coupon._id %>&page=<%= currentPage %>&search=<%= search %>" 
-                                           class="text-white unlist-coupon"
-                                           style="text-decoration: none;">Unlist</a>
+                                    <button 
+                                        class="custom-btn red toggle-list-btn text-white" 
+                                        data-id="<%= coupon._id %>" 
+                                        data-action="unlist"
+                                    >
+                                        Unlist
                                     </button>
                                 <% } else { %>
-                                    <button class="custom-btn green">
-                                        <a href="/admin/unlistCoupon?id=<%= coupon._id %>&page=<%= currentPage %>&search=<%= search %>" 
-                                           class="text-white list-coupon"
-                                           style="text-decoration: none;">List</a>
+                                    <button 
+                                        class="custom-btn green toggle-list-btn text-white" 
+                                        data-id="<%= coupon._id %>" 
+                                        data-action="list"
+                                    >
+                                        List
                                     </button>
                                 <% } %>
                             </td>
+                            
                             
     
                             <td>
@@ -187,62 +193,76 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function fetchCoupons(page) {
-        let searchInput = document.getElementById("searchInput").value;
-        fetch(`/admin/coupons?page=${page}&search=${encodeURIComponent(searchInput)}`, {
-            headers: { "X-Requested-With": "XMLHttpRequest" }
-        })
-        .then(response => response.json())
-        .then(data => {
-            let tableBody = document.getElementById("couponTableBody");
-            let paginationContainer = document.querySelector(".pagination");
+    let searchInput = document.getElementById("searchInput").value;
+    fetch(`/admin/coupons?page=${page}&search=${encodeURIComponent(searchInput)}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        let tableBody = document.getElementById("couponTableBody");
+        let paginationContainer = document.querySelector(".pagination");
 
-          
-            let couponHtml = data.coupons.map((coupon, index) => `
+     
+        if (data.coupons.length === 0) {
+            tableBody.innerHTML = `
                 <tr>
-                    <td>${(data.currentPage - 1) * 5 + index + 1}</td>
-                    <td>${coupon.name}</td>
-                    <td>${coupon.discountType}</td>
-                    <td>${coupon.discountValue}</td>
-                    <td>${coupon.minimumPrice}</td>
-                    <td>${new Date(coupon.expireOn).toLocaleDateString()}</td>
-                    <td>
-                        ${coupon.isList 
-                            ? `<button class="custom-btn red"><a href="/admin/listCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">Unlist</a></button>`
-                            : `<button class="custom-btn green"><a href="/admin/unlistCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">List</a></button>`}
-                    </td>
-                    <td>
-                        <button style="color: black;" class="action-btn orange edit-btn" 
-                            data-id="${coupon._id}" 
-                            data-name="${coupon.name}" 
-                            data-discounttype="${coupon.discountType}"
-                            data-discountvalue="${coupon.discountValue}"
-                            data-minimumprice="${coupon.minimumPrice}"
-                            data-expireon="${new Date(coupon.expireOn).toISOString().split('T')[0]}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="action-btn red" onclick="confirmDelete('${coupon._id}')">Delete</button>
+                    <td colspan="8" class="text-center text-danger py-3">
+                        No coupons found for "<strong>${searchInput}</strong>"
                     </td>
                 </tr>
-            `).join("");
+            `;
+            paginationContainer.innerHTML = ""; 
+            return;
+        }
 
-            tableBody.innerHTML = couponHtml;
+    
+        let couponHtml = data.coupons.map((coupon, index) => `
+            <tr id="row-${coupon._id}">
+                <td>${(data.currentPage - 1) * 5 + index + 1}</td>
+                <td>${coupon.name}</td>
+                <td>${coupon.discountType}</td>
+                <td>${coupon.discountValue}</td>
+                <td>${coupon.minimumPrice}</td>
+                <td>${new Date(coupon.expireOn).toLocaleDateString()}</td>
+                <td>
+                    ${coupon.isList 
+                        ? `<button class="custom-btn red"><a href="/admin/listCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">Unlist</a></button>`
+                        : `<button class="custom-btn green"><a href="/admin/unlistCoupon?id=${coupon._id}" class="text-white" style="text-decoration: none;">List</a></button>`}
+                </td>
+                <td>
+                    <button style="color: black;" class="action-btn orange edit-btn" 
+                        data-id="${coupon._id}" 
+                        data-name="${coupon.name}" 
+                        data-discounttype="${coupon.discountType}"
+                        data-discountvalue="${coupon.discountValue}"
+                        data-minimumprice="${coupon.minimumPrice}"
+                        data-expireon="${new Date(coupon.expireOn).toISOString().split('T')[0]}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="action-btn red" onclick="confirmDelete('${coupon._id}')">Delete</button>
+                </td>
+            </tr>
+        `).join("");
 
-          
-            let paginationHtml = "";
-            if (data.currentPage > 1) {
-                paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage - 1}">Previous</a>`;
-            }
-            for (let i = 1; i <= data.totalPages; i++) {
-                paginationHtml += `<a href="#" class="page-link ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</a>`;
-            }
-            if (data.currentPage < data.totalPages) {
-                paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage + 1}">Next</a>`;
-            }
+        tableBody.innerHTML = couponHtml;
 
-            paginationContainer.innerHTML = paginationHtml;
-        })
-        .catch(error => console.error("Error fetching coupons:", error));
-    }
+       
+        let paginationHtml = "";
+        if (data.currentPage > 1) {
+            paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage - 1}">Previous</a>`;
+        }
+        for (let i = 1; i <= data.totalPages; i++) {
+            paginationHtml += `<a href="#" class="page-link ${i === data.currentPage ? 'active' : ''}" data-page="${i}">${i}</a>`;
+        }
+        if (data.currentPage < data.totalPages) {
+            paginationHtml += `<a href="#" class="page-link" data-page="${data.currentPage + 1}">Next</a>`;
+        }
+
+        paginationContainer.innerHTML = paginationHtml;
+    })
+    .catch(error => console.error("Error fetching coupons:", error));
+}
+
 });
 
 
@@ -321,20 +341,39 @@ function addCouponToTable(coupon) {
 }
 //------------------------------------------------
 function confirmDelete(couponId) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/deleteCoupon?id=${couponId}`;
-            }
-        });
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/deleteCoupon?id=${couponId}`, {
+    method: 'DELETE'
+})
+.then(res => res.json())
+.then(data => {
+  
+    if (data.success) {
+        Swal.fire("Deleted!", data.message, "success");
+        const row = document.getElementById(`row-${couponId}`);
+        if (row) row.remove();
+      
+    } else {
+        Swal.fire("Error!", data.message || "Failed to delete", "error");
     }
+})
+.catch(err => {
+
+    Swal.fire("Error!", "Something went wrong", "error");
+});
+
+        }
+    });
+}
 
 //--------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
@@ -408,46 +447,60 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 //--------------------------------------
-
 document.addEventListener("click", function (event) {
-    if (event.target.matches(".unlist-coupon")) {
-        event.preventDefault();
-        const url = event.target.getAttribute("href");
+    if (event.target.classList.contains("toggle-list-btn")) {
+        const button = event.target;
+        const couponId = button.dataset.id;
+        const action = button.dataset.action; 
 
-        Swal.fire({
+        const swalOptions = {
             title: "Are you sure?",
-            text: "This coupon will be unlisted!",
-            icon: "warning",
+            text: action === "list" ? "This coupon will be listed!" : "This coupon will be unlisted!",
+            icon: action === "list" ? "info" : "warning",
             showCancelButton: true,
-            confirmButtonColor: "#d33",
+            confirmButtonColor: action === "list" ? "#28a745" : "#d33",
             cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, unlist it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
-            }
-        });
-    }
+            confirmButtonText: `Yes, ${action} it!`
+        };
 
-    if (event.target.matches(".list-coupon")) {
-        event.preventDefault();
-        const url = event.target.getAttribute("href");
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This coupon will be listed!",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#28a745",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, list it!"
-        }).then((result) => {
+        Swal.fire(swalOptions).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = url;
+                fetch(`/admin/${action}Coupon`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ id: couponId })
+                })
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success) {
+                        const row = document.getElementById(`row-${couponId}`);
+                        const buttonCell = row.querySelector("td:nth-child(7)");
+                        
+                        const newButton = document.createElement("button");
+                        newButton.className = `custom-btn ${action === "list" ? "red" : "green"} toggle-list-btn text-white`;
+                        newButton.dataset.id = couponId;
+                        newButton.dataset.action = action === "list" ? "unlist" : "list";
+                        newButton.textContent = action === "list" ? "Unlist" : "List";
+
+                        buttonCell.innerHTML = ""; 
+                        buttonCell.appendChild(newButton);
+
+                        Swal.fire("Success", `Coupon ${action === "list" ? "listed" : "unlisted"} successfully!`, "success");
+                    } else {
+                        Swal.fire("Error", "Something went wrong!", "error");
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                    Swal.fire("Error", "Something went wrong!", "error");
+                });
             }
         });
     }
 });
+
 
 
 

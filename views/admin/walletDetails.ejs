@@ -63,20 +63,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% wallets.forEach(wallet => { %>
+                            <% if (wallets.length === 0) { %>
+                              <tr>
+                                <td colspan="4" style="text-align: center; padding: 20px; color: #888;">
+                                  No wallet data found.
+                                </td>
+                              </tr>
+                            <% } else { %>
+                              <% wallets.forEach(wallet => { %>
                                 <tr>
-                                    <td><%= wallet.userId.name %></td>
-                                    <td><%= wallet.userId.email %></td>
-                                    <td>₹<%= wallet.balance.toFixed(2) %></td>
-                                    <td>
-                                        <a href="/admin/wallet/<%= wallet.userId._id %>" class="view-transactions-link">
-                                            <i class="fas fa-wallet"></i> View Transactions
-                                        </a>
-                                    </td>
-                                    
+                                  <td><%= wallet.userId.name %></td>
+                                  <td><%= wallet.userId.email %></td>
+                                  <td>₹<%= wallet.balance.toFixed(2) %></td>
+                                  <td>
+                                    <a href="/admin/wallet/<%= wallet.userId._id %>" class="view-transactions-link">
+                                      <i class="fas fa-wallet"></i> View Transactions
+                                    </a>
+                                  </td>
                                 </tr>
-                            <% }) %>
-                        </tbody>
+                              <% }) %>
+                            <% } %>
+                          </tbody>
+                          
                     </table>
                 </div>
                 

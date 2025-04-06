@@ -35,35 +35,38 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Address</th>
+                     
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% for (let i = 0; i < data.length; i++) { %>
+                    <% if (data.length === 0) { %>
+                      <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #888;">
+                          No users found.
+                        </td>
+                      </tr>
+                    <% } else { %>
+                      <% for (let i = 0; i < data.length; i++) { %>
                         <tr>
-                            <td><%= (page - 1) * limit + i + 1 %></td> 
-                            <td><%= data[i].name %></td>
-                            <td><%= data[i].email %></td>
-                            <td><%= data[i].phone %></td>
-                            <td><%= data[i].address %></td>
-                            <td>
-                                <% if (!data[i].isBlocked) { %>
-                                    <button class="btn btn-danger" style="width: 80px;"
-                                        onclick="confirmBlock('<%= data[i]._id %>')">
-                                        Block
-                                    </button>
-                                <% } else { %>
-                                    <button class="btn btn-success" style="width: 80px;"
-                                        onclick="confirmUnblock('<%= data[i]._id %>')">
-                                        Unblock
-                                    </button>
-                                <% } %>
-                            </td>
-                            
+                          <td><%= (page - 1) * limit + i + 1 %></td>
+                          <td><%= data[i].name %></td>
+                          <td><%= data[i].email %></td>
+                          <td><%= data[i].phone %></td>
+                          <td id="action-<%= data[i]._id %>">
+                            <% if (!data[i].isBlocked) { %>
+                              <button class="btn btn-danger" style="width: 80px;"
+                                onclick="confirmBlock('<%= data[i]._id %>')">Block</button>
+                            <% } else { %>
+                              <button class="btn btn-success" style="width: 80px;"
+                                onclick="confirmUnblock('<%= data[i]._id %>')">Unblock</button>
+                            <% } %>
+                          </td>
                         </tr>
+                      <% } %>
                     <% } %>
-                </tbody>
+                  </tbody>
+                  
                 
                 
                 
@@ -129,36 +132,97 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 function confirmBlock(customerId) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you really want to block this customer?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, block it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/blockCustomer?id=${customerId}`;
-            }
-        });
-    }
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to block this customer?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, block it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/blockCustomer?id=${customerId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                console.log("Response status:", response.status); 
+                console.log("Response headers:", response.headers.get('Content-Type')); 
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Server error: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response data:", data); 
+                if (data.success) {
+                    const actionCell = document.getElementById(`action-${customerId}`);
+                    actionCell.innerHTML = `
+                        <button class="btn btn-success" style="width: 80px;"
+                                onclick="confirmUnblock('${customerId}')">
+                            Unblock
+                        </button>
+                    `;
+                    Swal.fire("Blocked!", "The customer has been blocked.", "success");
+                } else {
+                    throw new Error(data.error || "Unknown error");
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                Swal.fire("Error", "Failed to block customer: " + error.message, "error");
+            });
+        }
+    });
+}
 
-    function confirmUnblock(customerId) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you really want to unblock this customer?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#28a745",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, unblock it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/unblockCustomer?id=${customerId}`;
-            }
-        });
-    }
+
+function confirmUnblock(customerId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to unblock this customer?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, unblock it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/unblockCustomer?id=${customerId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                console.log("Response status:", response.status);
+                console.log("Response headers:", response.headers.get('Content-Type'));
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Server error: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Response data:", data);
+                if (data.success) {
+                    const actionCell = document.getElementById(`action-${customerId}`);
+                    actionCell.innerHTML = `
+                        <button class="btn btn-danger" style="width: 80px;"
+                                onclick="confirmBlock('${customerId}')">
+                            Block
+                        </button>
+                    `;
+                    Swal.fire("Unblocked!", "The customer has been unblocked.", "success");
+                } else {
+                    throw new Error(data.error || "Unknown error");
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                Swal.fire("Error", "Failed to unblock customer: " + error.message, "error");
+            });
+        }
+    });
+}
 
      </script>
     

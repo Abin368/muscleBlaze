@@ -9,8 +9,16 @@ const categoryInfo = async (req, res) => {
     const limit = 4;
 
     try {
-        
-        const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit, { isDeleted: false });
+        const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit);
+
+        if (req.xhr) { 
+            return res.json({
+                success: categoryData.length > 0,
+                categoryData,
+                currentPage: page,
+                totalPages
+            });
+        }
 
         const successMessage = req.session.successMessage || null;
         const errorMessage = req.session.errorMessage || null;
@@ -28,7 +36,12 @@ const categoryInfo = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error fetching categories:", error);
+
+        if (req.xhr) { 
+            return res.json({ success: false, message: "Error fetching categories" });
+        }
+
         res.render('admin/categoryDetails', {
             search,
             cat: [],
@@ -46,63 +59,100 @@ const addCategory = async (req, res) => {
     const { name, description } = req.body;
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 4;
 
     try {
-        
+       
         const formattedName = name.trim().toLowerCase();
-        
-        
-        const existingCategory = await Category.findOne({ name: { $regex: `^${formattedName}$`, $options: 'i' } });
 
-        if (existingCategory) {
-            req.session.errorMessage = 'Category already exists!';
-            return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        
+        if (!formattedName) {
+            const errorMessage = 'Category name cannot be empty!';
+            
+            if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+                return res.status(400).json({ success: false, message: errorMessage });
+            } else {
+                req.session.errorMessage = errorMessage;
+                return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+            }
         }
 
         
-        const newCategory = new Category({ name: formattedName, description });
+        const existingCategory = await Category.findOne({
+            name: { $regex: `^${formattedName}$`, $options: 'i' }
+        });
+
+        if (existingCategory) {
+            const errorMessage = 'Category already exists!';
+            
+            if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+                return res.status(400).json({ success: false, message: errorMessage });
+            } else {
+                req.session.errorMessage = errorMessage;
+                return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+            }
+        }
+
+       
+        const newCategory = new Category({
+            name: formattedName,
+            description
+        });
+
         await newCategory.save();
 
-        req.session.successMessage = 'Category added successfully!';
+       
+        if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            return res.status(200).json({
+                success: true,
+                message: 'Category added successfully!',
+                newCategory
+            });
+        } else {
+            req.session.successMessage = 'Category added successfully!';
+            return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        }
     } catch (error) {
         console.error("Error adding category:", error);
-        req.session.errorMessage = 'An error occurred while adding the category!';
-    }
+        
+        const errorMessage = 'An error occurred while adding the category!';
 
-    return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            return res.status(500).json({ success: false, message: errorMessage });
+        } else {
+            req.session.errorMessage = errorMessage;
+            return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        }
+    }
 };
+
 
 //----------------------------------------------------------------------
 const getListCategory = async (req, res) => {
     try {
-        let id = req.query.id;
-        let search = req.query.search || ""; 
-        let page = req.query.page || 1; 
-
+        const { id } = req.body;
         await Category.updateOne({ _id: id }, { $set: { isListed: false } });
 
-        return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        
+        return res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.redirect("/pageerror");
+        res.json({ success: false });
     }
 };
-//--------------------------------------------------------------------
+
 const getUnlistCategory = async (req, res) => {
     try {
-        let id = req.query.id;
-        let search = req.query.search || "";
-        let page = req.query.page || 1; 
-
+        const { id } = req.body;
         await Category.updateOne({ _id: id }, { $set: { isListed: true } });
 
-        return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        
+        return res.json({ success: true });
     } catch (error) {
         console.error(error);
-        res.redirect("/pageerror");
+        res.json({ success: false });
     }
 };
+
 //------------------------------------------------------------------
 // GET Edit Category Page
 const getEditCategory = async (req, res) => {
@@ -153,20 +203,17 @@ const updateCategory = async (req, res) => {
 //-----------------------------------------------------------------------------
 const deleteCategory = async (req, res) => {
     try {
-        const { id, search, page } = req.query;
+        const { id } = req.query;
 
-      
         await Category.updateOne({ _id: id }, { $set: { isDeleted: true } });
 
-     
-        req.session.successMessage = 'Category deleted successfully';
-        return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        return res.json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
         console.error(error);
-        req.session.errorMessage = 'Failed to delete category';
-        return res.redirect(`/admin/categories?search=${search}&page=${page}`);
+        return res.json({ success: false, message: 'Failed to delete category' });
     }
 };
+
 //--------------------------------
 const addCategoryOffer = async (req, res) => {
     try {

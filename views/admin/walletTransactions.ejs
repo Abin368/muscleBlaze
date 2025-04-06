@@ -100,26 +100,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% transactions.forEach(transaction => { %>
+                        <% if (transactions.length === 0) { %>
+                          <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #888;">
+                              No transactions found.
+                            </td>
+                          </tr>
+                        <% } else { %>
+                          <% transactions.forEach(transaction => { %>
                             <tr>
-                                <td><%= transaction._id %></td>
-                                <td><%= new Date(transaction.createdAt).toDateString() %></td>
-                                <td><%= transaction.type %></td>
-                                <td>₹<%= transaction.amount.toFixed(2) %></td>
-                                <td><%= transaction.reason || "N/A" %></td>
-                                <td>
-                                    <% if (transaction.orderId) { %>
-                                        <a href="/admin/ordersPage/<%= transaction.orderId %>" class="view-order-link">
-                                            <i class="fas fa-receipt"></i> View Order
-                                        </a>
-                                    <% } else { %>
-                                        <span class="no-order">N/A</span>
-                                    <% } %>
-                                </td>
-                                
+                              <td><%= transaction._id %></td>
+                              <td><%= new Date(transaction.createdAt).toDateString() %></td>
+                              <td><%= transaction.type %></td>
+                              <td>₹<%= transaction.amount.toFixed(2) %></td>
+                              <td><%= transaction.reason || "N/A" %></td>
+                              <td>
+                                <% if (transaction.orderId) { %>
+                                  <a href="/admin/ordersPage/<%= transaction.orderId %>" class="view-order-link">
+                                    <i class="fas fa-receipt"></i> View Order
+                                  </a>
+                                <% } else { %>
+                                  <span class="no-order">N/A</span>
+                                <% } %>
+                              </td>
                             </tr>
-                        <% }) %>
-                    </tbody>
+                          <% }) %>
+                        <% } %>
+                      </tbody>
+                      
                 </table>
             </div>
         

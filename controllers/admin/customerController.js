@@ -46,27 +46,33 @@ const customerInfo = async (req, res) => {
 
 
 //-----------------------------
-const customerBlocked = async (req,res)=>{
-    try{
-
-        let id=req.query.id
-        await User.updateOne({_id:id},{$set:{isBlocked:true}});
-        res.redirect('/admin/users')
-    }catch(error){
-        res.redirect('pagerror')
+const customerBlocked = async (req, res) => {
+    try {
+        const id = req.query.id || req.body.id; 
+        const result = await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ success: false, error: "Customer not found or already blocked" });
+        }
+        res.json({ success: true, message: "Customer blocked successfully" });
+    } catch (error) {
+        console.error("Error blocking customer:", error);
+        res.status(500).json({ success: false, error: "Server error" });
     }
-}
-//----------------------------
-const customerunBlocked =async(req,res)=>{
-    try{
+};
 
-        let id=req.query.id
-        await User.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect('/admin/users')
-    }catch(error){
-        res.redirect('pageerror')
+const customerunBlocked = async (req, res) => {
+    try {
+        const id = req.query.id || req.body.id;
+        const result = await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ success: false, error: "Customer not found or already unblocked" });
+        }
+        res.json({ success: true, message: "Customer unblocked successfully" });
+    } catch (error) {
+        console.error("Error unblocking customer:", error);
+        res.status(500).json({ success: false, error: "Server error" });
     }
-}
+};
 
 
 

@@ -119,7 +119,7 @@ app.use((err, req, res, next) => {
     const isAdminRoute = req.originalUrl.startsWith("/admin");
   
   
-    const errorPage = isAdminRoute ? "pageerror" : "pageNotfound";
+    const errorPage = isAdminRoute ? "admin/pageNotfound" : "user/pageNotfound";
   
     res.status(statusCode).render(errorPage, { 
       message: err.message || (isAdminRoute ? "Admin Page Not Found" : "Page Not Found") 

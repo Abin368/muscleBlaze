@@ -27,7 +27,7 @@ router.post("/verify-otp",preventCache,isLoggedIn,userController.verifySignupOtp
 router.post("/resend-otp",preventCache,isLoggedIn,userController.resendOtp);
 
 router.get('/auth/google',preventCache,isLoggedIn,ensureAuthenticated,passport.authenticate('google',{scope:['profile','email']}))
-router.get('/auth/google/callback',preventCache,isLoggedIn,passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
+router.get('/auth/google/callback',preventCache,isLoggedIn,passport.authenticate('google',{failureRedirect:'/signup', failureMessage: true,}),(req,res)=>{
     req.session.user = {
         _id: req.user._id,
         username: req.user.name,

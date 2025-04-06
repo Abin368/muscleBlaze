@@ -6,6 +6,19 @@ const Category = require("../../models/categorySchema");
 const bcrypt = require('bcrypt')
 const HTTP_STATUS=require('../../config/httpStatusCode')
 
+
+
+const pageNotfound=async(req,res)=>{
+    try{
+        return res.render('admin/pageNotfound')
+    }catch(error){
+        console.log('something gone wrong');
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send('Server error')
+    }
+}
+
+
+//------------------------
 const loadLogin = async (req, res) => {
     try {
         if (req.session.admin) {
@@ -274,5 +287,6 @@ module.exports ={
     login,
     loadDashboard,
     logout,
-    salesReport
+    salesReport,
+    pageNotfound
 }

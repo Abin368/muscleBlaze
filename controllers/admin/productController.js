@@ -155,12 +155,12 @@ const getAllProducts = async (req, res) => {
                 search 
             });
         } else {
-            res.render('page-404');
+            res.render('admin/pageNotfound');
         }
 
     } catch (error) {
         console.error("Error fetching products:", error);
-        res.redirect('/pageerror');
+        res.redirect('/admin/pageNotfound');
     }
 };
 
@@ -173,33 +173,33 @@ const addProductOffer = async (req, res) => {
         
         const findProduct = await Product.findOne({ _id: productId });
         if (!findProduct) {
-            return res.status(HTTP_STATUS.NOT_FOUND).json({ status: false, message: "Product not found" });
+            return res.status(404).json({ status: false, message: "Product not found" });
         }
 
         const findCategory = await Category.findOne({ _id: findProduct.category });
 
-       
         const productDiscount = Math.floor(findProduct.regularPrice * (percentage / 100));
-
-        
         const categoryDiscount = findCategory.categoryOffer 
             ? Math.floor(findProduct.regularPrice * (findCategory.categoryOffer / 100)) 
             : 0;
 
-       
         const highestDiscount = Math.max(productDiscount, categoryDiscount);
 
-        
         findProduct.salePrice = findProduct.regularPrice - highestDiscount;
         findProduct.productOffer = parseInt(percentage);
         findProduct.highestOffer = (highestDiscount === productDiscount) ? percentage : findCategory.categoryOffer;
 
         await findProduct.save();
 
-        res.json({ status: true, message: "Product offer applied successfully" });
+        res.json({ 
+            status: true, 
+            message: "Product offer applied successfully", 
+            salePrice: findProduct.salePrice 
+        });
+
     } catch (error) {
         console.error(error);
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ status: false, message: "Internal server error" });
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
 };
 
@@ -210,56 +210,63 @@ const addProductOffer = async (req, res) => {
 const removeProductOffer = async (req, res) => {
     try {
         const { productId } = req.body;
+
         const findProduct = await Product.findOne({ _id: productId });
-        
         if (!findProduct) {
             return res.status(HTTP_STATUS.NOT_FOUND).json({ status: false, message: "Product not found" });
         }
 
         const findCategory = await Category.findOne({ _id: findProduct.category });
 
-        
+        // Remove product offer
         findProduct.productOffer = 0;
 
-        
+        // Calculate new sale price using category offer if it exists
         const categoryDiscount = findCategory?.categoryOffer
             ? Math.floor(findProduct.regularPrice * (findCategory.categoryOffer / 100))
             : 0;
 
-       
         findProduct.salePrice = findProduct.regularPrice - categoryDiscount;
-        findProduct.highestOffer = findCategory?.categoryOffer || 0; 
+        findProduct.highestOffer = findCategory?.categoryOffer || 0;
 
         await findProduct.save();
 
-        res.json({ status: true, message: "Product offer removed successfully" });
+        res.json({ 
+            status: true, 
+            message: "Product offer removed successfully", 
+            salePrice: findProduct.salePrice 
+        });
+
     } catch (error) {
         console.error(error);
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ status: false, message: "Internal server error" });
     }
 };
 
-//-----------------------------------------------------
-const blockProduct = async(req,res)=>{
-    try{
-        let id=req.query.id
-        await Product.updateOne({_id:id},{$set:{isBlocked:true}})
-        res.redirect('/admin/products')
-    }catch(error){
-        res.redirect('/pagerror')
-    }
-}
 
 //-----------------------------------------------------
-const unblockProduct = async(req,res)=>{
-    try{
-        let id=req.query.id
-        await Product.updateOne({_id:id},{$set:{isBlocked:false}})
-        res.redirect('/admin/products')
-    }catch(error){
-        res.redirect('/pagerror')
+const blockProduct = async (req, res) => {
+    try {
+        const id = req.body.id;
+        await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
+        res.json({ status: true, message: "Product blocked successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
-}
+};
+
+//-----------------------------------------------------
+const unblockProduct = async (req, res) => {
+    try {
+        const { id } = req.body;
+        await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+        res.json({ status: true, message: "Product unblocked successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Something went wrong!" });
+    }
+};
 
 
 //-----------------------------------------------------
@@ -277,7 +284,7 @@ const getEditProduct = async (req, res) => {
         });
     } catch (error) {
         console.log('here is the issue')
-        res.redirect('/pageerror');
+        res.redirect('/pageNotfound');
     }
 };
 
@@ -376,27 +383,24 @@ const deleteSingleImage = async(req,res)=>{
     }
     res.send({status:true});
     }catch(error){
-        res.redirect('/pageerror')
+        res.redirect('/pageNotfound')
     }
 }
 //-----------------------------------------------------
 
-const deleteProduct = async(req,res)=>{
-    try{
-        const { id, search, page } = req.query;
+const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.body;
 
         await Product.updateOne({ _id: id }, { $set: { isDeleted: true } });
 
-     
-        req.session.successMessage = 'Category deleted successfully';
-        return res.redirect(`/admin/products?search=${search}&page=${page}`);
-    }catch(error){
+        res.json({ status: true, message: "Product deleted successfully" });
+    } catch (error) {
         console.error(error);
-        req.session.errorMessage = 'Failed to delete category';
-        return res.redirect(`/admin/products?search=${search}&page=${page}`);
-
+        res.status(500).json({ status: false, message: "Failed to delete product" });
     }
-}
+};
+
 //-----------------------------------------------------
 module.exports = {
     getProductAddPage,

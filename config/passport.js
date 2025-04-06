@@ -14,11 +14,13 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-       
+      
         let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
-        
+          if (user.isBlocked) {
+            return done(null, false, { message: 'Your account is blocked.' });
+          }
           return done(null, user);
         }
 
@@ -26,19 +28,22 @@ passport.use(
         user = await User.findOne({ email: profile.emails[0].value });
 
         if (user) {
-      
+          if (user.isBlocked) {
+            return done(null, false, { message: 'Your account is blocked.' });
+          }
+
+        
           if (!user.googleId) {
-           
             user.googleId = profile.id;
             user.name = user.name || profile.displayName;
             await user.save();
             return done(null, user);
           }
-         
+
           return done(null, user);
         }
 
-     
+      
         user = new User({
           name: profile.displayName,
           email: profile.emails[0].value,
@@ -52,7 +57,7 @@ passport.use(
 
         return done(null, user);
       } catch (error) {
-        console.error('Google Auth Error:', error); 
+        console.error('Google Auth Error:', error);
         return done(error, null);
       }
     }

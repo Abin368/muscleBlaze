@@ -7,7 +7,7 @@ const getAllCoupons = async (req, res) => {
     try {
         let search = req.query.search?.trim() || "";
         let page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 8;
         const skip = (page - 1) * limit;
 
         const query = search ? { name: { $regex: ".*" + search + ".*", $options: "i" } } : {};
@@ -94,22 +94,19 @@ const deleteCoupon = async (req, res) => {
     try {
         const { id } = req.query;
 
-     
         const deletedCoupon = await Coupon.findByIdAndDelete(id);
         if (!deletedCoupon) {
-            req.session.errorMessage = 'Coupon not found!';
-            return res.redirect('/admin/coupons');
+            return res.json({ success: false, message: 'Coupon not found!' });
         }
 
-        req.session.successMessage = 'Coupon deleted successfully!';
-        return res.redirect('/admin/coupons');
+        return res.json({ success: true, message: 'Coupon deleted successfully!' });
 
     } catch (error) {
         console.error(error);
-        req.session.errorMessage = 'Error deleting coupon!';
-        return res.redirect('/admin/coupons');
+        return res.json({ success: false, message: 'Error deleting coupon!' });
     }
 };
+
 //-------------------------------------
 
 const editCoupon = async (req, res) => {
@@ -145,30 +142,27 @@ const editCoupon = async (req, res) => {
 //-------------------------------------------------------------
 const getListCoupon = async (req, res) => {
     try {
-        let { id: couponId, page = 1, search = "" } = req.query;
-
-        await Coupon.findByIdAndUpdate(couponId, { isList: false });
-
-        res.redirect(`/admin/coupons`);
+        const { id } = req.body;
+        await Coupon.findByIdAndUpdate(id, { isList: true });
+        res.json({ success: true });
     } catch (error) {
         console.error("Error listing coupon:", error);
-        res.redirect("/pageerror");
+        res.json({ success: false });
     }
 };
 
 //----------------------------------
 const getUnlistCoupon = async (req, res) => {
     try {
-        let { id: couponId, page = 1, search = "" } = req.query;
-
-        await Coupon.findByIdAndUpdate(couponId, { isList: true });
-
-        res.redirect(`/admin/coupons`);
+        const { id } = req.body;
+        await Coupon.findByIdAndUpdate(id, { isList: false });
+        res.json({ success: true });
     } catch (error) {
         console.error("Error unlisting coupon:", error);
-        res.redirect("/pageerror");
+        res.json({ success: false });
     }
 };
+
 
 
 

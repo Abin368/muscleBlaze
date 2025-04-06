@@ -18,6 +18,8 @@
   <div class="form-container">
     <h2>Create Account</h2>
 
+    
+
     <% if (messages && messages.error) { %>
       <div class="error-messages">
         <% messages.error.forEach((error) => { %>
@@ -25,6 +27,7 @@
         <% }) %>
       </div>
     <% } %>
+
     <div id="messages"></div>
 
     <form id="signupForm">

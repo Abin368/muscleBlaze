@@ -44,77 +44,78 @@
                         <th>Edit</th>
                     </tr>
                 </thead>
-               <tbody>
-                <% for (let i = data.length - 1; i >= 0; i--) { %>
-                    <tr>
-                        <td><%= data.length - i %></td> 
-                        <td><%= data[i].productName %></td>
-                        <td><%= data[i].category.name %></td>
-                        <td><%= data[i].flavor %></td>
-                        <td><%= data[i].salePrice %></td>
+                <tbody>
+                    <% if (data.length === 0) { %>
+                        <tr>
+                            <td colspan="10" class="text-center text-danger">No products found.</td>
+                        </tr>
+                    <% } else { %>
+                        <% for (let i = data.length - 1; i >= 0; i--) { %>
+                            <tr data-product-id="<%= data[i]._id %>" id="row-<%= data[i]._id %>">
 
-                        <td>
-                            <% if (data[i].productOffer) { %>
-                                <%= data[i].productOffer %>%
-                            <% } else { %>
-                                0%
-                            <% } %>
-                        </td>
-                        
-                       
-                            <td>
-                                <% if (!data[i].productOffer || data[i].productOffer === 0) { %>
-                                    <button class="custom-btn green" onclick="addOffer('<%= data[i]._id %>')">
-                                        Add Offer
-                                    </button>
-                                <% } else { %>
-                                    <button class="custom-btn red" onclick="removeOffer('<%= data[i]._id %>')">
-                                        Remove Offer
-                                    </button>
-                                <% } %>
-                            </td>
+                                <td><%= data.length - i %></td>
+                                <td><%= data[i].productName %></td>
+                                <td><%= data[i].category.name %></td>
+                                <td><%= data[i].flavor %></td>
                             
-                          
-                       
-                        <td><%= data[i].quantity %></td>
-                        
-                        <td>
-                            <% if (data[i].isBlocked == false) { %>
-                                <a href="javascript:void(0);" 
-                                   onclick="confirmBlock('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
-                                   class="custom-btn red">Block</a>
-                            <% } else { %>
-                                <a href="javascript:void(0);" 
-                                   onclick="confirmUnblock('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
-                                   class="custom-btn green">Unblock</a>
-                            <% } %>
-                        </td>
-                        
-                        
-                        
-                        
-                        
-                
+                               
+                                <td class="sale-price"><%= data[i].salePrice %></td>
+                            
+                                
+                                <td class="offer-value">
+                                    <% if (data[i].productOffer) { %>
+                                        <%= data[i].productOffer %>%
+                                    <% } else { %>
+                                        0%
+                                    <% } %>
+                                </td>
+                            
+                               
+                                <td>
+                                    <% if (!data[i].productOffer || data[i].productOffer === 0) { %>
+                                        <button class="custom-btn green offer-action" onclick="addOffer('<%= data[i]._id %>')">
+                                            Add Offer
+                                        </button>
+                                    <% } else { %>
+                                        <button class="custom-btn red offer-action" onclick="removeOffer('<%= data[i]._id %>')">
+                                            Remove Offer
+                                        </button>
+                                    <% } %>
+                                </td>
+                            
+                                <td><%= data[i].quantity %></td>
 
-                        <td class="action-icons">
-                            <a href="/admin/editProduct?id=<%= data[i]._id %>" 
-                                class="action-btn orange">
-                                 Edit
-                             </a>
-                             
-                        
-                             <a href="javascript:void(0);" 
-                             onclick="confirmDelete('<%= data[i]._id %>', '<%= search %>', '<%= currentPage %>')" 
-                             class="action-btn red">
-                             Delete
-                          </a>
-                          
-                        </td>
-                        
-                    </tr>
-                <% } %>
+                                <td id="btn-<%= data[i]._id %>">
+                                    <% if (!data[i].isBlocked) { %>
+                                        <a href="javascript:void(0);" 
+                                           onclick="confirmBlock('<%= data[i]._id %>')" 
+                                           class="custom-btn red">Block</a>
+                                    <% } else { %>
+                                        <a href="javascript:void(0);" 
+                                           onclick="confirmUnblock('<%= data[i]._id %>')" 
+                                           class="custom-btn green">Unblock</a>
+                                    <% } %>
+                                </td>
+                                
+                                
+                                
+                                    
+                                
+                                    <td class="action-icons">
+                                        <a href="/admin/editProduct?id=<%= data[i]._id %>" class="action-btn orange">Edit</a>
+                                        <a href="javascript:void(0);" 
+                                           onclick="confirmDelete('<%= data[i]._id %>')" 
+                                           class="action-btn red">Delete</a>
+                                    </td>
+                               
+                                
+
+                            </tr>
+                            
+                        <% } %>
+                    <% } %>
+                </tbody>
                 
-</tbody>
 
             </table>
         </div>
@@ -148,51 +149,58 @@
    <script>
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.body.addEventListener("click", function (e) {
-        if (e.target.classList.contains("page-link")) {
-            e.preventDefault();  
 
-            let page = e.target.getAttribute("data-page");
-            let search = new URLSearchParams(window.location.search).get("search") || "";
 
-            fetch(`/admin/products?page=${page}&search=${encodeURIComponent(search)}`)
-                .then(response => response.text())
-                .then(data => {
-                    let parser = new DOMParser();
-                    let doc = parser.parseFromString(data, "text/html");
+function fetchProducts(page = 1, search = "") {
+    fetch(`/admin/products?page=${page}&search=${encodeURIComponent(search)}`)
+        .then(response => response.text())
+        .then(data => {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(data, "text/html");
 
-               
-                    document.querySelector(".products-container").innerHTML =
-                        doc.querySelector(".products-container").innerHTML;
-                    document.querySelector(".pagination").innerHTML =
-                        doc.querySelector(".pagination").innerHTML;
-                })
-                .catch(error => console.error("Error fetching products:", error));
-        }
-    });
+            const newProducts = doc.querySelector(".products-container");
+            const newPagination = doc.querySelector(".pagination");
+
+            document.querySelector(".products-container").innerHTML =
+                newProducts ? newProducts.innerHTML : "<div class='text-center text-danger mt-3'>No products found.</div>";
+
+            document.querySelector(".pagination").innerHTML =
+                newPagination ? newPagination.innerHTML : "";
+        })
+        .catch(error => console.error("Error fetching products:", error));
+}
+
+
+document.body.addEventListener("click", function (e) {
+    if (e.target.classList.contains("page-link")) {
+        e.preventDefault();
+        let page = e.target.getAttribute("data-page");
+        let search = document.getElementById("searchInput")?.value || "";
+        fetchProducts(page, search);
+    }
 });
 
-//-----------------------------------------
 
-document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
+const searchForm = document.getElementById("searchForm");
+const searchInput = document.getElementById("searchInput");
 
+if (searchForm && searchInput) {
     searchForm.addEventListener("submit", function (event) {
-      if (!searchInput.value.trim()) {
-        event.preventDefault(); 
-        window.location.href = "/admin/products"; 
-      }
+        event.preventDefault();
+        const query = searchInput.value.trim();
+        fetchProducts(1, query);
     });
-  });
+}
+
+});
+
 
 
 //-----------------------------
-     async function addOffer(productId) {
+async function addOffer(productId) {
     const { value: amount } = await Swal.fire({
         title: 'Offer in percentage',
         input: 'number',
-        // inputLabel: 'Percentage',
         inputPlaceholder: '% Percentage',
         inputAttributes: {
             min: 0,
@@ -212,7 +220,19 @@ document.addEventListener("DOMContentLoaded", function () {
             success: (response) => {
                 if (response.status === true) {
                     Swal.fire("Offer added", "The offer has been added successfully.", "success");
-                    location.reload(); 
+
+                   
+                    const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+                    if (row) {
+                        row.querySelector(".offer-value").textContent = `${amount}%`;
+                        row.querySelector(".sale-price").textContent = response.salePrice;
+
+                        const offerBtn = row.querySelector(".offer-action");
+                        offerBtn.classList.remove("green");
+                        offerBtn.classList.add("red");
+                        offerBtn.textContent = "Remove Offer";
+                        offerBtn.setAttribute("onclick", `removeOffer('${productId}')`);
+                    }
                 } else {
                     Swal.fire("Failed", response.message || "There was an issue adding the offer.", "error");
                 }
@@ -225,6 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 
+
 //-----------------------------------------------------
 async function removeOffer(productId) {
     try {
@@ -234,10 +255,10 @@ async function removeOffer(productId) {
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
-            cancelButtonColor: 'd33',
-            confirmButtonText: 'Yes, remove it!',
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, remove it!",
             timer: 5000,
-            timeProgressBar: true
+            timerProgressBar: true
         });
 
         if (result.isConfirmed) {
@@ -249,7 +270,24 @@ async function removeOffer(productId) {
 
             if (response.status === true) {
                 Swal.fire('Removed', 'The offer has been removed', 'success');
-                location.reload();
+
+               
+                const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+                if (row) {
+                 
+                    row.querySelector(".offer-value").textContent = `0%`;
+
+                   
+                    row.querySelector(".sale-price").textContent = response.salePrice;
+
+                   
+                    const offerBtn = row.querySelector(".offer-action");
+                    offerBtn.classList.remove("red");
+                    offerBtn.classList.add("green");
+                    offerBtn.textContent = "Add Offer";
+                    offerBtn.setAttribute("onclick", `addOffer('${productId}')`);
+                }
+
             } else {
                 Swal.fire('Failed', 'There was an issue removing the offer', 'error');
             }
@@ -259,55 +297,131 @@ async function removeOffer(productId) {
         Swal.fire("Error", "An error occurred during the process.", "error");
     }
 }
-//---------------------------------
-function confirmBlock(productId, search, page) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you really want to block this product?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, block it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/blockProduct?id=${productId}&search=${search}&page=${page}`;
-            }
-        });
-    }
 
-    function confirmUnblock(productId, search, page) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Do you want to unblock this product?",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#28a745",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, unblock it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/unblockProduct?id=${productId}&search=${search}&page=${page}`;
-            }
-        });
-    }
+//---------------------------------
+function confirmBlock(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you really want to block this product?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, block it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/blockProduct', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: productId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    Swal.fire("Blocked!", "Product has been blocked.", "success");
+
+                
+                    document.getElementById(`btn-${productId}`).innerHTML =
+                        `<a href="javascript:void(0);" 
+                            onclick="confirmUnblock('${productId}')" 
+                            class="custom-btn green">Unblock</a>`;
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
+
+//--------------------------------------------
+function confirmUnblock(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to unblock this product?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, unblock it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/unblockProduct', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: productId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    Swal.fire("Unblocked!", "Product has been unblocked.", "success");
+
+                   
+                    document.getElementById(`btn-${productId}`).innerHTML =
+                        `<a href="javascript:void(0);" 
+                            onclick="confirmBlock('${productId}')" 
+                            class="custom-btn red">Block</a>`;
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
+
     //--------------------------------
 
-    function confirmDelete(productId, search, page) {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This action cannot be undone. Do you want to delete this product?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, delete it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = `/admin/deleteProduct?id=${productId}&search=${search}&page=${page}`;
-            }
-        });
-    }
+    function confirmDelete(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This action cannot be undone. Do you want to delete this product?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/admin/deleteProduct', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: productId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    Swal.fire("Deleted!", "Product has been deleted.", "success");
+
+                   
+                    const row = document.getElementById(`row-${productId}`);
+                    if (row) row.remove();
+
+                  
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Something went wrong!", "error");
+            });
+        }
+    });
+}
+
 
    </script>
 </body>

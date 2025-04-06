@@ -1,0 +1,152 @@
+function fetchCategories(page = 1, search = '') {
+    fetch(`/admin/categories?page=${page}&search=${search}`, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' } // Marks request as AJAX
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCategoryTable(data.categoryData);
+            updatePaginationButtons(data.currentPage, data.totalPages, search);
+
+            // Show "No results found" message if the search yields nothing
+            const messageDiv = document.getElementById("no-results-message");
+            if (data.categoryData.length === 0) {
+                messageDiv.innerHTML = "No categories found";
+                messageDiv.style.display = "block";
+            } else {
+                messageDiv.style.display = "none";
+            }
+        } else {
+            console.error("Failed to fetch categories");
+        }
+    })
+    .catch(error => console.error("Error fetching categories:", error));
+}
+
+function updateCategoryTable(categories) {
+    const tableBody = document.querySelector("tbody");
+    tableBody.innerHTML = ""; 
+
+    if (categories.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No categories found</td></tr>`;
+        return;
+    }
+
+    categories.forEach((category, index) => {
+        const row = `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${category.name}</td>
+                <td>${category.description}</td>
+                <td>${category.categoryOffer || '0'}</td>
+                <td>
+                    ${category.categoryOffer
+                        ? `<button class="custom-btn red" onclick="removeCategoryOffer('${category._id}')">Remove Offer</button>`
+                        : `<button class="custom-btn green" onclick="addCategoryOffer('${category._id}')">Add Offer</button>`
+                    }
+                </td>
+                <td id="category-btn-${category._id}">
+                    ${category.isListed
+                        ? `<button class="btn btn-danger" style="width: 70px;" onclick="confirmUnlist('${category._id}')">Unlist</button>`
+                        : `<button class="btn btn-success" style="width: 70px;" onclick="confirmList('${category._id}')">List</button>`
+                    }
+                </td>
+                <td class="action-icons">
+                    <button class="btn btn-primary" style="width: 70px;">
+                        <a href="/admin/editCategory/${category._id}" class="btn btn-warning btn-sm" style="color: black;">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </button>
+                    <a href="javascript:void(0);" onclick="confirmDelete('${category._id}', this)" style="text-decoration: none;">
+                        <button class="btn btn-danger" style="width: 70px; color: white;">Delete</button>
+                    </a>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+function updatePaginationButtons(currentPage, totalPages, search) {
+    const paginationDiv = document.querySelector(".pagination");
+    paginationDiv.innerHTML = ""; // Clear previous pagination
+
+    if (currentPage > 1) {
+        paginationDiv.innerHTML += `<a href="javascript:void(0);" onclick="fetchCategories(${currentPage - 1}, '${search}')">Previous</a>`;
+    }
+
+    for (let i = 1; i <= totalPages; i++) {
+        paginationDiv.innerHTML += `<a href="javascript:void(0);" onclick="fetchCategories(${i}, '${search}')" class="${i === currentPage ? 'active' : ''}">${i}</a>`;
+    }
+
+    if (currentPage < totalPages) {
+        paginationDiv.innerHTML += `<a href="javascript:void(0);" onclick="fetchCategories(${currentPage + 1}, '${search}')">Next</a>`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+
+    searchForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const searchValue = searchInput.value.trim();
+
+        if (!searchValue) {
+            window.location.href = "/admin/categories"; 
+        } else {
+            fetchCategories(1, searchValue);
+        }
+    });
+});
+
+
+
+
+
+const categoryInfo = async (req, res) => {
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+
+    try {
+        const { categoryData, totalCategories, totalPages } = await getPaginatedCategories(search, page, limit);
+
+        if (req.xhr) { 
+            return res.json({
+                success: true,
+                categoryData,
+                currentPage: page,
+                totalPages
+            });
+        }
+
+        // Ensure pagination applies when initially rendering
+        res.render('admin/categoryDetails', {
+            search,
+            cat: categoryData, // Ensure it contains only the paginated results
+            currentPage: page,
+            totalPages,
+            totalCategories,
+            successMessage: req.session.successMessage || null,
+            errorMessage: req.session.errorMessage || null
+        });
+
+        req.session.successMessage = null;
+        req.session.errorMessage = null;
+    } catch (error) {
+        console.error(error);
+        
+        if (req.xhr) {
+            return res.json({ success: false, message: "Error fetching categories" });
+        }
+
+        res.render('admin/categoryDetails', {
+            search,
+            cat: [],
+            successMessage: null,
+            errorMessage: 'Error fetching categories'
+        });
+    }
+};
